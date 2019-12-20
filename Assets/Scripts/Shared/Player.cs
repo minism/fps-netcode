@@ -30,8 +30,8 @@ public class Player : IReadonlyPlayer {
       Metadata = Metadata,
       NetworkObjectState = new NetworkObjectState {
         NetworkId = NetworkObject.NetworkId,
-        Position = NetworkObject.transform.position,
       },
+      PlayerState = Controller.ToPlayerState(),
     };
   }
 }

@@ -11,24 +11,18 @@ using KinematicCharacterController;
 /// Primary logic controller for managing server game state.
 public class ServerLogicController : BaseLogicController {
   // Currently connected peers indexed by their peer ID.
-  private HashSet<NetPeer> connectedPeers;
+  private HashSet<NetPeer> connectedPeers = new HashSet<NetPeer>();
 
   // A handle to the game server registered with the hotel master server.
   private Hotel.RegisteredGameServer hotelGameServer;
 
   // Queue for incoming player input commands.
   // These are processed explicitly in a fixed update loop.
-  private Queue<WithPeer<NetCommand.PlayerInput>> playerInputQueue;
-
-  // A re-usable list for keeping track of physics movers.  Not used yet.
-  private List<PhysicsMover> movingPhysicsMovers;
+  private Queue<WithPeer<NetCommand.PlayerInput>> playerInputQueue
+      = new Queue<WithPeer<NetCommand.PlayerInput>>();
 
   protected override void Awake() {
     base.Awake();
-
-    connectedPeers = new HashSet<NetPeer>();
-    playerInputQueue = new Queue<WithPeer<NetCommand.PlayerInput>>();
-    movingPhysicsMovers = new List<PhysicsMover>();
 
     // Setup network event handling.
     netChannel.Subscribe<NetCommand.JoinRequest>(HandleJoinRequest);
@@ -44,21 +38,27 @@ public class ServerLogicController : BaseLogicController {
     base.Update();
 
     // Process the player input queue.
+    // TODO: An optimization would be to make this a priority queue, and process
+    // matching world ticks in lock-step.  I don't actually know how often that
+    // would happen though.
     while (playerInputQueue.Count > 0) {
       var entry = playerInputQueue.Dequeue();
       var peer = entry.Peer;
       var command = entry.Value;
 
-      // Apply inputs to the associated player controller.
+      // Apply inputs to the associated player controller and simulate the world.
       var player = playerManager.GetPlayerForPeer(peer);
       player.Controller.SetPlayerInputs(command.Inputs);
-      var motors = new List<KinematicCharacterMotor> { player.Motor };
+      SimulateKinematicSystem(Time.fixedDeltaTime);
 
-      // TODO: An optimization here would be to collect all inputs for the same world tick?
-      // Not sure exactly yet.
-      KinematicCharacterSystem.Simulate(Time.fixedDeltaTime, motors, movingPhysicsMovers);
-
-      ++worldTick;
+      // Broadcast the world state.
+      // The new world state tick is N+1, given input world tick N.
+      var worldStateCmd = new NetCommand.WorldState {
+        WorldTick = command.WorldTick + 1,
+        PlayerStates = playerManager.GetPlayers().Select(
+            p => p.Controller.ToPlayerState()).ToArray(),
+      };
+      netChannel.BroadcastCommand(worldStateCmd);
     }
   }
 
@@ -84,12 +84,33 @@ public class ServerLogicController : BaseLogicController {
   }
 
   /// Setup all server authoritative state for a new player.
-  private Player InitializeServerPlayer(byte playerId, PlayerMetadata metadata) {
+  private Player CreateServerPlayer(byte playerId, PlayerMetadata metadata) {
     // Setup the serverside object for the player.
     var position = Vector3.zero;
     var playerNetworkObject = networkObjectManager.CreatePlayerGameObject(0, position);
     var player = playerManager.AddPlayer(playerId, metadata, playerNetworkObject.gameObject);
+
+    // Update kinematic caches.
+    activeKinematicMotors.Add(player.Motor);
+
     return player;
+  }
+
+  /// Tear down all server authoritative state for a player.
+  private void DestroyServerPlayer(Player player) {
+    Debug.Log($"{player.Metadata.Name} left the server.");
+
+    // Update managers.
+    networkObjectManager.DestroyNetworkObject(player.NetworkObject);
+    playerManager.RemovePlayer(player.PlayerId);
+
+    // Update kinematic caches.
+    activeKinematicMotors.Remove(player.Motor);
+
+    // Notify peers.
+    netChannel.BroadcastCommand(new NetCommand.PlayerLeft {
+      PlayerId = player.PlayerId,
+    }, player.peer);
   }
 
   /** Network command handling */
@@ -105,7 +126,7 @@ public class ServerLogicController : BaseLogicController {
     // Initialize the server player model - Peer ID is used as player ID always.
     var existingPlayers = playerManager.GetPlayers();
     var playerId = (byte)peer.Id;
-    var player = InitializeServerPlayer(playerId, metadata);
+    var player = CreateServerPlayer(playerId, metadata);
 
     // Transmit existing player state to new player and new player state to
     // existing clients. Separate RPCs with the same payload are used so that
@@ -128,16 +149,9 @@ public class ServerLogicController : BaseLogicController {
   protected override void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo) {
     connectedPeers.Remove(peer);
     hotelGameServer.UpdateNumPlayers(connectedPeers.Count);
-
-    // Tear down the associated player if it exists.
     var player = playerManager.GetPlayerForPeer(peer);
     if (player != null) {
-      Debug.Log($"{player.Metadata.Name} left the server.");
-      networkObjectManager.DestroyNetworkObject(player.NetworkObject);
-      playerManager.RemovePlayer(player.PlayerId);
+      DestroyServerPlayer(player);
     }
-    netChannel.BroadcastCommand(new NetCommand.PlayerLeft {
-      PlayerId = player.PlayerId,
-    }, peer);
   }
 }

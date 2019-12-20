@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviour, ICharacterController {
   private Vector3 moveVector;
   private Vector3 lookVector;
 
-  private void Start() {
+  private void Awake() {
     motor = GetComponent<KinematicCharacterMotor>();
     motor.CharacterController = this;
     animator = GetComponentInChildren<Animator>();
@@ -70,6 +70,17 @@ public class PlayerController : MonoBehaviour, ICharacterController {
     return jumpWhileSliding ?
         motor.GroundingStatus.FoundAnyGround :
         motor.GroundingStatus.IsStableOnGround;
+  }
+
+  /**
+   * Networking details.
+   */
+  public PlayerState ToPlayerState() {
+    return new PlayerState {
+      Position = transform.position,
+      Rotation = transform.rotation,
+      Velocity = motor == null ? Vector3.zero : motor.Velocity,
+    };
   }
 
   /**

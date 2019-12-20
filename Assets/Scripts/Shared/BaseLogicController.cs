@@ -3,6 +3,7 @@ using LiteNetLib;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System;
+using KinematicCharacterController;
 
 /// Base component for primary logic and dependencies needed by both client and server.
 [RequireComponent(typeof(NetworkObjectManager))]
@@ -14,8 +15,9 @@ public abstract class BaseLogicController : MonoBehaviour {
   protected NetChannel netChannel;
   protected PlayerManager playerManager;
 
-  // The current world tick.
-  protected uint worldTick = 0;
+  // Cached lists for keeping track of kinematic objects in the scene.
+  protected List<KinematicCharacterMotor> activeKinematicMotors = new List<KinematicCharacterMotor>();
+  protected List<PhysicsMover> activePhysicsMovers = new List<PhysicsMover>();
 
   protected virtual void Awake() {
     networkObjectManager = GetComponent<NetworkObjectManager>();
@@ -37,6 +39,10 @@ public abstract class BaseLogicController : MonoBehaviour {
     if (Input.GetKeyDown(KeyCode.Escape)) {
       LoadLobbyScene();
     }
+  }
+
+  protected void SimulateKinematicSystem(float dt) {
+    KinematicCharacterSystem.Simulate(dt, activeKinematicMotors, activePhysicsMovers);
   }
 
   private void OnApplicationQuit() {

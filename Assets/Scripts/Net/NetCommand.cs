@@ -31,6 +31,11 @@ namespace NetCommand {
     public byte PlayerId { get; set; }
   }
 
+  public class WorldState {
+    public uint WorldTick { get; set; }
+    public PlayerState[] PlayerStates { get; set; }
+  }
+
   /// Metadata about each command.
   public static class Metadata {
 
@@ -44,6 +49,7 @@ namespace NetCommand {
 
       // Unreliable commands sent frequently.
       { typeof(PlayerInput), DeliveryMethod.Unreliable },
+      { typeof(WorldState), DeliveryMethod.Unreliable },
     };
   }
 }

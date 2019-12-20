@@ -37,6 +37,7 @@ public class NetChannel : INetEventListener, INetChannel {
     netPacketProcessor.RegisterNestedType<PlayerSetupData>();
     netPacketProcessor.RegisterNestedType<PlayerMetadata>();
     netPacketProcessor.RegisterNestedType<InitialPlayerState>();
+    netPacketProcessor.RegisterNestedType<PlayerState>();
     netPacketProcessor.RegisterNestedType<NetworkObjectState>();
     netPacketProcessor.RegisterNestedType<PlayerInputs>();
   }

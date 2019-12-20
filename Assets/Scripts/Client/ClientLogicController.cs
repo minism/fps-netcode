@@ -3,6 +3,7 @@ using UnityEngine;
 using LiteNetLib;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using KinematicCharacterController;
 
 /// Primary logic controller for managing client game state.
 public class ClientLogicController : BaseLogicController {
@@ -14,6 +15,12 @@ public class ClientLogicController : BaseLogicController {
   // Fixed timing accumulator.
   private float accumulator;
 
+  // The current world tick.
+  private uint worldTick = 0;
+
+  // Queue for incoming world states from the server.
+  private Queue<NetCommand.WorldState> worldStateQueue = new Queue<NetCommand.WorldState>();
+
   protected override void Awake() {
     base.Awake();
 
@@ -21,6 +28,7 @@ public class ClientLogicController : BaseLogicController {
     netChannel.Subscribe<NetCommand.JoinAccepted>(HandleJoinAccepted);
     netChannel.Subscribe<NetCommand.PlayerJoined>(HandleOtherPlayerJoined);
     netChannel.Subscribe<NetCommand.PlayerLeft>(HandleOtherPlayerLeft);
+    netChannel.SubscribeQueue(worldStateQueue);
   }
 
   protected override void Update() {
@@ -31,17 +39,21 @@ public class ClientLogicController : BaseLogicController {
       return;
     }
 
-    // Send unreliable input packets as fast as possible.
+    // Fixed timestep loop.
     accumulator += Time.deltaTime;
     while (accumulator >= Time.fixedDeltaTime) {
       accumulator -= Time.fixedDeltaTime;
+
+      // Send an input packet immediately.
       var command = new NetCommand.PlayerInput {
         WorldTick = worldTick,
         Inputs = localPlayerInput.SampleInputs(),
       };
       netChannel.SendCommand(serverPeer, command);
 
-      // Client-side prediction herer
+      // Apply inputs to the associated player controller and simulate the world.
+      localPlayer.Controller.SetPlayerInputs(command.Inputs);
+      SimulateKinematicSystem(Time.fixedDeltaTime);
 
       ++worldTick;
     }
@@ -54,12 +66,16 @@ public class ClientLogicController : BaseLogicController {
     LoadGameScene();
   }
 
-  private Player AddPlayerFromInitialServerState(InitialPlayerState playerData) {
+  private Player AddPlayerFromInitialServerState(InitialPlayerState initialState) {
     var playerObject = networkObjectManager.CreatePlayerGameObject(
-        playerData.NetworkObjectState.NetworkId,
-        playerData.NetworkObjectState.Position).gameObject;
+        initialState.NetworkObjectState.NetworkId,
+        initialState.PlayerState.Position).gameObject;
     var player = playerManager.AddPlayer(
-        playerData.PlayerId, playerData.Metadata, playerObject);
+        initialState.PlayerId, initialState.Metadata, playerObject);
+
+    // Update kinematic caches.
+    activeKinematicMotors.Add(player.Motor);
+
     return player;
   }
 
@@ -94,6 +110,9 @@ public class ClientLogicController : BaseLogicController {
     Debug.Log($"{player.Metadata.Name} left the server.");
     networkObjectManager.DestroyNetworkObject(player.NetworkObject);
     playerManager.RemovePlayer(player.PlayerId);
+
+    // Update kinematic caches.
+    activeKinematicMotors.Remove(player.Motor);
   }
 
 	protected override void OnPeerConnected(NetPeer peer) {
