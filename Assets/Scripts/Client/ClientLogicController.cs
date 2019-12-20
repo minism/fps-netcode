@@ -97,7 +97,10 @@ public class ClientLogicController : BaseLogicController {
 
       // Compare the historical state to see how off it was.
       var error = incomingPlayerState.SimplePosition - stateSnapshot.SimplePosition;
-      //Debug.Log(error.sqrMagnitude);
+
+      // TODO: Getting a huge amount of these. Next step to debug is to make a simple
+      // Rigidbody based controller and see if the same issues are there, to determine
+      // whether its an issue with my netcode or if KCC is really this non-deterministic.
       if (error.sqrMagnitude > 0.0001f) {
         if (!headState) {
           replayedStates++;
