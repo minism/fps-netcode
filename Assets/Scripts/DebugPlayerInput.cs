@@ -13,7 +13,7 @@ public class DebugPlayerInput : MonoBehaviour, ClientPlayerInput.Handler {
     clientPlayerInput.InputHandler = this;
   }
 
-  public void HandleClientPlayerInput(in ClientPlayerInput.Inputs inputs) {
-    playerController.SetPlayerInput(in inputs);
+  public void HandleClientPlayerInput(in PlayerInputs inputs) {
+    playerController.SetPlayerInputs(inputs);
   }
 }

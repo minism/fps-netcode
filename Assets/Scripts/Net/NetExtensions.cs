@@ -17,6 +17,30 @@ public static class NetExtensions {
     return v;
   }
 
+  public static void SerializeQuaternion(NetDataWriter writer, Quaternion quaternion) {
+    writer.Put(quaternion.w);
+    writer.Put(quaternion.x);
+    writer.Put(quaternion.y);
+    writer.Put(quaternion.z);
+  }
+
+  public static Quaternion DeserializeQuaternion(NetDataReader reader) {
+    Quaternion q;
+    q.w = reader.GetFloat();
+    q.x = reader.GetFloat();
+    q.y = reader.GetFloat();
+    q.z = reader.GetFloat();
+    return q;
+  }
+
+  public static void Put(this NetDataWriter writer, Quaternion quaternion) {
+    SerializeQuaternion(writer, quaternion);
+  }
+
+  public static Quaternion GetQuaternion(this NetDataReader reader) {
+    return DeserializeQuaternion(reader);
+  }
+
   public static void Put(this NetDataWriter writer, Vector3 vector) {
     SerializeVector3(writer, vector);
   }

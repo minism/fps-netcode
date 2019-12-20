@@ -25,6 +25,12 @@ public class CameraController : MonoBehaviour {
   }
 
   private void Update() {
+    // If we have no target, do nothing.
+    if (followTarget == null) {
+      return;
+    }
+
+    // Lock the cursor state when the game is clicked.
     if (Input.GetMouseButtonDown(0)) {
       Cursor.lockState = CursorLockMode.Locked;
     }

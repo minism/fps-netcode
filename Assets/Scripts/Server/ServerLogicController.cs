@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 using System.Collections;
+using KinematicCharacterController;
 
 /// Primary logic controller for managing server game state.
 public class ServerLogicController : BaseLogicController {
@@ -15,13 +16,23 @@ public class ServerLogicController : BaseLogicController {
   // A handle to the game server registered with the hotel master server.
   private Hotel.RegisteredGameServer hotelGameServer;
 
+  // Queue for incoming player input commands.
+  // These are processed explicitly in a fixed update loop.
+  private Queue<WithPeer<NetCommand.PlayerInput>> playerInputQueue;
+
+  // A re-usable list for keeping track of physics movers.  Not used yet.
+  private List<PhysicsMover> movingPhysicsMovers;
+
   protected override void Awake() {
     base.Awake();
 
     connectedPeers = new HashSet<NetPeer>();
+    playerInputQueue = new Queue<WithPeer<NetCommand.PlayerInput>>();
+    movingPhysicsMovers = new List<PhysicsMover>();
 
     // Setup network event handling.
     netChannel.Subscribe<NetCommand.JoinRequest>(HandleJoinRequest);
+    netChannel.SubscribeQueue<NetCommand.PlayerInput>(playerInputQueue);
   }
 
   protected override void Start() {
@@ -31,6 +42,24 @@ public class ServerLogicController : BaseLogicController {
 
   protected override void Update() {
     base.Update();
+
+    // Process the player input queue.
+    while (playerInputQueue.Count > 0) {
+      var entry = playerInputQueue.Dequeue();
+      var peer = entry.Peer;
+      var command = entry.Value;
+
+      // Apply inputs to the associated player controller.
+      var player = playerManager.GetPlayerForPeer(peer);
+      player.Controller.SetPlayerInputs(command.Inputs);
+      var motors = new List<KinematicCharacterMotor> { player.Motor };
+
+      // TODO: An optimization here would be to collect all inputs for the same world tick?
+      // Not sure exactly yet.
+      KinematicCharacterSystem.Simulate(Time.fixedDeltaTime, motors, movingPhysicsMovers);
+
+      ++worldTick;
+    }
   }
 
   protected override void OnApplicationQuit() {
@@ -84,6 +113,10 @@ public class ServerLogicController : BaseLogicController {
     var playerJoinedCmd = CommandBuilder.BuildPlayerJoinedCmd(player);
     netChannel.SendCommand(peer, joinAcceptedCmd);
     netChannel.BroadcastCommand(playerJoinedCmd, peer);
+  }
+
+  private void HandlePlayerInput(NetCommand.PlayerInput cmd, NetPeer peer) {
+    var player = playerManager.GetPlayerForPeer(peer);
   }
 
   protected override void OnPeerConnected(NetPeer peer) {

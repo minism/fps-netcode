@@ -32,10 +32,13 @@ public class NetChannel : INetEventListener, INetChannel {
     // Register nested types used in net commands.
     netPacketProcessor.RegisterNestedType(
         NetExtensions.SerializeVector3, NetExtensions.DeserializeVector3);
+    netPacketProcessor.RegisterNestedType(
+        NetExtensions.SerializeQuaternion, NetExtensions.DeserializeQuaternion);
     netPacketProcessor.RegisterNestedType<PlayerSetupData>();
     netPacketProcessor.RegisterNestedType<PlayerMetadata>();
     netPacketProcessor.RegisterNestedType<InitialPlayerState>();
     netPacketProcessor.RegisterNestedType<NetworkObjectState>();
+    netPacketProcessor.RegisterNestedType<PlayerInputs>();
   }
 
   /// Update should be called every frame.
@@ -43,8 +46,8 @@ public class NetChannel : INetEventListener, INetChannel {
     netManager.PollEvents();
   }
 
-	/// Destroy should be called if the channel will never be used again.
-	public void Destroy() {
+	/// Stop all networking activity (shuts down the client or server).
+	public void Stop() {
     netManager.Stop();
   }
 
@@ -80,6 +83,18 @@ public class NetChannel : INetEventListener, INetChannel {
 
   public void Subscribe<T>(Action<T, NetPeer> onReceiveHandler) where T : class, new() {
     netPacketProcessor.SubscribeReusable(onReceiveHandler);
+  }
+
+  public void SubscribeQueue<T>(Queue<T> queue) where T : class, new() {
+    netPacketProcessor.SubscribeReusable((T data) => {
+      queue.Enqueue(data);
+    });
+  }
+
+  public void SubscribeQueue<T>(Queue<WithPeer<T>> queue) where T : class, new() {
+    netPacketProcessor.SubscribeReusable((T data, NetPeer peer) => {
+      queue.Enqueue(new WithPeer<T> { Peer = peer, Value = data });
+    });
   }
 
   public void SendCommand<T>(NetPeer peer, T command) where T : class, new() {

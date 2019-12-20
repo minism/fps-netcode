@@ -7,27 +7,23 @@ public class ClientPlayerInput : MonoBehaviour {
   public CameraController cameraController;
 
   public interface Handler {
-    void HandleClientPlayerInput(in Inputs inputs);
-  }
-
-  // Movement input for a single frame.
-  public struct Inputs {
-    public float ForwardAxis;
-    public float RightAxis;
-    public Vector3 ViewDirection;
-    public bool Jump;
+    void HandleClientPlayerInput(in PlayerInputs inputs);
   }
 
   public Handler InputHandler { get; set; }
 
-  private void Update() {
-    var inputs = new Inputs {
+  public PlayerInputs SampleInputs() {
+    return new PlayerInputs {
       ForwardAxis = Input.GetAxisRaw("Vertical"),
       RightAxis = Input.GetAxisRaw("Horizontal"),
-      ViewDirection = cameraController.transform.forward,
+      CameraOrientation = cameraController.transform.rotation,
       Jump = Input.GetKeyDown(KeyCode.Space),
     };
+  }
+
+  private void Update() {
     if (InputHandler != null) {
+      var inputs = SampleInputs();
       InputHandler.HandleClientPlayerInput(in inputs);
     }
   }

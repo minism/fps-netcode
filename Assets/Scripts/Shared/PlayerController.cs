@@ -28,9 +28,9 @@ public class PlayerController : MonoBehaviour, ICharacterController {
   }
   private JumpState jumpState;
 
-  // The next movement vectors to use.
-  public Vector3 moveVector;
-  public Vector3 lookVector;
+  // The next movement vectors to use, computed from inputs.
+  private Vector3 moveVector;
+  private Vector3 lookVector;
 
   private void Start() {
     motor = GetComponent<KinematicCharacterMotor>();
@@ -39,23 +39,20 @@ public class PlayerController : MonoBehaviour, ICharacterController {
   }
 
   // Sets the move input data to use for the next update frame.
-  public void SetPlayerInput(in ClientPlayerInput.Inputs inputs) {
+  public void SetPlayerInputs(PlayerInputs inputs) {
     // Create a clamped movement vector to avoid the classic diagonal movement problem.            
     var inputVector = Vector3.ClampMagnitude(
         new Vector3(inputs.RightAxis, 0, inputs.ForwardAxis), 1f);
-    Debug.Log(inputVector);
 
     // Determine the direction we should be moving within our plane, based on the view direction.
-    // Our plane is defined by the up vector on the kinematic controller, which may change in
-    // centrifuge physics.
     var viewForward = Vector3.ProjectOnPlane(
-        inputs.ViewDirection, Vector3.up).normalized;
+        inputs.CameraOrientation * Vector3.forward, Vector3.up).normalized;
 
     // TODO: Is this needeD?
-    //if (camForward.sqrMagnitude == 0f) {
-    //  camForward = Vector3.ProjectOnPlane(
-    //      input.CameraOrientation * Vector3.up, motor.CharacterUp).normalized;
-    //}
+    if (viewForward.sqrMagnitude == 0f) {
+      viewForward = Vector3.ProjectOnPlane(
+          inputs.CameraOrientation * Vector3.up, Vector3.up).normalized;
+    }
 
     // Apply view direction to input vector.
     var rotation = Quaternion.LookRotation(viewForward, Vector3.up);

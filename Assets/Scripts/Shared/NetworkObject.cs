@@ -5,17 +5,8 @@ using UnityEngine;
 /// Indicates a synchronized presence over the network for this object.
 /// NetworkID is common to all clients and server.
 /// Similar concept to NetworkIdentity in Unity's deprecated implementation.
-[RequireComponent(typeof(Rigidbody))]
 public class NetworkObject : MonoBehaviour {
   private ushort _networkId;
-
-  private new Rigidbody rigidbody;
-
-  private void Start() {
-    // For now assume these exist, but eventually we will need to support
-    // network objects that don't depend on rigidbodies.
-    rigidbody = GetComponent<Rigidbody>();
-  }
 
   public ushort NetworkId {
     get {
@@ -32,19 +23,24 @@ public class NetworkObject : MonoBehaviour {
   public NetworkObjectState ToNetworkState() {
     return new NetworkObjectState {
       NetworkId = NetworkId,
-      Position = transform.position,
-      Rotation = transform.rotation.eulerAngles,
-      Velocity = rigidbody.velocity,
-      AngularVelocity = rigidbody.angularVelocity,
+      //Position = transform.position,
+      //Rotation = transform.rotation.eulerAngles,
+      //Velocity = GetVelocity(),
+      //AngularVelocity = GetAngularVelocity(),
     };
   }
 
   public void ApplyNetworkState(NetworkObjectState state) {
-    transform.position = state.Position;
-    transform.rotation = Quaternion.Euler(state.Rotation);
-    rigidbody.velocity = state.Velocity;
-    rigidbody.angularVelocity = state.AngularVelocity;
+    //transform.position = state.Position;
+    //transform.rotation = Quaternion.Euler(state.Rotation);
+    //SetVelocity(state.Velocity);
+    //SetAngularVelocity(state.AngularVelocity);
   }
+
+  //protected abstract Vector3 GetVelocity();
+  //protected abstract Vector3 GetAngularVelocity();
+  //protected abstract void SetVelocity(Vector3 velocity);
+  //protected abstract void SetAngularVelocity(Vector3 velocity);
 
   private void OnGUI() {
     if (GamePrefs.DebugMode) {

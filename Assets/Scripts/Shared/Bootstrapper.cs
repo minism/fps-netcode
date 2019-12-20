@@ -29,6 +29,11 @@ public class Bootstrapper : MonoBehaviour {
 
   public void StartGameAsClient(Hotel.GameServer serverToJoin) {
     Debug.Log($"Joining server {serverToJoin.host}:{serverToJoin.port}...");
+
+    // Disable kinematic simulation since it will be done manually on the client.
+    KinematicCharacterController.KinematicCharacterSystem.EnsureCreation();
+    KinematicCharacterController.KinematicCharacterSystem.Settings.AutoSimulation = false;
+
     // Fake player data for now.
     var playerSetupData = new PlayerSetupData {
       Name = "Player",

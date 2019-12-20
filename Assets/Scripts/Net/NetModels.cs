@@ -49,6 +49,28 @@ public struct InitialPlayerState : INetSerializable {
   }
 }
 
+/// Player input data.
+public struct PlayerInputs : INetSerializable {
+  public float ForwardAxis;
+  public float RightAxis;
+  public Quaternion CameraOrientation;
+  public bool Jump;
+
+  public void Serialize(NetDataWriter writer) {
+    writer.Put(ForwardAxis);
+    writer.Put(RightAxis);
+    writer.Put(CameraOrientation);
+    writer.Put(Jump);
+  }
+
+  public void Deserialize(NetDataReader reader) {
+    ForwardAxis = reader.GetFloat();
+    RightAxis = reader.GetFloat();
+    CameraOrientation = reader.GetQuaternion();
+    Jump = reader.GetBool();
+  }
+}
+
 // 50 bytes
 public struct NetworkObjectState : INetSerializable {
   public ushort NetworkId;

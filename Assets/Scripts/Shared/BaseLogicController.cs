@@ -9,9 +9,13 @@ using System;
 public abstract class BaseLogicController : MonoBehaviour {
   public NetMonitor netMonitor;
 
+  // Delegates.
   protected NetworkObjectManager networkObjectManager;
   protected NetChannel netChannel;
   protected PlayerManager playerManager;
+
+  // The current world tick.
+  protected uint worldTick = 0;
 
   protected virtual void Awake() {
     networkObjectManager = GetComponent<NetworkObjectManager>();
@@ -29,10 +33,14 @@ public abstract class BaseLogicController : MonoBehaviour {
 
   protected virtual void Update() {
     netChannel.Update();
+
+    if (Input.GetKeyDown(KeyCode.Escape)) {
+      LoadLobbyScene();
+    }
   }
 
   protected virtual void OnApplicationQuit() {
-    netChannel.Destroy();
+    netChannel.Stop();
   }
 
   protected void LoadGameScene() {

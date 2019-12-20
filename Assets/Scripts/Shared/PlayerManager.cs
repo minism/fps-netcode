@@ -27,8 +27,9 @@ public class PlayerManager : IPlayerLookup {
       PlayerId = playerId,
       Metadata = metadata,
       NetworkObject = playerGameObject.GetComponent<NetworkObject>(),
-      //Controller = playerGameObject.GetComponent<PlayerController>(),
-      Rigidbody = playerGameObject.GetComponent<Rigidbody>(),
+      Controller = playerGameObject.GetComponent<PlayerController>(),
+      Motor = playerGameObject.GetComponent<KinematicCharacterController.KinematicCharacterMotor>(),
+      //Rigidbody = playerGameObject.GetComponent<Rigidbody>(),
     };
     players.Add(playerId, player);
     return player;

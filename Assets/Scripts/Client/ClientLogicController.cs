@@ -5,11 +5,14 @@ using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
 /// Primary logic controller for managing client game state.
-public class ClientLogicController : BaseLogicController, ClientPlayerInput.Handler {
+public class ClientLogicController : BaseLogicController {
   private NetPeer serverPeer;
-  private PlayerSetupData playerSetupData;
   private ClientPlayerInput localPlayerInput;
   private Player localPlayer;
+  private PlayerSetupData playerSetupData;
+
+  // Fixed timing accumulator.
+  private float accumulator;
 
   protected override void Awake() {
     base.Awake();
@@ -22,6 +25,26 @@ public class ClientLogicController : BaseLogicController, ClientPlayerInput.Hand
 
   protected override void Update() {
     base.Update();
+
+    if (localPlayerInput == null) {
+      // If the input component isn't created yet, take no action.
+      return;
+    }
+
+    // Send unreliable input packets as fast as possible.
+    accumulator += Time.deltaTime;
+    while (accumulator >= Time.fixedDeltaTime) {
+      accumulator -= Time.fixedDeltaTime;
+      var command = new NetCommand.PlayerInput {
+        WorldTick = this.worldTick,
+        Inputs = localPlayerInput.SampleInputs(),
+      };
+      netChannel.SendCommand(serverPeer, command);
+
+      // Client-side prediction herer
+
+      ++this.worldTick;
+    }
   }
 
   public void TryJoinServer(string host, int port, PlayerSetupData playerSetupData) {
@@ -29,9 +52,6 @@ public class ClientLogicController : BaseLogicController, ClientPlayerInput.Hand
     this.playerSetupData = playerSetupData;
 		netChannel.ConnectToServer(host, port);
     LoadGameScene();
-  }
-
-  public void HandleClientPlayerInput(in ClientPlayerInput.Inputs inputs) {
   }
 
   private Player AddPlayerFromInitialServerState(InitialPlayerState playerData) {
@@ -43,6 +63,12 @@ public class ClientLogicController : BaseLogicController, ClientPlayerInput.Hand
     return player;
   }
 
+  private void InitializeLocalPlayer() {
+    // Create input component.
+    localPlayerInput = gameObject.AddComponent<ClientPlayerInput>();
+    localPlayerInput.cameraController = FindObjectOfType<CameraController>();
+  }
+
   /** Network command handling */
 
   private void HandleJoinAccepted(NetCommand.JoinAccepted cmd) {
@@ -50,6 +76,7 @@ public class ClientLogicController : BaseLogicController, ClientPlayerInput.Hand
 
     // Create our player object and attach client-specific components.
     localPlayer = AddPlayerFromInitialServerState(cmd.YourPlayerState);
+    InitializeLocalPlayer();
 
     // Create player objects for existing clients.
     foreach (var state in cmd.ExistingPlayerStates) {

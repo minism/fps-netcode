@@ -11,6 +11,11 @@ namespace NetCommand {
     public PlayerSetupData PlayerSetupData { get; set; }
   }
 
+  public class PlayerInput {
+    public uint WorldTick;
+    public PlayerInputs Inputs;
+  }
+
   /** Server -> Client commands. */
 
   public class JoinAccepted {
@@ -31,10 +36,14 @@ namespace NetCommand {
 
     /// Mapping of the command type to its default delivery method, for convenience.
     public static Dictionary<Type, DeliveryMethod> DeliveryType = new Dictionary<Type, DeliveryMethod>() {
+      // Reliable commands like chat and major state changes.
       { typeof(JoinRequest), DeliveryMethod.ReliableOrdered },
       { typeof(JoinAccepted), DeliveryMethod.ReliableOrdered },
       { typeof(PlayerJoined), DeliveryMethod.ReliableOrdered },
       { typeof(PlayerLeft), DeliveryMethod.ReliableOrdered },
+
+      // Unreliable commands sent frequently.
+      { typeof(PlayerInput), DeliveryMethod.Unreliable },
     };
   }
 }
