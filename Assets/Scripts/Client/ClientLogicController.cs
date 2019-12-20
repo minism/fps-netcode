@@ -25,6 +25,10 @@ public class ClientLogicController : BaseLogicController {
   private PlayerInputs[] localPlayerInputsSnapshots = new PlayerInputs[1024];
   private PlayerState[] localPlayerStateSnapshots = new PlayerState[1024];
 
+  // Monitoring.
+  private int receivedStates;
+  private int replayedStates;
+
   protected override void Awake() {
     base.Awake();
 
@@ -57,7 +61,7 @@ public class ClientLogicController : BaseLogicController {
       netChannel.SendCommand(serverPeer, command);
 
       // Update our snapshot buffers.
-      // TODO: We may not need to actually store velocity here.
+      // TODO: The snapshot might only need pos/rot.
       uint bufidx = worldTick % 1024;
       localPlayerInputsSnapshots[bufidx] = inputs;
       localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
@@ -74,6 +78,7 @@ public class ClientLogicController : BaseLogicController {
     while (worldStateQueue.Count > 0) {
       // Lookup the historical state for the world tick we got.
       var incomingState = worldStateQueue.Dequeue();
+      receivedStates++;
       // TODO: Fix this assumption.
       var incomingPlayerState = incomingState.PlayerStates[0];
       uint bufidx = incomingState.WorldTick % 1024;
@@ -81,11 +86,12 @@ public class ClientLogicController : BaseLogicController {
 
       // Compare the historical state to see how off it was.
       var error = incomingPlayerState.MotorState.Position - stateSnapshot.MotorState.Position;
-      if (error.sqrMagnitude > 0.0000001f) {
-        Debug.Log("Divergence, rewinding.");
+      Debug.Log(error.sqrMagnitude);
+      if (error.sqrMagnitude > 0.00001f) {
+        replayedStates++;
 
-        // Rewind the player state to the historical snapshot
-        localPlayer.Controller.ApplyNetworkState(stateSnapshot);
+        // Rewind the player state to the correct state from the server.
+        localPlayer.Controller.ApplyNetworkState(incomingPlayerState);
 
         // Loop through and replay all captured input snapshots up to the current tick.
         uint replayTick = incomingState.WorldTick;
@@ -105,6 +111,10 @@ public class ClientLogicController : BaseLogicController {
         }
       }
     }
+
+    // Update debug monitoring.
+    DebugUI.ShowValue("recv states", receivedStates);
+    DebugUI.ShowValue("repl states", replayedStates);
   }
 
   public void TryJoinServer(string host, int port, PlayerSetupData playerSetupData) {
