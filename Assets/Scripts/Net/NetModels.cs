@@ -57,13 +57,16 @@ public struct InitialPlayerState : INetSerializable {
 /// TODO: See later if the physics state can be merged with network state,
 /// once we have non-player networked objects.
 public struct PlayerState : INetSerializable {
+  public Vector3 SimplePosition;
   public KinematicCharacterMotorState MotorState;
 
   public void Serialize(NetDataWriter writer) {
+    writer.Put(SimplePosition);
     NetExtensions.SerializeKinematicMotorState(writer, MotorState);
   }
 
   public void Deserialize(NetDataReader reader) {
+    SimplePosition = reader.GetVector3();
     MotorState = NetExtensions.DeserializeKinematicMotorState(reader);
   }
 }

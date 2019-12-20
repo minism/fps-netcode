@@ -77,6 +77,7 @@ public class PlayerController : MonoBehaviour, ICharacterController {
    */
   public PlayerState ToNetworkState() {
     return new PlayerState {
+      SimplePosition = transform.position,
       MotorState = motor.GetState(),
     };
   }

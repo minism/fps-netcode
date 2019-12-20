@@ -21,6 +21,9 @@ public class ServerLogicController : BaseLogicController {
   private Queue<WithPeer<NetCommand.PlayerInput>> playerInputQueue
       = new Queue<WithPeer<NetCommand.PlayerInput>>();
 
+  // Monitoring.
+  private int sentPlayerNearOriginStates;
+
   protected override void Awake() {
     base.Awake();
 
@@ -58,8 +61,13 @@ public class ServerLogicController : BaseLogicController {
         PlayerStates = playerManager.GetPlayers().Select(
             p => p.Controller.ToNetworkState()).ToArray(),
       };
+      if (worldStateCmd.PlayerStates[0].MotorState.Position.magnitude < 5) {
+        sentPlayerNearOriginStates++;
+      }
       netChannel.BroadcastCommand(worldStateCmd);
     }
+
+    DebugUI.ShowValue("SentNearOrigin", sentPlayerNearOriginStates);
   }
 
   protected override void TearDownGameScene() {

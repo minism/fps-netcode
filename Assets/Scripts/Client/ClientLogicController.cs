@@ -28,6 +28,7 @@ public class ClientLogicController : BaseLogicController {
   // Monitoring.
   private int receivedStates;
   private int replayedStates;
+  private int headStates;
 
   protected override void Awake() {
     base.Awake();
@@ -79,16 +80,29 @@ public class ClientLogicController : BaseLogicController {
       // Lookup the historical state for the world tick we got.
       var incomingState = worldStateQueue.Dequeue();
       receivedStates++;
+
+      bool headState = false;
+      if (incomingState.WorldTick >= worldTick) {
+        headState = true;
+        headStates++;
+      }
+      if (incomingState.WorldTick > worldTick) {
+        Debug.LogError("Got a FUTURE tick somehow???");
+      }
+
       // TODO: Fix this assumption.
       var incomingPlayerState = incomingState.PlayerStates[0];
       uint bufidx = incomingState.WorldTick % 1024;
       var stateSnapshot = localPlayerStateSnapshots[bufidx];
 
       // Compare the historical state to see how off it was.
-      var error = incomingPlayerState.MotorState.Position - stateSnapshot.MotorState.Position;
-      Debug.Log(error.sqrMagnitude);
-      if (error.sqrMagnitude > 0.00001f) {
-        replayedStates++;
+      var error = incomingPlayerState.SimplePosition - stateSnapshot.SimplePosition;
+      //Debug.Log(error.sqrMagnitude);
+      if (error.sqrMagnitude > 0.0001f) {
+        if (!headState) {
+          replayedStates++;
+          Debug.Log(error.sqrMagnitude);
+        }
 
         // Rewind the player state to the correct state from the server.
         localPlayer.Controller.ApplyNetworkState(incomingPlayerState);
@@ -115,6 +129,7 @@ public class ClientLogicController : BaseLogicController {
     // Update debug monitoring.
     DebugUI.ShowValue("recv states", receivedStates);
     DebugUI.ShowValue("repl states", replayedStates);
+    DebugUI.ShowValue("head states", headStates);
   }
 
   public void TryJoinServer(string host, int port, PlayerSetupData playerSetupData) {

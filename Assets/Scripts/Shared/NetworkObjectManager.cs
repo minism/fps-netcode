@@ -47,6 +47,7 @@ public class NetworkObjectManager : MonoBehaviour {
 
   public NetworkObject CreatePlayerGameObject(ushort networkId, Vector3 position) {
     networkId = EnsureNetworkId(networkId);
+    position = new Vector3(10, 0, 10);
     var obj = Instantiate(basePlayerPrefab, position, Quaternion.identity);
     obj.NetworkId = networkId;
     activeObjects[networkId] = obj;
