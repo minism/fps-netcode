@@ -75,12 +75,14 @@ public class PlayerController : MonoBehaviour, ICharacterController {
   /**
    * Networking details.
    */
-  public PlayerState ToPlayerState() {
+  public PlayerState ToNetworkState() {
     return new PlayerState {
-      Position = transform.position,
-      Rotation = transform.rotation,
-      Velocity = motor == null ? Vector3.zero : motor.Velocity,
+      MotorState = motor.GetState(),
     };
+  }
+
+  public void ApplyNetworkState(PlayerState state) {
+    motor.ApplyState(state.MotorState);
   }
 
   /**

@@ -31,7 +31,7 @@ public class Player : IReadonlyPlayer {
       NetworkObjectState = new NetworkObjectState {
         NetworkId = NetworkObject.NetworkId,
       },
-      PlayerState = Controller.ToPlayerState(),
+      PlayerState = Controller.ToNetworkState(),
     };
   }
 }

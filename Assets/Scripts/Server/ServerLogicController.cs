@@ -56,7 +56,7 @@ public class ServerLogicController : BaseLogicController {
       var worldStateCmd = new NetCommand.WorldState {
         WorldTick = command.WorldTick + 1,
         PlayerStates = playerManager.GetPlayers().Select(
-            p => p.Controller.ToPlayerState()).ToArray(),
+            p => p.Controller.ToNetworkState()).ToArray(),
       };
       netChannel.BroadcastCommand(worldStateCmd);
     }

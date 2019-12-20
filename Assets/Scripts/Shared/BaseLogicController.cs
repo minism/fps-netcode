@@ -9,6 +9,7 @@ using KinematicCharacterController;
 [RequireComponent(typeof(NetworkObjectManager))]
 public abstract class BaseLogicController : MonoBehaviour {
   public NetMonitor netMonitor;
+  public DebugNetworkSettings debugNetworkSettings;
 
   // Delegates.
   protected NetworkObjectManager networkObjectManager;
@@ -22,7 +23,7 @@ public abstract class BaseLogicController : MonoBehaviour {
   protected virtual void Awake() {
     networkObjectManager = GetComponent<NetworkObjectManager>();
     playerManager = new PlayerManager();
-    netChannel = new NetChannel();
+    netChannel = new NetChannel(debugNetworkSettings);
     if (netMonitor != null) {
       netChannel.SetNetMonitor(netMonitor);
     }

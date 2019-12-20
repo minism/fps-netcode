@@ -41,15 +41,16 @@ namespace NetCommand {
 
     /// Mapping of the command type to its default delivery method, for convenience.
     public static Dictionary<Type, DeliveryMethod> DeliveryType = new Dictionary<Type, DeliveryMethod>() {
-      // Reliable commands like chat and major state changes.
+      // Major state changes must be reliable ordered.
       { typeof(JoinRequest), DeliveryMethod.ReliableOrdered },
       { typeof(JoinAccepted), DeliveryMethod.ReliableOrdered },
       { typeof(PlayerJoined), DeliveryMethod.ReliableOrdered },
       { typeof(PlayerLeft), DeliveryMethod.ReliableOrdered },
 
-      // Unreliable commands sent frequently.
-      { typeof(PlayerInput), DeliveryMethod.Unreliable },
-      { typeof(WorldState), DeliveryMethod.Unreliable },
+      // Input and world state can be unreliable since it is sent every frame, but we use
+      // sequenced so that older packets are simply dropped since we don't care about them anymore.
+      { typeof(PlayerInput), DeliveryMethod.Sequenced },
+      { typeof(WorldState), DeliveryMethod.Sequenced },
     };
   }
 }

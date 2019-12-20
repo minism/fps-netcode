@@ -1,3 +1,4 @@
+using KinematicCharacterController;
 using LiteNetLib.Utils;
 using UnityEngine;
 
@@ -56,20 +57,14 @@ public struct InitialPlayerState : INetSerializable {
 /// TODO: See later if the physics state can be merged with network state,
 /// once we have non-player networked objects.
 public struct PlayerState : INetSerializable {
-  public Vector3 Position;
-  public Quaternion Rotation;
-  public Vector3 Velocity;
+  public KinematicCharacterMotorState MotorState;
 
   public void Serialize(NetDataWriter writer) {
-    writer.Put(Position);
-    writer.Put(Rotation);
-    writer.Put(Velocity);
+    NetExtensions.SerializeKinematicMotorState(writer, MotorState);
   }
 
   public void Deserialize(NetDataReader reader) {
-    Position = reader.GetVector3();
-    Rotation = reader.GetQuaternion();
-    Velocity = reader.GetVector3();
+    MotorState = NetExtensions.DeserializeKinematicMotorState(reader);
   }
 }
 

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using UnityEngine;
+using KinematicCharacterController;
 
 /// Central controller for sending network commands and receiving network events.
 /// Used by both client and server, so logic should be relatively generic.
@@ -22,9 +23,14 @@ public class NetChannel : INetEventListener, INetChannel {
   private NetDataWriter netDataWriter;
   private NetMonitor netMonitor;
 
-  public NetChannel() {
+  public NetChannel(DebugNetworkSettings debugNetworkSettings) {
     netManager = new NetManager(this) {
-      AutoRecycle = true
+      AutoRecycle = true,
+      SimulatePacketLoss = debugNetworkSettings.SimulatePacketLoss,
+      SimulateLatency = debugNetworkSettings.SimulateLatency,
+      SimulationPacketLossChance = debugNetworkSettings.PacketLossChance,
+      SimulationMinLatency = debugNetworkSettings.MinLatency,
+      SimulationMaxLatency = debugNetworkSettings.MaxLatency,
     };
     netPacketProcessor = new NetPacketProcessor();
     netDataWriter = new NetDataWriter();
@@ -34,6 +40,9 @@ public class NetChannel : INetEventListener, INetChannel {
         NetExtensions.SerializeVector3, NetExtensions.DeserializeVector3);
     netPacketProcessor.RegisterNestedType(
         NetExtensions.SerializeQuaternion, NetExtensions.DeserializeQuaternion);
+    netPacketProcessor.RegisterNestedType(
+        NetExtensions.SerializeKinematicMotorState,
+        NetExtensions.DeserializeKinematicMotorState);
     netPacketProcessor.RegisterNestedType<PlayerSetupData>();
     netPacketProcessor.RegisterNestedType<PlayerMetadata>();
     netPacketProcessor.RegisterNestedType<InitialPlayerState>();

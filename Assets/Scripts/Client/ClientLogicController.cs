@@ -21,6 +21,10 @@ public class ClientLogicController : BaseLogicController {
   // Queue for incoming world states from the server.
   private Queue<NetCommand.WorldState> worldStateQueue = new Queue<NetCommand.WorldState>();
 
+  // Snapshot buffers for input and state used for prediction & replay.
+  private PlayerInputs[] localPlayerInputsSnapshots = new PlayerInputs[1024];
+  private PlayerState[] localPlayerStateSnapshots = new PlayerState[1024];
+
   protected override void Awake() {
     base.Awake();
 
@@ -43,13 +47,20 @@ public class ClientLogicController : BaseLogicController {
     accumulator += Time.deltaTime;
     while (accumulator >= Time.fixedDeltaTime) {
       accumulator -= Time.fixedDeltaTime;
+      var inputs = localPlayerInput.SampleInputs();
 
       // Send an input packet immediately.
       var command = new NetCommand.PlayerInput {
         WorldTick = worldTick,
-        Inputs = localPlayerInput.SampleInputs(),
+        Inputs = inputs,
       };
       netChannel.SendCommand(serverPeer, command);
+
+      // Update our snapshot buffers.
+      // TODO: We may not need to actually store velocity here.
+      uint bufidx = worldTick % 1024;
+      localPlayerInputsSnapshots[bufidx] = inputs;
+      localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
 
       // Apply inputs to the associated player controller and simulate the world.
       localPlayer.Controller.SetPlayerInputs(command.Inputs);
@@ -57,19 +68,56 @@ public class ClientLogicController : BaseLogicController {
 
       ++worldTick;
     }
+
+    // Step through the incoming world state queue.
+    // TODO: This is going to need to be structured pretty differently with other players.
+    while (worldStateQueue.Count > 0) {
+      // Lookup the historical state for the world tick we got.
+      var incomingState = worldStateQueue.Dequeue();
+      // TODO: Fix this assumption.
+      var incomingPlayerState = incomingState.PlayerStates[0];
+      uint bufidx = incomingState.WorldTick % 1024;
+      var stateSnapshot = localPlayerStateSnapshots[bufidx];
+
+      // Compare the historical state to see how off it was.
+      var error = incomingPlayerState.MotorState.Position - stateSnapshot.MotorState.Position;
+      if (error.sqrMagnitude > 0.0000001f) {
+        Debug.Log("Divergence, rewinding.");
+
+        // Rewind the player state to the historical snapshot
+        localPlayer.Controller.ApplyNetworkState(stateSnapshot);
+
+        // Loop through and replay all captured input snapshots up to the current tick.
+        uint replayTick = incomingState.WorldTick;
+        while (replayTick < worldTick) {
+          // Grab the historical input.
+          bufidx = replayTick % 1024;
+          var inputSnapshot = localPlayerInputsSnapshots[bufidx];
+
+          // Rewrite the historical sate snapshot.
+          localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
+
+          // Apply inputs to the associated player controller and simulate the world.
+          localPlayer.Controller.SetPlayerInputs(inputSnapshot);
+          SimulateKinematicSystem(Time.fixedDeltaTime);
+
+          ++replayTick;
+        }
+      }
+    }
   }
 
   public void TryJoinServer(string host, int port, PlayerSetupData playerSetupData) {
     Debug.Log($"Connecting to host {host}:{port}...");
     this.playerSetupData = playerSetupData;
-		netChannel.ConnectToServer(host, port);
+    netChannel.ConnectToServer(host, port);
     LoadGameScene();
   }
 
   private Player AddPlayerFromInitialServerState(InitialPlayerState initialState) {
     var playerObject = networkObjectManager.CreatePlayerGameObject(
         initialState.NetworkObjectState.NetworkId,
-        initialState.PlayerState.Position).gameObject;
+        initialState.PlayerState.MotorState.Position).gameObject;
     var player = playerManager.AddPlayer(
         initialState.PlayerId, initialState.Metadata, playerObject);
 
@@ -88,7 +136,7 @@ public class ClientLogicController : BaseLogicController {
   /** Network command handling */
 
   private void HandleJoinAccepted(NetCommand.JoinAccepted cmd) {
-		Debug.Log("Server join successful!");
+    Debug.Log("Server join successful!");
 
     // Create our player object and attach client-specific components.
     localPlayer = AddPlayerFromInitialServerState(cmd.YourPlayerState);
@@ -115,7 +163,7 @@ public class ClientLogicController : BaseLogicController {
     activeKinematicMotors.Remove(player.Motor);
   }
 
-	protected override void OnPeerConnected(NetPeer peer) {
+  protected override void OnPeerConnected(NetPeer peer) {
     Debug.Log("Connected to host: " + peer.EndPoint);
     serverPeer = peer;
 

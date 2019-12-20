@@ -1591,6 +1591,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   netMonitor: {fileID: 0}
+  debugNetworkSettings:
+    SimulatePacketLoss: 1
+    SimulateLatency: 1
+    PacketLossChance: 75
+    MinLatency: 100
+    MaxLatency: 200
 --- !u!114 &1029436119
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2152,6 +2158,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   netMonitor: {fileID: 0}
+  debugNetworkSettings:
+    SimulatePacketLoss: 1
+    SimulateLatency: 1
+    PacketLossChance: 75
+    MinLatency: 100
+    MaxLatency: 200
 --- !u!1 &1724369160
 GameObject:
   m_ObjectHideFlags: 0
