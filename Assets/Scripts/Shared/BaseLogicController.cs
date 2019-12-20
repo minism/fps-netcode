@@ -39,7 +39,11 @@ public abstract class BaseLogicController : MonoBehaviour {
     }
   }
 
-  protected virtual void OnApplicationQuit() {
+  private void OnApplicationQuit() {
+    TearDownGameScene();
+  }
+
+  protected virtual void TearDownGameScene() {
     netChannel.Stop();
   }
 
@@ -47,7 +51,7 @@ public abstract class BaseLogicController : MonoBehaviour {
     SceneManager.LoadScene("Game");
   }
 
-  protected AsyncOperation InitializeGameSceneAsync() {
+  protected AsyncOperation LoadGameSceneAsync() {
     return SceneManager.LoadSceneAsync("Game");
   }
 

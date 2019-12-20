@@ -36,14 +36,14 @@ public class ClientLogicController : BaseLogicController {
     while (accumulator >= Time.fixedDeltaTime) {
       accumulator -= Time.fixedDeltaTime;
       var command = new NetCommand.PlayerInput {
-        WorldTick = this.worldTick,
+        WorldTick = worldTick,
         Inputs = localPlayerInput.SampleInputs(),
       };
       netChannel.SendCommand(serverPeer, command);
 
       // Client-side prediction herer
 
-      ++this.worldTick;
+      ++worldTick;
     }
   }
 

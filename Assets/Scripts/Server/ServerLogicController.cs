@@ -62,10 +62,11 @@ public class ServerLogicController : BaseLogicController {
     }
   }
 
-  protected override void OnApplicationQuit() {
-    base.OnApplicationQuit();
+  protected override void TearDownGameScene() {
+    base.TearDownGameScene();
     if (hotelGameServer != null) {
       hotelGameServer.Destroy();
+      hotelGameServer = null;
     }
   }
 

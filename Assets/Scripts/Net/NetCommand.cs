@@ -12,8 +12,8 @@ namespace NetCommand {
   }
 
   public class PlayerInput {
-    public uint WorldTick;
-    public PlayerInputs Inputs;
+    public uint WorldTick { get; set; }
+    public PlayerInputs Inputs { get; set; }
   }
 
   /** Server -> Client commands. */
