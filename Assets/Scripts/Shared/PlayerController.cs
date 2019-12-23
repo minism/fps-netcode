@@ -2,7 +2,8 @@
 using UnityEngine;
 
 [RequireComponent(typeof(KinematicCharacterMotor))]
-public class PlayerController : MonoBehaviour, ICharacterController {
+public class PlayerController :
+    MonoBehaviour, ICharacterController, IPlayerController {
   [Header("Physics/Movement params")]
   public float maxSpeed = 1f;
   public float maxAirSpeed = 1f;
@@ -76,15 +77,18 @@ public class PlayerController : MonoBehaviour, ICharacterController {
    * Networking details.
    */
   public PlayerState ToNetworkState() {
-    return new PlayerState {
-      SimplePosition = transform.position,
-      MotorState = motor.GetState(),
-    };
+    return new PlayerState();
+    //return new PlayerState {
+    //  SimplePosition = transform.position,
+    //  MotorState = motor.GetState(),
+    //};
   }
 
   public void ApplyNetworkState(PlayerState state) {
-    motor.ApplyState(state.MotorState);
+    //motor.ApplyState(state.MotorState);
   }
+
+  public void Simulate(float dt) { }
 
   /**
    * KinematicCharacterController API.

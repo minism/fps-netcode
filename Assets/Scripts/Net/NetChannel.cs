@@ -96,15 +96,17 @@ public class NetChannel : INetEventListener, INetChannel {
   }
 
   public void SubscribeQueue<T>(Queue<T> queue) where T : class, new() {
-    netPacketProcessor.SubscribeReusable((T data) => {
+    // TODO: Optimize with a packet pool using queue max size.
+    netPacketProcessor.Subscribe((T data) => {
       queue.Enqueue(data);
-    });
+    }, () => { return new T(); });
   }
 
   public void SubscribeQueue<T>(Queue<WithPeer<T>> queue) where T : class, new() {
-    netPacketProcessor.SubscribeReusable((T data, NetPeer peer) => {
+    // TODO: Optimize with a packet pool using queue max size.
+    netPacketProcessor.Subscribe((T data, NetPeer peer) => {
       queue.Enqueue(new WithPeer<T> { Peer = peer, Value = data });
-    });
+    }, () => { return new T(); });
   }
 
   public void SendCommand<T>(NetPeer peer, T command) where T : class, new() {
@@ -163,5 +165,6 @@ public class NetChannel : INetEventListener, INetChannel {
     if (netMonitor != null) {
       netMonitor.SetLatency(latency);
     }
+    DebugUI.ShowValue("ping", latency);
   }
 }

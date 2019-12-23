@@ -57,17 +57,24 @@ public struct InitialPlayerState : INetSerializable {
 /// TODO: See later if the physics state can be merged with network state,
 /// once we have non-player networked objects.
 public struct PlayerState : INetSerializable {
-  public Vector3 SimplePosition;
-  public KinematicCharacterMotorState MotorState;
+  public Vector3 Position;
+  //public Quaternion Rotation;
+  public Vector3 Rotation;
+  public Vector3 Velocity;
+  //public KinematicCharacterMotorState MotorState;
 
   public void Serialize(NetDataWriter writer) {
-    writer.Put(SimplePosition);
-    NetExtensions.SerializeKinematicMotorState(writer, MotorState);
+    writer.Put(Position);
+    writer.Put(Rotation);
+    writer.Put(Velocity);
+    //NetExtensions.SerializeKinematicMotorState(writer, MotorState);
   }
 
   public void Deserialize(NetDataReader reader) {
-    SimplePosition = reader.GetVector3();
-    MotorState = NetExtensions.DeserializeKinematicMotorState(reader);
+    Position = reader.GetVector3();
+    Rotation = reader.GetVector3();
+    Velocity = reader.GetVector3();
+    //MotorState = NetExtensions.DeserializeKinematicMotorState(reader);
   }
 }
 
@@ -75,12 +82,16 @@ public struct PlayerState : INetSerializable {
 public struct PlayerInputs : INetSerializable {
   public float ForwardAxis;
   public float RightAxis;
+  public float MouseXAxis;
+  public float MouseYAxis;
   public Quaternion CameraOrientation;
   public bool Jump;
 
   public void Serialize(NetDataWriter writer) {
     writer.Put(ForwardAxis);
     writer.Put(RightAxis);
+    writer.Put(MouseXAxis);
+    writer.Put(MouseYAxis);
     writer.Put(CameraOrientation);
     writer.Put(Jump);
   }
@@ -88,6 +99,8 @@ public struct PlayerInputs : INetSerializable {
   public void Deserialize(NetDataReader reader) {
     ForwardAxis = reader.GetFloat();
     RightAxis = reader.GetFloat();
+    MouseXAxis = reader.GetFloat();
+    MouseYAxis = reader.GetFloat();
     CameraOrientation = reader.GetQuaternion();
     Jump = reader.GetBool();
   }

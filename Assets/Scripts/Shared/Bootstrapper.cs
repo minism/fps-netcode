@@ -20,6 +20,7 @@ public class Bootstrapper : MonoBehaviour {
 
   public async Task StartGameAsServer() {
     Debug.Log("Starting game as dedicated server.");
+    clientLogicController.gameObject.SetActive(false);
     await serverLogicController.StartServer(PORT);
   }
 
@@ -35,6 +36,7 @@ public class Bootstrapper : MonoBehaviour {
 
   public void StartGameAsClient(Hotel.GameServer serverToJoin) {
     Debug.Log($"Joining server {serverToJoin.host}:{serverToJoin.port}...");
+    serverLogicController.gameObject.SetActive(false);
 
     // Fake player data for now.
     var playerSetupData = new PlayerSetupData {

@@ -9,17 +9,17 @@ public class Player : IReadonlyPlayer {
   // Set-once metadata for the player, not transmitted on all packets.
   public PlayerMetadata Metadata { get; set; }
 
+  // The associated in-scene game object.
+  public GameObject GameObject { get; set; }
+
   // The associated in-scene network component.
   public NetworkObject NetworkObject { get; set; }
 
   // The associated in-scene controller component.
-  public PlayerController Controller { get; set; }
+  public IPlayerController Controller { get; set; }
 
   // The associated in-scene kinematic motor component.
   public KinematicCharacterController.KinematicCharacterMotor Motor { get; set; }
-
-  // The associated in-scene rigidbody component;
-  //public Rigidbody Rigidbody { get; set; }
 
   // The associated network peer for the player (only set on server).
   public NetPeer peer { get; set; }

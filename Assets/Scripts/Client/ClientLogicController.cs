@@ -28,7 +28,6 @@ public class ClientLogicController : BaseLogicController {
   // Monitoring.
   private int receivedStates;
   private int replayedStates;
-  private int headStates;
 
   protected override void Awake() {
     base.Awake();
@@ -61,6 +60,11 @@ public class ClientLogicController : BaseLogicController {
       };
       netChannel.SendCommand(serverPeer, command);
 
+      // Monitoring.
+      if (worldTick % 100 == 0) {
+        //Debug.Log($"Beginning of tick {command.WorldTick} = {localPlayer.GameObject.transform.position}");
+      }
+
       // Update our snapshot buffers.
       // TODO: The snapshot might only need pos/rot.
       uint bufidx = worldTick % 1024;
@@ -69,7 +73,12 @@ public class ClientLogicController : BaseLogicController {
 
       // Apply inputs to the associated player controller and simulate the world.
       localPlayer.Controller.SetPlayerInputs(command.Inputs);
-      SimulateKinematicSystem(Time.fixedDeltaTime);
+      SimulateWorld(Time.fixedDeltaTime);
+
+      // Monitoring.
+      if (worldTick % 100 == 0) {
+        //Debug.Log($"Moved for tick {worldTick+1} = {localPlayer.GameObject.transform.position}");
+      }
 
       ++worldTick;
     }
@@ -84,7 +93,6 @@ public class ClientLogicController : BaseLogicController {
       bool headState = false;
       if (incomingState.WorldTick >= worldTick) {
         headState = true;
-        headStates++;
       }
       if (incomingState.WorldTick > worldTick) {
         Debug.LogError("Got a FUTURE tick somehow???");
@@ -96,15 +104,15 @@ public class ClientLogicController : BaseLogicController {
       var stateSnapshot = localPlayerStateSnapshots[bufidx];
 
       // Compare the historical state to see how off it was.
-      var error = incomingPlayerState.SimplePosition - stateSnapshot.SimplePosition;
+      var error = incomingPlayerState.Position - stateSnapshot.Position;
 
       // TODO: Getting a huge amount of these. Next step to debug is to make a simple
       // Rigidbody based controller and see if the same issues are there, to determine
       // whether its an issue with my netcode or if KCC is really this non-deterministic.
       if (error.sqrMagnitude > 0.0001f) {
         if (!headState) {
+          Debug.Log($"Rewind: {incomingPlayerState.Position} - {stateSnapshot.Position}");
           replayedStates++;
-          Debug.Log(error.sqrMagnitude);
         }
 
         // Rewind the player state to the correct state from the server.
@@ -122,7 +130,7 @@ public class ClientLogicController : BaseLogicController {
 
           // Apply inputs to the associated player controller and simulate the world.
           localPlayer.Controller.SetPlayerInputs(inputSnapshot);
-          SimulateKinematicSystem(Time.fixedDeltaTime);
+          SimulateWorld(Time.fixedDeltaTime);
 
           ++replayTick;
         }
@@ -132,7 +140,6 @@ public class ClientLogicController : BaseLogicController {
     // Update debug monitoring.
     DebugUI.ShowValue("recv states", receivedStates);
     DebugUI.ShowValue("repl states", replayedStates);
-    DebugUI.ShowValue("head states", headStates);
   }
 
   public void TryJoinServer(string host, int port, PlayerSetupData playerSetupData) {
@@ -145,7 +152,7 @@ public class ClientLogicController : BaseLogicController {
   private Player AddPlayerFromInitialServerState(InitialPlayerState initialState) {
     var playerObject = networkObjectManager.CreatePlayerGameObject(
         initialState.NetworkObjectState.NetworkId,
-        initialState.PlayerState.MotorState.Position).gameObject;
+        initialState.PlayerState.Position).gameObject;
     var player = playerManager.AddPlayer(
         initialState.PlayerId, initialState.Metadata, playerObject);
 
@@ -157,8 +164,10 @@ public class ClientLogicController : BaseLogicController {
 
   private void InitializeLocalPlayer() {
     // Create input component.
-    localPlayerInput = gameObject.AddComponent<ClientPlayerInput>();
-    localPlayerInput.cameraController = FindObjectOfType<CameraController>();
+    localPlayerInput = localPlayer.GameObject.AddComponent<ClientPlayerInput>();
+
+    // Setup camera.
+    Camera.main.gameObject.AddComponent<CPMCameraController>();
   }
 
   /** Network command handling */

@@ -7,6 +7,8 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 using System.Collections;
 using KinematicCharacterController;
+using System.Collections.Concurrent;
+using System.Threading;
 
 /// Primary logic controller for managing server game state.
 public class ServerLogicController : BaseLogicController {
@@ -18,11 +20,12 @@ public class ServerLogicController : BaseLogicController {
 
   // Queue for incoming player input commands.
   // These are processed explicitly in a fixed update loop.
-  private Queue<WithPeer<NetCommand.PlayerInput>> playerInputQueue
-      = new Queue<WithPeer<NetCommand.PlayerInput>>();
+  private Queue<WithPeer<NetCommand.PlayerInput>> playerInputQueue =
+      new Queue<WithPeer<NetCommand.PlayerInput>>();
 
   // Monitoring.
-  private int sentPlayerNearOriginStates;
+  private int maxInputQueueSize;
+  private HashSet<uint> seen = new HashSet<uint>();
 
   protected override void Awake() {
     base.Awake();
@@ -40,19 +43,33 @@ public class ServerLogicController : BaseLogicController {
   protected override void Update() {
     base.Update();
 
+    // Monitoring.
+    DebugUI.ShowValue("max input queue", maxInputQueueSize);
+
     // Process the player input queue.
     // TODO: An optimization would be to make this a priority queue, and process
     // matching world ticks in lock-step.  I don't actually know how often that
     // would happen though.
-    while (playerInputQueue.Count > 0) {
-      var entry = playerInputQueue.Dequeue();
-      var peer = entry.Peer;
+    while (playerInputQueue.Count > 0) { 
+      if (playerInputQueue.Count > maxInputQueueSize) {
+        maxInputQueueSize = playerInputQueue.Count;
+      }
+      var entry = (WithPeer<NetCommand.PlayerInput>) playerInputQueue.Dequeue();
+      var player = playerManager.GetPlayerForPeer(entry.Peer);
       var command = entry.Value;
 
+      // Monitoring.
+      if (seen.Contains(command.WorldTick)) {
+        Debug.LogWarning($"ALREADY SAW TICK #{command.WorldTick}");
+      }
+      seen.Add(command.WorldTick);
+      if (command.WorldTick % 100 == 0) {
+        //Debug.Log($"Beginning of tick {command.WorldTick} = {player.GameObject.transform.position}");
+      }
+
       // Apply inputs to the associated player controller and simulate the world.
-      var player = playerManager.GetPlayerForPeer(peer);
       player.Controller.SetPlayerInputs(command.Inputs);
-      SimulateKinematicSystem(Time.fixedDeltaTime);
+      SimulateWorld(Time.fixedDeltaTime);
 
       // Broadcast the world state.
       // The new world state tick is N+1, given input world tick N.
@@ -61,13 +78,13 @@ public class ServerLogicController : BaseLogicController {
         PlayerStates = playerManager.GetPlayers().Select(
             p => p.Controller.ToNetworkState()).ToArray(),
       };
-      if (worldStateCmd.PlayerStates[0].MotorState.Position.magnitude < 5) {
-        sentPlayerNearOriginStates++;
-      }
       netChannel.BroadcastCommand(worldStateCmd);
-    }
 
-    DebugUI.ShowValue("SentNearOrigin", sentPlayerNearOriginStates);
+      // Monitoring.
+      if (command.WorldTick % 100 == 0) {
+        //Debug.Log($"Sending tick {worldStateCmd.WorldTick} = {worldStateCmd.PlayerStates[0].Position}");
+      }
+    }
   }
 
   protected override void TearDownGameScene() {

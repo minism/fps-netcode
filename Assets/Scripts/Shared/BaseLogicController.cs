@@ -37,13 +37,15 @@ public abstract class BaseLogicController : MonoBehaviour {
   protected virtual void Update() {
     netChannel.Update();
 
-    if (Input.GetKeyDown(KeyCode.Escape)) {
+    if (Input.GetKeyDown(KeyCode.F1)) {
+      TearDownGameScene();
       LoadLobbyScene();
     }
   }
 
-  protected void SimulateKinematicSystem(float dt) {
-    KinematicCharacterSystem.Simulate(dt, activeKinematicMotors, activePhysicsMovers);
+  protected void SimulateWorld(float dt) {
+    //KinematicCharacterSystem.Simulate(dt, activeKinematicMotors, activePhysicsMovers);
+    playerManager.GetPlayers().ForEach(p => p.Controller.Simulate(dt));
   }
 
   private void OnApplicationQuit() {
@@ -51,6 +53,8 @@ public abstract class BaseLogicController : MonoBehaviour {
   }
 
   protected virtual void TearDownGameScene() {
+    Debug.Log("Stopping network stack.");
+    Cursor.lockState = CursorLockMode.None;
     netChannel.Stop();
   }
 
