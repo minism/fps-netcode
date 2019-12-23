@@ -111,7 +111,7 @@ public class ClientLogicController : BaseLogicController {
       // whether its an issue with my netcode or if KCC is really this non-deterministic.
       if (error.sqrMagnitude > 0.0001f) {
         if (!headState) {
-          Debug.Log($"Rewind: {incomingPlayerState.Position} - {stateSnapshot.Position}");
+          Debug.Log($"Rewind tick#{incomingState.WorldTick}: {incomingPlayerState.Position} - {stateSnapshot.Position}");
           replayedStates++;
         }
 

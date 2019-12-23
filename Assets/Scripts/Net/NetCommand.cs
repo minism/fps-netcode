@@ -49,8 +49,8 @@ namespace NetCommand {
 
       // Input and world state can be unreliable since it is sent every frame, but we use
       // sequenced so that older packets are simply dropped since we don't care about them anymore.
-      { typeof(PlayerInput), DeliveryMethod.ReliableOrdered },
-      { typeof(WorldState), DeliveryMethod.ReliableOrdered },
+      { typeof(PlayerInput), DeliveryMethod.Sequenced },
+      { typeof(WorldState), DeliveryMethod.Sequenced },
     };
   }
 }
