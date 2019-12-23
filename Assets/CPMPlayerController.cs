@@ -108,7 +108,14 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   }
 
   public void ApplyNetworkState(PlayerState state) {
+    // The built-in CharacterController is an absolute dumbass, it caches its position in private
+    // state and uses it for interpolation in .Move().  That means we cant actually serialize
+    // its state over the network.
+    // A shitty hack for now is to trigger OnEnable for the component, which copies
+    // transform.position into its cache.
+    controller.enabled = false;
     transform.position = state.Position;
+    controller.enabled = true;
     rotX = state.Rotation.x;
     rotY = state.Rotation.y;
     playerVelocity = state.Velocity;

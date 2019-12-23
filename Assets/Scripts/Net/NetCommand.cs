@@ -12,8 +12,11 @@ namespace NetCommand {
   }
 
   public class PlayerInput {
-    public uint WorldTick { get; set; }
-    public PlayerInputs Inputs { get; set; }
+    // The world tick for the first input in the array.
+    public uint StartWorldTick { get; set; }
+
+    // An array of inputs, one entry for tick.  Ticks are guaranteed to be contiguous.
+    public PlayerInputs[] Inputs { get; set; }
   }
 
   /** Server -> Client commands. */

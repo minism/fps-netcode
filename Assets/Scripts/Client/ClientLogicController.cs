@@ -15,8 +15,9 @@ public class ClientLogicController : BaseLogicController {
   // Fixed timing accumulator.
   private float accumulator;
 
-  // The current world tick.
+  // The current world tick and last ack'd server world tick.
   private uint worldTick = 0;
+  private uint lastServerWorldTick = 0;
 
   // Queue for incoming world states from the server.
   private Queue<NetCommand.WorldState> worldStateQueue = new Queue<NetCommand.WorldState>();
@@ -53,10 +54,20 @@ public class ClientLogicController : BaseLogicController {
       accumulator -= Time.fixedDeltaTime;
       var inputs = localPlayerInput.SampleInputs();
 
-      // Send an input packet immediately.
+      // Update our snapshot buffers.
+      // TODO: The snapshot might only need pos/rot.
+      uint bufidx = worldTick % 1024;
+      localPlayerInputsSnapshots[bufidx] = inputs;
+      localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
+
+      // Send a command for all inputs not yet acknowledged from the server.
+      var unackedInputs = new List<PlayerInputs>();
+      for (uint tick = lastServerWorldTick; tick <= worldTick; ++tick) {
+        unackedInputs.Add(localPlayerInputsSnapshots[tick % 1024]);
+      }
       var command = new NetCommand.PlayerInput {
-        WorldTick = worldTick,
-        Inputs = inputs,
+        StartWorldTick = lastServerWorldTick,
+        Inputs = unackedInputs.ToArray(),
       };
       netChannel.SendCommand(serverPeer, command);
 
@@ -65,14 +76,8 @@ public class ClientLogicController : BaseLogicController {
         //Debug.Log($"Beginning of tick {command.WorldTick} = {localPlayer.GameObject.transform.position}");
       }
 
-      // Update our snapshot buffers.
-      // TODO: The snapshot might only need pos/rot.
-      uint bufidx = worldTick % 1024;
-      localPlayerInputsSnapshots[bufidx] = inputs;
-      localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
-
-      // Apply inputs to the associated player controller and simulate the world.
-      localPlayer.Controller.SetPlayerInputs(command.Inputs);
+      // Prediction - Apply inputs to the associated player controller and simulate the world.
+      localPlayer.Controller.SetPlayerInputs(inputs);
       SimulateWorld(Time.fixedDeltaTime);
 
       // Monitoring.
@@ -89,6 +94,7 @@ public class ClientLogicController : BaseLogicController {
       // Lookup the historical state for the world tick we got.
       var incomingState = worldStateQueue.Dequeue();
       receivedStates++;
+      lastServerWorldTick = incomingState.WorldTick;
 
       bool headState = false;
       if (incomingState.WorldTick >= worldTick) {
@@ -111,7 +117,7 @@ public class ClientLogicController : BaseLogicController {
       // whether its an issue with my netcode or if KCC is really this non-deterministic.
       if (error.sqrMagnitude > 0.0001f) {
         if (!headState) {
-          Debug.Log($"Rewind tick#{incomingState.WorldTick}: {incomingPlayerState.Position} - {stateSnapshot.Position}");
+          Debug.Log($"Rewind tick#{incomingState.WorldTick}: {incomingPlayerState.Position} - {stateSnapshot.Position}, Range: {worldTick - incomingState.WorldTick}");
           replayedStates++;
         }
 
