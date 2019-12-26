@@ -22,7 +22,7 @@ public class Player : IReadonlyPlayer {
   public KinematicCharacterController.KinematicCharacterMotor Motor { get; set; }
 
   // The associated network peer for the player (only set on server).
-  public NetPeer peer { get; set; }
+  public NetPeer Peer { get; set; }
 
   public InitialPlayerState ToInitialPlayerState() {
     return new InitialPlayerState {
@@ -33,6 +33,16 @@ public class Player : IReadonlyPlayer {
       },
       PlayerState = Controller.ToNetworkState(),
     };
+  }
+
+  public void CopyFrom(Player other) {
+    PlayerId = other.PlayerId;
+    Metadata = other.Metadata;
+    GameObject = other.GameObject;
+    NetworkObject = other.NetworkObject;
+    Controller = other.Controller;
+    Motor = other.Motor;
+    Peer = other.Peer;
   }
 }
 

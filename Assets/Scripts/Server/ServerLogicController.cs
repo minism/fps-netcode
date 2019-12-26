@@ -3,12 +3,6 @@ using LiteNetLib;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
-using UnityEngine.Events;
-using System.Collections;
-using KinematicCharacterController;
-using System.Collections.Concurrent;
-using System.Threading;
 
 /// Primary logic controller for managing server game state.
 public class ServerLogicController : BaseLogicController {
@@ -160,7 +154,7 @@ public class ServerLogicController : BaseLogicController {
     // Notify peers.
     netChannel.BroadcastCommand(new NetCommand.PlayerLeft {
       PlayerId = player.PlayerId,
-    }, player.peer);
+    }, player.Peer);
   }
 
   /** Network command handling */
@@ -203,5 +197,10 @@ public class ServerLogicController : BaseLogicController {
     if (player != null) {
       DestroyServerPlayer(player);
     }
+  }
+
+  private void SimulateWorld(float dt) {
+    //KinematicCharacterSystem.Simulate(dt, activeKinematicMotors, activePhysicsMovers);
+    playerManager.GetPlayers().ForEach(p => p.Controller.Simulate(dt));
   }
 }

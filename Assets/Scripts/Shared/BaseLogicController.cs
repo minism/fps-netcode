@@ -43,11 +43,6 @@ public abstract class BaseLogicController : MonoBehaviour {
     }
   }
 
-  protected void SimulateWorld(float dt) {
-    //KinematicCharacterSystem.Simulate(dt, activeKinematicMotors, activePhysicsMovers);
-    playerManager.GetPlayers().ForEach(p => p.Controller.Simulate(dt));
-  }
-
   private void OnApplicationQuit() {
     TearDownGameScene();
   }
