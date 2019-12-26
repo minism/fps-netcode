@@ -10,7 +10,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   private Player localPlayer = new Player();
   private PlayerSetupData playerSetupData;
 
-  // Delegate that manages the world simulation, prediction, replay.
+  // Delegate that manages the world simulation, prediction, reconciliation.
   private ClientSimulation simulation;
 
   // Monitoring.
