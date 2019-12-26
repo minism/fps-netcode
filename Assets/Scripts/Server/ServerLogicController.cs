@@ -116,7 +116,8 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     // Transmit existing player state to new player and new player state to
     // existing clients. Separate RPCs with the same payload are used so that
     // the joining player can distinguish their own player ID.
-    var joinAcceptedCmd = CommandBuilder.BuildJoinAcceptedCmd(player, existingPlayers);
+    var joinAcceptedCmd = CommandBuilder.BuildJoinAcceptedCmd(
+        player, existingPlayers, simulation.WorldTick);
     var playerJoinedCmd = CommandBuilder.BuildPlayerJoinedCmd(player);
     netChannel.SendCommand(peer, joinAcceptedCmd);
     netChannel.BroadcastCommand(playerJoinedCmd, peer);

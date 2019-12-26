@@ -24,6 +24,10 @@ namespace NetCommand {
   public class JoinAccepted {
     public InitialPlayerState YourPlayerState { get; set; }
     public InitialPlayerState[] ExistingPlayerStates { get; set; }
+
+    // The current world tick on the server.
+    // The client will initially set theirs to this plus a latency estimate.
+    public uint WorldTick { get; set; } 
   }
 
   public class PlayerJoined {

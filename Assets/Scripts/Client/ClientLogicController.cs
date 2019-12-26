@@ -44,7 +44,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
     // Initialize simulation.
     simulation = new ClientSimulation(
-        localPlayer, playerManager, this);
+        localPlayer, playerManager, this, netChannel.PeerLatency[serverPeer]);
   }
 
   private Player AddPlayerFromInitialServerState(InitialPlayerState initialState) {

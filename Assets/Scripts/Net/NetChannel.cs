@@ -17,6 +17,10 @@ public class NetChannel : INetEventListener, INetChannel {
   public Action<NetPeer> PeerConnectedHandler { get; set; }
   public Action<NetPeer, DisconnectInfo> PeerDisconnectedHandler { get; set; }
 
+  // Lookup for latency by peer.
+  public Dictionary<NetPeer, int> PeerLatency { get; private set; }
+      = new Dictionary<NetPeer, int>();
+
   private bool acceptConnections;
   private NetManager netManager;
   private NetPacketProcessor netPacketProcessor;
@@ -165,6 +169,7 @@ public class NetChannel : INetEventListener, INetChannel {
     if (netMonitor != null) {
       netMonitor.SetLatency(latency);
     }
+    PeerLatency[peer] = latency;
     DebugUI.ShowValue("ping", latency);
   }
 }

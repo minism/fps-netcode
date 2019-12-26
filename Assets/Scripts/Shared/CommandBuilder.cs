@@ -10,10 +10,11 @@ public static class CommandBuilder {
   }
 
   public static NetCommand.JoinAccepted BuildJoinAcceptedCmd(
-      Player newPlayer, List<Player> existingPlayers) {
+      Player newPlayer, List<Player> existingPlayers, uint worldTick) {
     return new NetCommand.JoinAccepted {
       YourPlayerState = newPlayer.ToInitialPlayerState(),
       ExistingPlayerStates = existingPlayers.Select(p => p.ToInitialPlayerState()).ToArray(),
+      WorldTick = worldTick,
     };
   }
 }

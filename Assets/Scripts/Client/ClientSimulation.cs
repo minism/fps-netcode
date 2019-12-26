@@ -4,13 +4,10 @@ using UnityEngine;
 // Client world simulation including prediction and state rewind.
 // Inputs are state frames from the server.
 // Outputs are player command frames to the server.
-public class ClientSimulation {
+public class ClientSimulation : BaseSimulation {
   // Player stuff.
   private Player localPlayer;
   private PlayerManager playerManager;
-
-  // Fixed timing accumulator.
-  private float accumulator;
 
   // Snapshot buffers for input and state used for prediction & replay.
   private PlayerInputs[] localPlayerInputsSnapshots = new PlayerInputs[1024];
@@ -20,8 +17,13 @@ public class ClientSimulation {
   private Queue<NetCommand.WorldState> worldStateQueue = new Queue<NetCommand.WorldState>();
 
   // The current world tick and last ack'd server world tick.
-  private uint worldTick = 0;
   private uint lastServerWorldTick = 0;
+
+  // The latest known server latency, used to determine how many ticks ahead to
+  // run the client.
+  // TODO: Adjust this in real-time, overwatch style.
+  private int serverLatency;
+  private bool syncedToServerWorld;
 
   // I/O interface for player inputs.
   public interface Handler {
@@ -40,15 +42,21 @@ public class ClientSimulation {
   public ClientSimulation(
       Player localPlayer,
       PlayerManager playerManager,
-      Handler handler) {
+      Handler handler,
+      int serverLatency) : base(playerManager) {
     // TODO: Redo player here for multiple players.
     this.localPlayer = localPlayer;
-    this.playerManager = playerManager;
     this.handler = handler;
+    this.serverLatency = serverLatency;
     stats = new Stats();
   }
 
   public void Update(float dt) {
+    // Don't do anything until we've synced to the server world tick.
+    if (!syncedToServerWorld) {
+      return;
+    }
+
     // Fixed timestep loop.
     accumulator += dt;
     while (accumulator >= Time.fixedDeltaTime) {
@@ -61,13 +69,13 @@ public class ClientSimulation {
 
       // Update our snapshot buffers.
       // TODO: The snapshot might only need pos/rot.
-      uint bufidx = worldTick % 1024;
+      uint bufidx = WorldTick % 1024;
       localPlayerInputsSnapshots[bufidx] = inputs.Value;
       localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
 
       // Send a command for all inputs not yet acknowledged from the server.
       var unackedInputs = new List<PlayerInputs>();
-      for (uint tick = lastServerWorldTick; tick <= worldTick; ++tick) {
+      for (uint tick = lastServerWorldTick; tick <= WorldTick; ++tick) {
         unackedInputs.Add(localPlayerInputsSnapshots[tick % 1024]);
       }
       var command = new NetCommand.PlayerInput {
@@ -77,7 +85,7 @@ public class ClientSimulation {
       handler.SendInputs(command);
 
       // Monitoring.
-      if (worldTick % 100 == 0) {
+      if (WorldTick % 100 == 0) {
         //Debug.Log($"Beginning of tick {command.WorldTick} = {localPlayer.GameObject.transform.position}");
       }
 
@@ -86,11 +94,11 @@ public class ClientSimulation {
       SimulateWorld(Time.fixedDeltaTime);
 
       // Monitoring.
-      if (worldTick % 100 == 0) {
+      if (WorldTick % 100 == 0) {
         //Debug.Log($"Moved for tick {worldTick+1} = {localPlayer.GameObject.transform.position}");
       }
 
-      ++worldTick;
+      ++WorldTick;
     }
 
     // Step through the incoming world state queue.
@@ -102,10 +110,10 @@ public class ClientSimulation {
       lastServerWorldTick = incomingState.WorldTick;
 
       bool headState = false;
-      if (incomingState.WorldTick >= worldTick) {
+      if (incomingState.WorldTick >= WorldTick) {
         headState = true;
       }
-      if (incomingState.WorldTick > worldTick) {
+      if (incomingState.WorldTick > WorldTick) {
         Debug.LogError("Got a FUTURE tick somehow???");
       }
 
@@ -122,7 +130,7 @@ public class ClientSimulation {
       // whether its an issue with my netcode or if KCC is really this non-deterministic.
       if (error.sqrMagnitude > 0.0001f) {
         if (!headState) {
-          Debug.Log($"Rewind tick#{incomingState.WorldTick}: {incomingPlayerState.Position} - {stateSnapshot.Position}, Range: {worldTick - incomingState.WorldTick}");
+          Debug.Log($"Rewind tick#{incomingState.WorldTick}: {incomingPlayerState.Position} - {stateSnapshot.Position}, Range: {WorldTick - incomingState.WorldTick}");
           stats.replayedStates++;
         }
 
@@ -131,7 +139,7 @@ public class ClientSimulation {
 
         // Loop through and replay all captured input snapshots up to the current tick.
         uint replayTick = incomingState.WorldTick;
-        while (replayTick < worldTick) {
+        while (replayTick < WorldTick) {
           // Grab the historical input.
           bufidx = replayTick % 1024;
           var inputSnapshot = localPlayerInputsSnapshots[bufidx];
@@ -151,11 +159,6 @@ public class ClientSimulation {
     // Update debug monitoring.
     DebugUI.ShowValue("recv states", stats.receivedStates);
     DebugUI.ShowValue("repl states", stats.replayedStates);
-  }
-
-  private void SimulateWorld(float dt) {
-    //KinematicCharacterSystem.Simulate(dt, activeKinematicMotors, activePhysicsMovers);
-    playerManager.GetPlayers().ForEach(p => p.Controller.Simulate(dt));
   }
 
   public void EnqueueWorldState(NetCommand.WorldState state) {

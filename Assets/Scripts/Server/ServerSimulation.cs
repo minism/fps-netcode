@@ -5,15 +5,12 @@ using UnityEngine;
 // Client world simulation including prediction and state rewind.
 // Inputs are state frames from the server.
 // Outputs are player command frames to the server.
-public class ServerSimulation {
+public class ServerSimulation : BaseSimulation {
   // Debugging.
   public float debugPhysicsErrorChance;
 
   // Player stuff.
   private PlayerManager playerManager;
-
-  // Fixed timing accumulator.
-  private float accumulator;
 
   // Snapshot buffers for input and state used for prediction & replay.
   private PlayerInputs[] localPlayerInputsSnapshots = new PlayerInputs[1024];
@@ -43,9 +40,8 @@ public class ServerSimulation {
   public ServerSimulation(
       float debugPhysicsErrorChance,
       PlayerManager playerManager,
-      Handler handler) {
+      Handler handler) : base(playerManager) {
     this.debugPhysicsErrorChance = debugPhysicsErrorChance;
-    this.playerManager = playerManager;
     this.handler = handler;
     stats = new Stats();
   }
@@ -112,11 +108,6 @@ public class ServerSimulation {
     // Monitoring.
     DebugUI.ShowValue("max input packet queue", stats.maxInputQueueSize);
     DebugUI.ShowValue("max input array", stats.maxInputArraySize);
-  }
-
-  private void SimulateWorld(float dt) {
-    //KinematicCharacterSystem.Simulate(dt, activeKinematicMotors, activePhysicsMovers);
-    playerManager.GetPlayers().ForEach(p => p.Controller.Simulate(dt));
   }
 
   public void EnqueuePlayerInput(WithPeer<NetCommand.PlayerInput> input) {
