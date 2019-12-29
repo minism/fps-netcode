@@ -16,7 +16,7 @@ public class ClientPlayerInput : MonoBehaviour {
       RightAxis = Input.GetAxisRaw("Horizontal"),
       MouseXAxis = Input.GetAxisRaw("Mouse X"),
       MouseYAxis = Input.GetAxisRaw("Mouse Y"),
-      CameraOrientation = Camera.main.transform.rotation,
+      //CameraOrientation = Camera.main.transform.rotation,
       Jump = Input.GetKey(KeyCode.Space),
     };
   }

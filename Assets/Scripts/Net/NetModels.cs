@@ -84,7 +84,7 @@ public struct PlayerInputs : INetSerializable {
   public float RightAxis;
   public float MouseXAxis;
   public float MouseYAxis;
-  // public Quaternion CameraOrientation;
+  public Quaternion CameraOrientation;
   public bool Jump;
 
   public void Serialize(NetDataWriter writer) {
