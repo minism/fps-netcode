@@ -12,14 +12,12 @@ public class ServerSimulation : BaseSimulation {
   // Player stuff.
   private PlayerManager playerManager;
 
-  // Snapshot buffers for input and state used for prediction & replay.
-  private PlayerInputs[] localPlayerInputsSnapshots = new PlayerInputs[1024];
-  private PlayerState[] localPlayerStateSnapshots = new PlayerState[1024];
+  // Delegate for processing input packets.
+  private PlayerInputProcessor playerInputProcessor;
 
-  // Queue for incoming player input commands.
-  // These are processed explicitly in a fixed update loop.
-  private Queue<WithPeer<NetCommand.PlayerInput>> playerInputQueue =
-      new Queue<WithPeer<NetCommand.PlayerInput>>();
+  // Snapshot buffers for input and state used for prediction & replay.
+  //private PlayerInputs[] localPlayerInputsSnapshots = new PlayerInputs[1024];
+  //private PlayerState[] localPlayerStateSnapshots = new PlayerState[1024];
 
   // The latest world tick that has been simulated.
   private uint lastSimulatedWorldTick = 0;
@@ -30,87 +28,59 @@ public class ServerSimulation : BaseSimulation {
   }
   private Handler handler;
 
-  // Exported monitoring statistics.
-  public struct Stats {
-    public int maxInputQueueSize;
-    public int maxInputArraySize;
-  }
-  public Stats stats;
-
   public ServerSimulation(
       float debugPhysicsErrorChance,
       PlayerManager playerManager,
       Handler handler) : base(playerManager) {
     this.debugPhysicsErrorChance = debugPhysicsErrorChance;
+    this.playerManager = playerManager;
     this.handler = handler;
-    stats = new Stats();
+    playerInputProcessor = new PlayerInputProcessor();
   }
 
   public void Update(float dt) {
-    // Process the player input queue.
-    // TODO: An optimization would be to make this a priority queue, and process
-    // matching world ticks in lock-step.  I don't actually know how often that
-    // would happen though.
-    while (playerInputQueue.Count > 0) {
-      // Monitoring.
-      if (playerInputQueue.Count > stats.maxInputQueueSize) {
-        stats.maxInputQueueSize = playerInputQueue.Count;
+    // Fixed timestep loop.
+    accumulator += dt;
+    while (accumulator >= Time.fixedDeltaTime) {
+      accumulator -= Time.fixedDeltaTime;
+
+      // Apply inputs to each player.
+      var tickInputs = playerInputProcessor.DequeueInputsForTick(WorldTick);
+      foreach (var tickInput in tickInputs) {
+        var player = tickInput.Player;
+        player.Controller.SetPlayerInputs(tickInput.Inputs);
+      }
+      if (tickInputs.Count < 1 && playerManager.GetPlayers().Count > 0) {
+        Debug.LogWarning("No inputs for player!");
       }
 
-      var entry = playerInputQueue.Dequeue();
-      var player = playerManager.GetPlayerForPeer(entry.Peer);
-      var command = entry.Value;
+      // TODO: Check for missing inputs and notify player here.
 
-      // Monitoring.
-      if (command.Inputs.Length > stats.maxInputArraySize) {
-        stats.maxInputArraySize = command.Inputs.Length;
+      // Advance the world simulation.
+      SimulateWorld(Time.fixedDeltaTime);
+      if (Random.value < debugPhysicsErrorChance) {
+        Debug.Log("Injecting random physics error.");
+        playerManager.GetPlayers().ForEach(
+            p => p.GameObject.transform.Translate(new Vector3(1, 0, 0)));
       }
-      if (command.StartWorldTick % 100 == 0) {
-        //Debug.Log($"Beginning of tick {command.WorldTick} = {player.GameObject.transform.position}");
-      }
-
-      // Calculate the last tick in the incoming command.
-      uint maxTick = command.StartWorldTick + (uint)command.Inputs.Length - 1;
-
-      // Check if there are new inputs to simulate.
-      if (maxTick >= lastSimulatedWorldTick) {
-        uint start = lastSimulatedWorldTick > command.StartWorldTick
-            ? lastSimulatedWorldTick - command.StartWorldTick : 0;
-        for (int i = (int)start; i < command.Inputs.Length; ++i) {
-          // Apply inputs to the associated player controller and simulate the world.
-          player.Controller.SetPlayerInputs(command.Inputs[i]);
-          SimulateWorld(Time.fixedDeltaTime);
-          if (Random.value < debugPhysicsErrorChance) {
-            Debug.Log("Injecting random physics error.");
-            player.GameObject.transform.Translate(new Vector3(1, 0, 0));
-          }
-        }
-      }
-
-      // Update our latest simulated tick record.
-      lastSimulatedWorldTick = maxTick + 1;
+      ++WorldTick;
 
       // Broadcast the world state.
       // The new world state tick is N+1, given input world tick N.
       var worldStateCmd = new NetCommand.WorldState {
-        WorldTick = lastSimulatedWorldTick,
+        WorldTick = WorldTick,
         PlayerStates = playerManager.GetPlayers().Select(
             p => p.Controller.ToNetworkState()).ToArray(),
       };
       handler.BroadcastWorldState(worldStateCmd);
 
       // Monitoring.
-      if (command.StartWorldTick % 100 == 0) {
-        //Debug.Log($"Sending tick {worldStateCmd.WorldTick} = {worldStateCmd.PlayerStates[0].Position}");
-      }
+      DebugUI.ShowValue("tick", WorldTick);
     }
-
-    // Monitoring.
-    DebugUI.ShowValue("max input packet queue", stats.maxInputQueueSize);
-    DebugUI.ShowValue("max input array", stats.maxInputArraySize);
   }
 
   public void EnqueuePlayerInput(WithPeer<NetCommand.PlayerInput> input) {
-    playerInputQueue.Enqueue(input);
+    var player = playerManager.GetPlayerForPeer(input.Peer);
+    playerInputProcessor.EnqueueInput(input.Value, player, WorldTick);
   }
 }

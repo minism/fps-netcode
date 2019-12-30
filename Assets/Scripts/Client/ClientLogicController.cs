@@ -41,10 +41,6 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     this.playerSetupData = playerSetupData;
     netChannel.ConnectToServer(host, port);
     LoadGameScene();
-
-    // Initialize simulation.
-    simulation = new ClientSimulation(
-        localPlayer, playerManager, this, netChannel.PeerLatency[serverPeer]);
   }
 
   private Player AddPlayerFromInitialServerState(InitialPlayerState initialState) {
@@ -91,8 +87,13 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     Debug.Log("Server join successful!");
 
     // Create our player object and attach client-specific components.
+    // TODO: Copy is not needed here anymore.
     localPlayer.CopyFrom(AddPlayerFromInitialServerState(cmd.YourPlayerState));
     InitializeLocalPlayer();
+
+    // Initialize simulation.
+    simulation = new ClientSimulation(
+        localPlayer, playerManager, this, 0.1f, cmd.WorldTick);
 
     // Create player objects for existing clients.
     foreach (var state in cmd.ExistingPlayerStates) {

@@ -19,12 +19,6 @@ public class ClientSimulation : BaseSimulation {
   // The current world tick and last ack'd server world tick.
   private uint lastServerWorldTick = 0;
 
-  // The latest known server latency, used to determine how many ticks ahead to
-  // run the client.
-  // TODO: Adjust this in real-time, overwatch style.
-  private int serverLatency;
-  private bool syncedToServerWorld;
-
   // I/O interface for player inputs.
   public interface Handler {
     PlayerInputs? SampleInputs();
@@ -43,20 +37,24 @@ public class ClientSimulation : BaseSimulation {
       Player localPlayer,
       PlayerManager playerManager,
       Handler handler,
-      int serverLatency) : base(playerManager) {
+      float serverLatencySeconds,
+      uint initialWorldTick) : base(playerManager) {
     // TODO: Redo player here for multiple players.
     this.localPlayer = localPlayer;
     this.handler = handler;
-    this.serverLatency = serverLatency;
+
+    // Set the last-acknowledged server tick.
+    lastServerWorldTick = initialWorldTick;
+
+    // Extrapolate based on latency what our client tick should be.
+    var estimatedTickLead = (uint)(serverLatencySeconds / Time.fixedDeltaTime) * 2;
+    Debug.Log("Initializing client with estimated tick lead of " + estimatedTickLead);
+    WorldTick = initialWorldTick + estimatedTickLead;
+
     stats = new Stats();
   }
 
   public void Update(float dt) {
-    // Don't do anything until we've synced to the server world tick.
-    if (!syncedToServerWorld) {
-      return;
-    }
-
     // Fixed timestep loop.
     accumulator += dt;
     while (accumulator >= Time.fixedDeltaTime) {
@@ -84,19 +82,9 @@ public class ClientSimulation : BaseSimulation {
       };
       handler.SendInputs(command);
 
-      // Monitoring.
-      if (WorldTick % 100 == 0) {
-        //Debug.Log($"Beginning of tick {command.WorldTick} = {localPlayer.GameObject.transform.position}");
-      }
-
       // Prediction - Apply inputs to the associated player controller and simulate the world.
       localPlayer.Controller.SetPlayerInputs(inputs.Value);
       SimulateWorld(Time.fixedDeltaTime);
-
-      // Monitoring.
-      if (WorldTick % 100 == 0) {
-        //Debug.Log($"Moved for tick {worldTick+1} = {localPlayer.GameObject.transform.position}");
-      }
 
       ++WorldTick;
     }
@@ -159,6 +147,7 @@ public class ClientSimulation : BaseSimulation {
     // Update debug monitoring.
     DebugUI.ShowValue("recv states", stats.receivedStates);
     DebugUI.ShowValue("repl states", stats.replayedStates);
+    DebugUI.ShowValue("tick", WorldTick);
   }
 
   public void EnqueueWorldState(NetCommand.WorldState state) {
