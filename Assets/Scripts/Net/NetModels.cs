@@ -92,7 +92,7 @@ public struct PlayerInputs : INetSerializable {
     writer.Put(RightAxis);
     writer.Put(MouseXAxis);
     writer.Put(MouseYAxis);
-    writer.Put(CameraOrientation);
+    // writer.Put(CameraOrientation);
     writer.Put(Jump);
   }
 
@@ -101,7 +101,7 @@ public struct PlayerInputs : INetSerializable {
     RightAxis = reader.GetFloat();
     MouseXAxis = reader.GetFloat();
     MouseYAxis = reader.GetFloat();
-    CameraOrientation = reader.GetQuaternion();
+    // CameraOrientation = reader.GetQuaternion();
     Jump = reader.GetBool();
   }
 }
