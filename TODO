@@ -5,3 +5,6 @@
 - At 588e7, the replaying inputs feature works great with only using WASD, the client hardly replays states at all.  But, while turning
   the view with the mouse, replays happen heavily.  I think this is likely something to do with what data we're actually sending
   for inputs, i wonder if it should be dx/dy, or view direction, or what.
+
+- There needs to be a "player synchronizing" sequence when a client first connects, before the player prefab is spawned in either scene.
+  there will be no player inputs right away on server simulation, so it should be in a state that waits until inputs are ready.

@@ -296,7 +296,7 @@ MonoBehaviour:
   debugNetworkSettings:
     SimulatePacketLoss: 1
     SimulateLatency: 1
-    PacketLossChance: 50
+    PacketLossChance: 5
     MinLatency: 100
     MaxLatency: 110
   debugPhysicsErrorChance: 0
