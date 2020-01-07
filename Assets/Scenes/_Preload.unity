@@ -298,7 +298,7 @@ MonoBehaviour:
     SimulateLatency: 1
     PacketLossChance: 50
     MinLatency: 100
-    MaxLatency: 200
+    MaxLatency: 110
   debugPhysicsErrorChance: 0
 --- !u!114 &383801353
 MonoBehaviour:

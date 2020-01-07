@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using Priority_Queue;
 
@@ -15,8 +15,26 @@ public struct TickInput {
 public class PlayerInputProcessor {
   private SimplePriorityQueue<TickInput> queue = new SimplePriorityQueue<TickInput>();
 
+  // Monitoring.
+  private const int QUEUE_SIZE_AVERAGE_WINDOW = 10;
+  private int[] playerInputQueueSizes = new int[QUEUE_SIZE_AVERAGE_WINDOW];
+  private int playerInputQueueSizesIdx;
   private int maxInputArraySize;
   private int staleInputs;
+
+  public void LogQueueStatsForPlayer(Player player) {
+    int count = 0;
+    foreach (var entry in queue) {
+      if (entry.Player.PlayerId == player.PlayerId) {
+        count++;
+      }
+    }
+    // TODO: Moving average should go into a delegate.
+    playerInputQueueSizesIdx = (playerInputQueueSizesIdx + 1) % QUEUE_SIZE_AVERAGE_WINDOW;
+    playerInputQueueSizes[playerInputQueueSizesIdx] = count;
+    DebugUI.ShowValue(
+        "avg input queue", playerInputQueueSizes.Sum() / playerInputQueueSizes.Length);
+  }
 
   public List<TickInput> DequeueInputsForTick(uint worldTick) {
     var ret = new List<TickInput>();

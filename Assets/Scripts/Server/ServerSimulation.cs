@@ -76,6 +76,10 @@ public class ServerSimulation : BaseSimulation {
 
       // Monitoring.
       DebugUI.ShowValue("tick", WorldTick);
+      var players = playerManager.GetPlayers();
+      if (players.Count > 0) {
+        playerInputProcessor.LogQueueStatsForPlayer(players[0]);
+      }
     }
   }
 
