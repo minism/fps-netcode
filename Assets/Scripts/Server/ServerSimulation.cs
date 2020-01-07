@@ -9,18 +9,11 @@ public class ServerSimulation : BaseSimulation {
   // Debugging.
   public float debugPhysicsErrorChance;
 
-  // Player stuff.
-  private PlayerManager playerManager;
-
   // Delegate for processing input packets.
   private PlayerInputProcessor playerInputProcessor;
 
-  // Snapshot buffers for input and state used for prediction & replay.
-  //private PlayerInputs[] localPlayerInputsSnapshots = new PlayerInputs[1024];
-  //private PlayerState[] localPlayerStateSnapshots = new PlayerState[1024];
-
-  // The latest world tick that has been simulated.
-  private uint lastSimulatedWorldTick = 0;
+  // Reusable hash set for players whose input we've checked each frame.
+  private HashSet<byte> unprocessedPlayerIds = new HashSet<byte>(); 
 
   // I/O interface for world states.
   public interface Handler {
@@ -28,12 +21,14 @@ public class ServerSimulation : BaseSimulation {
   }
   private Handler handler;
 
+  // Monitoring.
+  private int missedInputs;
+
   public ServerSimulation(
       float debugPhysicsErrorChance,
       PlayerManager playerManager,
       Handler handler) : base(playerManager) {
     this.debugPhysicsErrorChance = debugPhysicsErrorChance;
-    this.playerManager = playerManager;
     this.handler = handler;
     playerInputProcessor = new PlayerInputProcessor();
   }
@@ -45,13 +40,25 @@ public class ServerSimulation : BaseSimulation {
       accumulator -= Time.fixedDeltaTime;
 
       // Apply inputs to each player.
+      unprocessedPlayerIds.UnionWith(playerManager.GetPlayerIds());
       var tickInputs = playerInputProcessor.DequeueInputsForTick(WorldTick);
       foreach (var tickInput in tickInputs) {
         var player = tickInput.Player;
         player.Controller.SetPlayerInputs(tickInput.Inputs);
+        unprocessedPlayerIds.Remove(player.PlayerId);
       }
-      if (tickInputs.Count < 1 && playerManager.GetPlayers().Count > 0) {
-        Debug.LogWarning("No inputs for player!");
+
+      // Any remaining players without inputs have their latest input command repeated,
+      // but we notify them that they need to fast-forward their simulation to improve buffering.
+      foreach (var playerId in unprocessedPlayerIds) {
+        DebugUI.ShowValue("missed inputs", missedInputs++);
+        Debug.LogWarning($"No inputs for player #{playerId}, repeating last received input.");
+        TickInput latestInput;
+        if (playerInputProcessor.TryGetLatestInput(playerId, out latestInput)) {
+          playerManager.GetPlayer(playerId).Controller.SetPlayerInputs(latestInput.Inputs);
+        } else {
+          Debug.LogWarning($"No inputs for player #{playerId} and no history to replay.");
+        }
       }
 
       // TODO: Check for missing inputs and notify player here.

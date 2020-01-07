@@ -14,6 +14,7 @@ public struct TickInput {
 // a way to the simulation which is easier to interact with.
 public class PlayerInputProcessor {
   private SimplePriorityQueue<TickInput> queue = new SimplePriorityQueue<TickInput>();
+  private Dictionary<byte, TickInput> latestPlayerInput = new Dictionary<byte, TickInput>();
 
   // Monitoring.
   private const int QUEUE_SIZE_AVERAGE_WINDOW = 10;
@@ -34,6 +35,10 @@ public class PlayerInputProcessor {
     playerInputQueueSizes[playerInputQueueSizesIdx] = count;
     DebugUI.ShowValue(
         "avg input queue", playerInputQueueSizes.Sum() / playerInputQueueSizes.Length);
+  }
+
+  public bool TryGetLatestInput(byte playerId, out TickInput ret) {
+    return latestPlayerInput.TryGetValue(playerId, out ret);
   }
 
   public List<TickInput> DequeueInputsForTick(uint worldTick) {
@@ -70,12 +75,15 @@ public class PlayerInputProcessor {
       for (int i = (int)start; i < command.Inputs.Length; ++i) {
         // Apply inputs to the associated player controller and simulate the world.
         var worldTick = command.StartWorldTick + i;
-        var pinput = new TickInput {
+        var tickInput = new TickInput {
             WorldTick = (uint) worldTick,
             Player = player,
             Inputs = command.Inputs[i],
           };
-        queue.Enqueue(pinput, worldTick);
+        queue.Enqueue(tickInput, worldTick);
+
+        // Store the latest input in case the simulation needs to repeat missed frames.
+        latestPlayerInput[player.PlayerId] = tickInput;
       }
     } else {
       staleInputs++;
