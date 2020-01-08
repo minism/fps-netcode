@@ -82,7 +82,6 @@ public class PlayerInputProcessor {
             Inputs = command.Inputs[i],
           };
         queue.Enqueue(tickInput, worldTick);
-        Debug.Log($"Adding player input tick {worldTick}, the server tick is {serverWorldTick}");
 
         // Store the latest input in case the simulation needs to repeat missed frames.
         latestPlayerInput[player.PlayerId] = tickInput;
