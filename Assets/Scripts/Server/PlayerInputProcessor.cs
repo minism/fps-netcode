@@ -23,18 +23,19 @@ public class PlayerInputProcessor {
   private int maxInputArraySize;
   private int staleInputs;
 
-  public void LogQueueStatsForPlayer(Player player) {
+  public void LogQueueStatsForPlayer(Player player, uint worldTick) {
     int count = 0;
     foreach (var entry in queue) {
-      if (entry.Player.PlayerId == player.PlayerId) {
+      if (entry.Player.PlayerId == player.PlayerId && entry.WorldTick >= worldTick) {
         count++;
+        worldTick++;
       }
     }
     // TODO: Moving average should go into a delegate.
     playerInputQueueSizesIdx = (playerInputQueueSizesIdx + 1) % QUEUE_SIZE_AVERAGE_WINDOW;
     playerInputQueueSizes[playerInputQueueSizesIdx] = count;
-    DebugUI.ShowValue(
-        "avg input queue", playerInputQueueSizes.Sum() / playerInputQueueSizes.Length);
+    var average = playerInputQueueSizes.Sum() / playerInputQueueSizes.Length;
+    DebugUI.ShowValue("avg input queue", average);
   }
 
   public bool TryGetLatestInput(byte playerId, out TickInput ret) {
@@ -81,6 +82,7 @@ public class PlayerInputProcessor {
             Inputs = command.Inputs[i],
           };
         queue.Enqueue(tickInput, worldTick);
+        Debug.Log($"Adding player input tick {worldTick}, the server tick is {serverWorldTick}");
 
         // Store the latest input in case the simulation needs to repeat missed frames.
         latestPlayerInput[player.PlayerId] = tickInput;

@@ -294,7 +294,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   netMonitor: {fileID: 0}
   debugNetworkSettings:
-    SimulatePacketLoss: 1
+    SimulatePacketLoss: 0
     SimulateLatency: 1
     PacketLossChance: 5
     MinLatency: 100
