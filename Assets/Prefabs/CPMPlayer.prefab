@@ -199,8 +199,8 @@ MonoBehaviour:
   holdJumpToBhop: 0
   playerView: {fileID: 1860611757}
   playerViewYOffset: 1.5
-  xMouseSensitivity: 100
-  yMouseSensitivity: 100
+  xMouseSensitivity: 200
+  yMouseSensitivity: 200
 --- !u!1 &6697177392628622769
 GameObject:
   m_ObjectHideFlags: 0

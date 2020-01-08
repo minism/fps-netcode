@@ -108,15 +108,12 @@ public struct PlayerInputs : INetSerializable {
 
 public struct NetworkObjectState : INetSerializable {
   public ushort NetworkId;
-  public byte[] data;
 
   public void Serialize(NetDataWriter writer) {
     writer.Put(NetworkId);
-    writer.Put(data);
   }
 
   public void Deserialize(NetDataReader reader) {
     NetworkId = reader.GetUShort();
-    data = reader.GetRemainingBytes();
   }
 }
