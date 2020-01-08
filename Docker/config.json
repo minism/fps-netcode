@@ -1,0 +1,11 @@
+{
+    "supportedGameId": "test-game",
+    "maxGameServers": 3,
+    "gameServerPath": "/data/GameServer.x86_64",
+    "gameServerFlags": [
+      "-nographics",
+      "-batchmode",
+      "--hotel_master_address=http://master:3000"
+    ],
+    "autorun": false
+}
