@@ -106,28 +106,17 @@ public struct PlayerInputs : INetSerializable {
   }
 }
 
-// 50 bytes
 public struct NetworkObjectState : INetSerializable {
   public ushort NetworkId;
-  //public Vector3 Position;
-  //public Vector3 Rotation;
-  //public Vector3 Velocity;
-  //public Vector3 AngularVelocity;
+  public byte[] data;
 
   public void Serialize(NetDataWriter writer) {
     writer.Put(NetworkId);
-    //writer.Put(Position);
-    //writer.Put(Rotation);
-    //writer.Put(Velocity);
-    //writer.Put(AngularVelocity);
+    writer.Put(data);
   }
 
   public void Deserialize(NetDataReader reader) {
     NetworkId = reader.GetUShort();
-    //Position = reader.GetVector3();
-    //Rotation = reader.GetVector3();
-    //Velocity = reader.GetVector3();
-    //AngularVelocity = reader.GetVector3();
+    data = reader.GetRemainingBytes();
   }
 }
-

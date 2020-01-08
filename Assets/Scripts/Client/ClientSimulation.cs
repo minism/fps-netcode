@@ -19,6 +19,10 @@ public class ClientSimulation : BaseSimulation {
   // The current world tick and last ack'd server world tick.
   private uint lastServerWorldTick = 0;
 
+  // The estimated number of ticks we're running ahead of the server.
+  // TODO: Implement a system for adjusting this on-the-fly, overwatch style.
+  private uint estimatedTickLead;
+
   // I/O interface for player inputs.
   public interface Handler {
     PlayerInputs? SampleInputs();
@@ -47,8 +51,8 @@ public class ClientSimulation : BaseSimulation {
     lastServerWorldTick = initialWorldTick;
 
     // Extrapolate based on latency what our client tick should be.
-    var estimatedTickLead = (uint)(serverLatencySeconds / Time.fixedDeltaTime) * 1;
-    estimatedTickLead = estimatedTickLead < 1 ? 1 : estimatedTickLead;
+    estimatedTickLead = (uint)(serverLatencySeconds / Time.fixedDeltaTime);
+    estimatedTickLead = (estimatedTickLead < 1 ? 1 : estimatedTickLead) + 1;
     Debug.Log("Initializing client with estimated tick lead of " + estimatedTickLead);
     WorldTick = initialWorldTick + estimatedTickLead;
 
@@ -149,6 +153,7 @@ public class ClientSimulation : BaseSimulation {
     DebugUI.ShowValue("recv states", stats.receivedStates);
     DebugUI.ShowValue("repl states", stats.replayedStates);
     DebugUI.ShowValue("tick", WorldTick);
+    DebugUI.ShowValue("estimated tick lead", estimatedTickLead);
   }
 
   public void EnqueueWorldState(NetCommand.WorldState state) {

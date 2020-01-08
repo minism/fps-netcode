@@ -295,7 +295,7 @@ MonoBehaviour:
   netMonitor: {fileID: 0}
   debugNetworkSettings:
     SimulatePacketLoss: 0
-    SimulateLatency: 1
+    SimulateLatency: 0
     PacketLossChance: 5
     MinLatency: 100
     MaxLatency: 110
@@ -806,7 +806,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 300, y: 100}
+  m_SizeDelta: {x: 300, y: 150}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1987079840
 MonoBehaviour:
