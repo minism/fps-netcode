@@ -43,6 +43,13 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     LoadGameScene();
   }
 
+  protected override void TearDownGameScene() {
+    base.TearDownGameScene();
+    if (simulation != null) {
+      simulation = null;
+    }
+  }
+
   private Player AddPlayerFromInitialServerState(InitialPlayerState initialState) {
     var playerObject = networkObjectManager.CreatePlayerGameObject(
         initialState.NetworkObjectState.NetworkId,
@@ -134,6 +141,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     serverPeer = null;
 
     // Return to the lobby.
+    TearDownGameScene();
     LoadLobbyScene();
   }
 }

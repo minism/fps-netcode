@@ -41,6 +41,9 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
 
   protected override void TearDownGameScene() {
     base.TearDownGameScene();
+    if (simulation != null) {
+      simulation = null;
+    }
     if (hotelGameServer != null) {
       hotelGameServer.Destroy();
       hotelGameServer = null;

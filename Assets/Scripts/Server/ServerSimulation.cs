@@ -51,8 +51,7 @@ public class ServerSimulation : BaseSimulation {
       // Any remaining players without inputs have their latest input command repeated,
       // but we notify them that they need to fast-forward their simulation to improve buffering.
       foreach (var playerId in unprocessedPlayerIds) {
-        DebugUI.ShowValue("missed inputs", missedInputs++);
-        Debug.LogWarning($"No inputs for player #{playerId}, repeating last received input.");
+        DebugUI.ShowValue("missed inputs", ++missedInputs);
         TickInput latestInput;
         if (playerInputProcessor.TryGetLatestInput(playerId, out latestInput)) {
           playerManager.GetPlayer(playerId).Controller.SetPlayerInputs(latestInput.Inputs);

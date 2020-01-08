@@ -47,18 +47,16 @@ public abstract class BaseLogicController : MonoBehaviour {
     TearDownGameScene();
   }
 
-  protected virtual void TearDownGameScene() {
-    Debug.Log("Stopping network stack.");
-    Cursor.lockState = CursorLockMode.None;
-    netChannel.Stop();
-  }
-
   protected void LoadGameScene() {
     SceneManager.LoadScene("Game");
   }
 
-  protected AsyncOperation LoadGameSceneAsync() {
-    return SceneManager.LoadSceneAsync("Game");
+  protected virtual void TearDownGameScene() {
+    Debug.Log("Stopping network stack.");
+    Cursor.lockState = CursorLockMode.None;
+    playerManager.Clear();
+    networkObjectManager.Clear();
+    netChannel.Stop();
   }
 
   protected void LoadLobbyScene() {

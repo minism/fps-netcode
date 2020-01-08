@@ -66,4 +66,8 @@ public class NetworkObjectManager : MonoBehaviour {
       Debug.LogError($"Couldn't destroy non-existant network object #{networkId}");
     }
   }
+  
+  public void Clear() {
+    activeObjects.Clear();
+  }
 }

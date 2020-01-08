@@ -49,6 +49,11 @@ public class PlayerManager : IPlayerLookup {
     CachePlayerIds();
   }
 
+  public void Clear() {
+    players.Clear();
+    CachePlayerIds();
+  }
+
   private void CachePlayerIds() {
     playerIds = GetPlayers().Select(p => p.PlayerId).ToArray();
   }
