@@ -50,14 +50,14 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     }
   }
 
-  public async Task StartServer(int port) {
-    await StartServer(port, true);
+  public async Task StartServer(string host, int port) {
+    await StartServer(host, port, true);
   }
 
-  public async Task StartServer(int port, bool loadScene) {
+  public async Task StartServer(string host, int port, bool loadScene) {
     netChannel.StartServer(port);
     hotelGameServer = await Hotel.HotelClient.Instance.StartHostingServer(
-        "localhost", port, 8, "Test");
+        host, port, 8, "Test");
     if (loadScene) {
       LoadGameScene();
     }

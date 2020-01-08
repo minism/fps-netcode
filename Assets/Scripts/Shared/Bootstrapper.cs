@@ -10,28 +10,42 @@ public class Bootstrapper : MonoBehaviour {
   public ClientLogicController clientLogicController;
   public ServerLogicController serverLogicController;
 
-  private static int PORT = 10770;
+  private static string DEFAULT_HOST = "localhost";
+  private static int DEFAULT_PORT = 10770;
 
   private void Awake() {
     // Disable kinematic auto simulation.
     KinematicCharacterController.KinematicCharacterSystem.EnsureCreation();
     KinematicCharacterController.KinematicCharacterSystem.Settings.AutoSimulation = false;
+
+    // Parse command line arguments.
+    var host = Hotel.Util.GetFlagValue("--host");
+    var port = Hotel.Util.GetFlagValue("--port");
+
+    // If host and port was specified via command line, start a server immediately.
+    if (!string.IsNullOrEmpty(port) && !string.IsNullOrEmpty(host)) {
+      StartGameAsServer(host, int.Parse(port));
+    }
   }
 
   public async Task StartGameAsServer() {
-    Debug.Log("Starting game as dedicated server.");
+    StartGameAsServer(DEFAULT_HOST, DEFAULT_PORT);
+  }
+
+  public async Task StartGameAsServer(string host, int port) {
+    Debug.Log($"Starting game as dedicated server on port {port}.");
     clientLogicController.gameObject.SetActive(false);
-    await serverLogicController.StartServer(PORT);
+    await serverLogicController.StartServer(host, port);
   }
 
   public async Task StartGameAsListenServer() {
     Debug.Log("Starting game as a listen server.");
-    await serverLogicController.StartServer(PORT, false);
+    await serverLogicController.StartServer(DEFAULT_HOST, DEFAULT_PORT, false);
     // Fake player data for now.
     var playerSetupData = new PlayerSetupData {
       Name = "Player",
     };
-    clientLogicController.StartClient("localhost", PORT, playerSetupData);
+    clientLogicController.StartClient("localhost", DEFAULT_PORT, playerSetupData);
   }
 
   public void StartGameAsClient(Hotel.GameServer serverToJoin) {
