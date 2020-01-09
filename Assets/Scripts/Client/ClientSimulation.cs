@@ -7,7 +7,6 @@ using UnityEngine;
 public class ClientSimulation : BaseSimulation {
   // Player stuff.
   private Player localPlayer;
-  private PlayerManager playerManager;
 
   // Snapshot buffers for input and state used for prediction & replay.
   private PlayerInputs[] localPlayerInputsSnapshots = new PlayerInputs[1024];
@@ -59,41 +58,43 @@ public class ClientSimulation : BaseSimulation {
     stats = new Stats();
   }
 
-  public void Update(float dt) {
-    // Fixed timestep loop.
-    accumulator += dt;
-    while (accumulator >= Time.fixedDeltaTime) {
-      accumulator -= Time.fixedDeltaTime;
-      var inputs = handler.SampleInputs();
-      if (!inputs.HasValue) {
-        // We can't do any simulating until inputs are ready.
-        continue;
-      }
+  public void EnqueueWorldState(NetCommand.WorldState state) {
+    worldStateQueue.Enqueue(state);
+  }
 
-      // Update our snapshot buffers.
-      // TODO: The snapshot might only need pos/rot.
-      uint bufidx = WorldTick % 1024;
-      localPlayerInputsSnapshots[bufidx] = inputs.Value;
-      localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
-
-      // Send a command for all inputs not yet acknowledged from the server.
-      var unackedInputs = new List<PlayerInputs>();
-      for (uint tick = lastServerWorldTick; tick <= WorldTick; ++tick) {
-        unackedInputs.Add(localPlayerInputsSnapshots[tick % 1024]);
-      }
-      var command = new NetCommand.PlayerInput {
-        StartWorldTick = lastServerWorldTick,
-        Inputs = unackedInputs.ToArray(),
-      };
-      handler.SendInputs(command);
-
-      // Prediction - Apply inputs to the associated player controller and simulate the world.
-      localPlayer.Controller.SetPlayerInputs(inputs.Value);
-      SimulateWorld(Time.fixedDeltaTime);
-
-      ++WorldTick;
+  // Process a single world tick update.
+  protected override void Tick() {
+    var inputs = handler.SampleInputs();
+    if (!inputs.HasValue) {
+      // We can't do any simulating until inputs are ready.
+      return;
     }
 
+    // Update our snapshot buffers.
+    // TODO: The snapshot might only need pos/rot.
+    uint bufidx = WorldTick % 1024;
+    localPlayerInputsSnapshots[bufidx] = inputs.Value;
+    localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
+
+    // Send a command for all inputs not yet acknowledged from the server.
+    var unackedInputs = new List<PlayerInputs>();
+    for (uint tick = lastServerWorldTick; tick <= WorldTick; ++tick) {
+      unackedInputs.Add(localPlayerInputsSnapshots[tick % 1024]);
+    }
+    var command = new NetCommand.PlayerInput {
+      StartWorldTick = lastServerWorldTick,
+      Inputs = unackedInputs.ToArray(),
+    };
+    handler.SendInputs(command);
+
+    // Prediction - Apply inputs to the associated player controller and simulate the world.
+    localPlayer.Controller.SetPlayerInputs(inputs.Value);
+    SimulateWorld(Time.fixedDeltaTime);
+
+    ++WorldTick;
+  }
+
+  protected override void PostUpdate() {
     // Step through the incoming world state queue.
     // TODO: This is going to need to be structured pretty differently with other players.
     while (worldStateQueue.Count > 0) {
@@ -149,14 +150,10 @@ public class ClientSimulation : BaseSimulation {
       }
     }
 
-    // Update debug monitoring.
+    // Show some debug monitoring values.
     DebugUI.ShowValue("recv states", stats.receivedStates);
     DebugUI.ShowValue("repl states", stats.replayedStates);
     DebugUI.ShowValue("tick", WorldTick);
     DebugUI.ShowValue("estimated tick lead", estimatedTickLead);
-  }
-
-  public void EnqueueWorldState(NetCommand.WorldState state) {
-    worldStateQueue.Enqueue(state);
   }
 }

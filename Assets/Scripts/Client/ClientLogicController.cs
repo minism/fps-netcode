@@ -13,10 +13,6 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   // Delegate that manages the world simulation, prediction, reconciliation.
   private ClientSimulation simulation;
 
-  // Monitoring.
-  private int receivedStates;
-  private int replayedStates;
-
   protected override void Awake() {
     base.Awake();
 
