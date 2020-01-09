@@ -53,7 +53,7 @@ public class ServerSimulation : BaseSimulation {
     // Any remaining players without inputs have their latest input command repeated,
     // but we notify them that they need to fast-forward their simulation to improve buffering.
     foreach (var playerId in unprocessedPlayerIds) {
-      DebugUI.ShowValue("missed inputs", ++missedInputs);
+      DebugUI.ShowValue("sv missed inputs", ++missedInputs);
       TickInput latestInput;
       if (playerInputProcessor.TryGetLatestInput(playerId, out latestInput)) {
         playerManager.GetPlayer(playerId).Controller.SetPlayerInputs(latestInput.Inputs);
@@ -85,7 +85,7 @@ public class ServerSimulation : BaseSimulation {
 
   protected override void PostUpdate() {
     // Monitoring.
-    DebugUI.ShowValue("tick", WorldTick);
+    DebugUI.ShowValue("sv tick", WorldTick);
     var players = playerManager.GetPlayers();
     if (players.Count > 0) {
       playerInputProcessor.LogQueueStatsForPlayer(players[0], WorldTick);

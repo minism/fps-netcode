@@ -181,9 +181,8 @@ public class ClientSimulation : BaseSimulation {
     }
 
     // Show some debug monitoring values.
-    DebugUI.ShowValue("recv states", stats.receivedStates);
-    DebugUI.ShowValue("repl states", stats.replayedStates);
-    DebugUI.ShowValue("tick", WorldTick);
-    DebugUI.ShowValue("estimated tick lead", estimatedTickLead);
+    DebugUI.ShowValue("cl rewinds", stats.replayedStates);
+    DebugUI.ShowValue("cl tick", WorldTick);
+    DebugUI.ShowValue("cl tick lead", estimatedTickLead);
   }
 }

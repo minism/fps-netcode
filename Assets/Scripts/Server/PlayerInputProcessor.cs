@@ -20,7 +20,6 @@ public class PlayerInputProcessor {
   private const int QUEUE_SIZE_AVERAGE_WINDOW = 10;
   private int[] playerInputQueueSizes = new int[QUEUE_SIZE_AVERAGE_WINDOW];
   private int playerInputQueueSizesIdx;
-  private int maxInputArraySize;
   private int staleInputs;
 
   public void LogQueueStatsForPlayer(Player player, uint worldTick) {
@@ -35,7 +34,7 @@ public class PlayerInputProcessor {
     playerInputQueueSizesIdx = (playerInputQueueSizesIdx + 1) % QUEUE_SIZE_AVERAGE_WINDOW;
     playerInputQueueSizes[playerInputQueueSizesIdx] = count;
     var average = playerInputQueueSizes.Sum() / playerInputQueueSizes.Length;
-    DebugUI.ShowValue("avg input queue", average);
+    DebugUI.ShowValue("sv avg input queue", average);
   }
 
   public bool TryGetLatestInput(byte playerId, out TickInput ret) {
@@ -60,11 +59,7 @@ public class PlayerInputProcessor {
 
   public void EnqueueInput(NetCommand.PlayerInput command, Player player, uint serverWorldTick) {
     // Monitoring.
-    if (command.Inputs.Length > maxInputArraySize) {
-      maxInputArraySize = command.Inputs.Length;
-    }
-    DebugUI.ShowValue("max # inputs", maxInputArraySize);
-    DebugUI.ShowValue("stale inputs", staleInputs);
+    DebugUI.ShowValue("sv stale inputs", staleInputs);
 
     // Calculate the last tick in the incoming command.
     uint maxTick = command.StartWorldTick + (uint)command.Inputs.Length - 1;
