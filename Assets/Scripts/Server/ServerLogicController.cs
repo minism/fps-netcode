@@ -67,7 +67,8 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     }
 
     // Initialize simulation.
-    simulation = new ServerSimulation(debugPhysicsErrorChance, playerManager, this);
+    simulation = new ServerSimulation(
+        debugPhysicsErrorChance, playerManager, networkObjectManager, this);
   }
 
   /// Setup all server authoritative state for a new player.

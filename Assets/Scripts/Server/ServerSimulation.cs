@@ -27,7 +27,8 @@ public class ServerSimulation : BaseSimulation {
   public ServerSimulation(
       float debugPhysicsErrorChance,
       PlayerManager playerManager,
-      Handler handler) : base(playerManager) {
+      NetworkObjectManager networkObjectManager,
+      Handler handler) : base(playerManager, networkObjectManager) {
     this.debugPhysicsErrorChance = debugPhysicsErrorChance;
     this.handler = handler;
     playerInputProcessor = new PlayerInputProcessor();

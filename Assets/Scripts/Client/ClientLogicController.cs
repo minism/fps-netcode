@@ -96,7 +96,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
     // Initialize simulation.
     simulation = new ClientSimulation(
-        localPlayer, playerManager, this, 0.1f, cmd.WorldTick);
+        localPlayer, playerManager, networkObjectManager, this, 0.1f, cmd.WorldTick);
 
     // Create player objects for existing clients.
     foreach (var state in cmd.ExistingPlayerStates) {

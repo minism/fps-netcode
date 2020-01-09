@@ -1,5 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
+// TODO: Probably share this.
+struct ClientWorldState {
+  public PlayerState[] playerStates;
+}
 
 // Client world simulation including prediction and state rewind.
 // Inputs are state frames from the server.
@@ -10,7 +16,7 @@ public class ClientSimulation : BaseSimulation {
 
   // Snapshot buffers for input and state used for prediction & replay.
   private PlayerInputs[] localPlayerInputsSnapshots = new PlayerInputs[1024];
-  private PlayerState[] localPlayerStateSnapshots = new PlayerState[1024];
+  private ClientWorldState[] localWorldStateSnapshots = new ClientWorldState[1024];
 
   // Queue for incoming world states.
   private Queue<NetCommand.WorldState> worldStateQueue = new Queue<NetCommand.WorldState>();
@@ -39,9 +45,10 @@ public class ClientSimulation : BaseSimulation {
   public ClientSimulation(
       Player localPlayer,
       PlayerManager playerManager,
+      NetworkObjectManager networkObjectManager,
       Handler handler,
       float serverLatencySeconds,
-      uint initialWorldTick) : base(playerManager) {
+      uint initialWorldTick) : base(playerManager, networkObjectManager) {
     // TODO: Redo player here for multiple players.
     this.localPlayer = localPlayer;
     this.handler = handler;
@@ -74,7 +81,8 @@ public class ClientSimulation : BaseSimulation {
     // TODO: The snapshot might only need pos/rot.
     uint bufidx = WorldTick % 1024;
     localPlayerInputsSnapshots[bufidx] = inputs.Value;
-    localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
+    localWorldStateSnapshots[bufidx].playerStates =
+       playerManager.GetPlayers().Select(p => p.Controller.ToNetworkState()).ToArray();
 
     // Send a command for all inputs not yet acknowledged from the server.
     var unackedInputs = new List<PlayerInputs>();
@@ -112,24 +120,45 @@ public class ClientSimulation : BaseSimulation {
       }
 
       // TODO: Fix this assumption.
-      var incomingPlayerState = incomingState.PlayerStates[0];
       uint bufidx = incomingState.WorldTick % 1024;
-      var stateSnapshot = localPlayerStateSnapshots[bufidx];
+      var stateSnapshot = localWorldStateSnapshots[bufidx];
+
+      // Locate the data for our local player.
+      PlayerState incomingPlayerState = new PlayerState();
+      foreach (var playerState in incomingState.PlayerStates) {
+        if (playerState.NetworkId == localPlayer.NetworkObject.NetworkId) {
+          incomingPlayerState = playerState;
+        }
+      }
+      if (default(PlayerState).Equals(incomingPlayerState)) {
+        Debug.LogError("No local player state found!");
+      }
 
       // Compare the historical state to see how off it was.
-      var error = incomingPlayerState.Position - stateSnapshot.Position;
+      Vector3 error = Vector3.zero;
+      if (stateSnapshot.playerStates != null) {
+        foreach (var playerState in stateSnapshot.playerStates) {
+          if (playerState.NetworkId == localPlayer.NetworkObject.NetworkId) {
+            error = incomingPlayerState.Position - playerState.Position;
+          }
+        }
+      }
 
       // TODO: Getting a huge amount of these. Next step to debug is to make a simple
       // Rigidbody based controller and see if the same issues are there, to determine
       // whether its an issue with my netcode or if KCC is really this non-deterministic.
       if (error.sqrMagnitude > 0.0001f) {
         if (!headState) {
-          Debug.Log($"Rewind tick#{incomingState.WorldTick}: {incomingPlayerState.Position} - {stateSnapshot.Position}, Range: {WorldTick - incomingState.WorldTick}");
+          Debug.Log($"Rewind tick#{incomingState.WorldTick}, Error: {error.magnitude}, Range: {WorldTick - incomingState.WorldTick}");
           stats.replayedStates++;
         }
 
-        // Rewind the player state to the correct state from the server.
-        localPlayer.Controller.ApplyNetworkState(incomingPlayerState);
+        // Rewind all player state to the correct state from the server.
+        // TODO: Cleanup a lot of this when its merged with how rockets are spawned.
+        foreach (var state in incomingState.PlayerStates) {
+          var obj = networkObjectManager.GetObject(state.NetworkId);
+          obj.GetComponent<IPlayerController>().ApplyNetworkState(state);
+        }
 
         // Loop through and replay all captured input snapshots up to the current tick.
         uint replayTick = incomingState.WorldTick;
@@ -139,7 +168,8 @@ public class ClientSimulation : BaseSimulation {
           var inputSnapshot = localPlayerInputsSnapshots[bufidx];
 
           // Rewrite the historical sate snapshot.
-          localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
+          localWorldStateSnapshots[bufidx].playerStates =
+             playerManager.GetPlayers().Select(p => p.Controller.ToNetworkState()).ToArray();
 
           // Apply inputs to the associated player controller and simulate the world.
           localPlayer.Controller.SetPlayerInputs(inputSnapshot);

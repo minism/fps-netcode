@@ -37,6 +37,16 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   }
   private CharacterController _controller;
 
+  private NetworkObject networkObject {
+    get {
+      if (_networkObject == null) {
+        _networkObject = GetComponent<NetworkObject>();
+      }
+      return _networkObject;
+    }
+  }
+  private NetworkObject _networkObject;
+
   // Last received input.
   private PlayerInputs inputs;
 
@@ -101,6 +111,7 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
 
   public PlayerState ToNetworkState() {
     return new PlayerState {
+      NetworkId = networkObject.NetworkId,
       Position = transform.position,
       Rotation = new Vector3(rotX, rotY, 0),
       Velocity = playerVelocity,

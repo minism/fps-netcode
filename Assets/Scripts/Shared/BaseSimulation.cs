@@ -9,13 +9,15 @@ public abstract class BaseSimulation {
   // during re-sync events with the server.
   protected float tickInterval = Time.fixedDeltaTime;
 
-  // The player manager.
+  // Managers.
   protected PlayerManager playerManager;
+  protected NetworkObjectManager networkObjectManager;
 
   private float accumulator;
 
-  protected BaseSimulation(PlayerManager playerManager) {
+  protected BaseSimulation(PlayerManager playerManager, NetworkObjectManager networkObjectManager) {
     this.playerManager = playerManager;
+    this.networkObjectManager = networkObjectManager;
   }
 
   public void Update(float dt) {
