@@ -1,11 +1,13 @@
 {
-    "supportedGameId": "test-game",
-    "maxGameServers": 3,
+    "host": "hotel.minornine.com",
+    "port": 10770,
+    "supportedGameId": "fps-net-prediction",
+    "maxGameServers": 1,
     "gameServerPath": "/data/GameServer.x86_64",
     "gameServerFlags": [
       "-nographics",
       "-batchmode",
-      "--hotel_master_address=http://master:3000"
+      "--hotel_master_address=https://hotel.minornine.com"
     ],
-    "autorun": false
+    "autorun": true
 }

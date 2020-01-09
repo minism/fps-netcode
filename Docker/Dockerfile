@@ -6,3 +6,4 @@ RUN ["apt", "install", "ca-certificates", "-y"]
 
 # Copy game server data
 COPY . /data
+
