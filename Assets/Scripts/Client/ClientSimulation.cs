@@ -128,6 +128,12 @@ public class ClientSimulation : BaseSimulation {
       foreach (var playerState in incomingState.PlayerStates) {
         if (playerState.NetworkId == localPlayer.NetworkObject.NetworkId) {
           incomingPlayerState = playerState;
+        } else {
+          // Apply the state to other players.
+          // TODO: This is definitely wrong, because this is a historical tick.  Not sure yet
+          // how to resolve this.
+          var obj = networkObjectManager.GetObject(playerState.NetworkId);
+          obj.GetComponent<IPlayerController>().ApplyNetworkState(playerState);
         }
       }
       if (default(PlayerState).Equals(incomingPlayerState)) {
