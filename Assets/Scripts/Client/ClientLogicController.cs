@@ -63,8 +63,9 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     // Create input component.
     localPlayerInput = localPlayer.GameObject.AddComponent<ClientPlayerInput>();
 
-    // Setup camera.
-    Camera.main.gameObject.AddComponent<CPMCameraController>();
+    // Setup camera and attach to the local player camera anchor.
+    var cpmCamera = Camera.main.gameObject.AddComponent<CPMCameraController>();
+    cpmCamera.PlayerView = localPlayer.Controller.GetPlayerViewTransform();
   }
 
   /** ClientSimulation.Handler interface */
@@ -91,6 +92,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
     // Create our player object and attach client-specific components.
     // TODO: Copy is not needed here anymore.
+    Debug.Log("Local player network ID is " + cmd.YourPlayerState.NetworkObjectState.NetworkId);
     localPlayer.CopyFrom(AddPlayerFromInitialServerState(cmd.YourPlayerState));
     InitializeLocalPlayer();
 

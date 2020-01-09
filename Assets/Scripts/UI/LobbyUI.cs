@@ -52,7 +52,7 @@ public class LobbyUI : MonoBehaviour {
       obj.SetActive(true);
       obj.name = "Join Button";
       var text = obj.GetComponentInChildren<Text>();
-      text.text = $"Join '{server.name}'";
+      text.text = $"Join '{server.name}' (Players: {server.numPlayers}/{server.maxPlayers})";
 
       // Add a click listener.
       obj.GetComponent<Button>().onClick.AddListener(() => {

@@ -39,6 +39,10 @@ public class PlayerController :
     animator = GetComponentInChildren<Animator>();
   }
 
+  public Transform GetPlayerViewTransform() {
+    return transform;
+  }
+
   // Sets the move input data to use for the next update frame.
   public void SetPlayerInputs(PlayerInputs inputs) {
     // Create a clamped movement vector to avoid the classic diagonal movement problem.            

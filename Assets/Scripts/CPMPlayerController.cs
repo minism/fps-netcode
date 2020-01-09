@@ -77,6 +77,10 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
    * IPlayerController interface
    */
 
+  public Transform GetPlayerViewTransform() {
+    return playerView;
+  }
+
   public void SetPlayerInputs(PlayerInputs inputs) {
     this.inputs = inputs;
   }
