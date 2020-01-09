@@ -196,7 +196,6 @@ GameObject:
   m_Component:
   - component: {fileID: 323191869}
   - component: {fileID: 323191868}
-  - component: {fileID: 323191870}
   m_Layer: 0
   m_Name: Global
   m_TagString: Untagged
@@ -235,19 +234,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &323191870
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 323191867}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f16d1da05b2c72f42b934862da813319, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  initialScene: Lobby
 --- !u!1 &383801350
 GameObject:
   m_ObjectHideFlags: 0
@@ -434,6 +420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58f276971d6ff784b8c69a5bb7ac14e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  initialScene: Lobby
   clientLogicController: {fileID: 289582693}
   serverLogicController: {fileID: 383801352}
 --- !u!1 &1022001990

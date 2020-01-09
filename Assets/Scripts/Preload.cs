@@ -7,6 +7,5 @@ public class Preload : MonoBehaviour {
   public string initialScene;
 
   private void Awake() {
-    SceneManager.LoadScene(initialScene); 
   }
 }

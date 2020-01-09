@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// Responsible for initializing the client or server state of the game
 /// in a certain configuration. Sets up the state of any logic controllers
 /// needed and then hands off control to them.
 public class Bootstrapper : MonoBehaviour {
+  public string initialScene = "Lobby";
   public ClientLogicController clientLogicController;
   public ServerLogicController serverLogicController;
 
@@ -17,7 +19,9 @@ public class Bootstrapper : MonoBehaviour {
     // Disable kinematic auto simulation.
     KinematicCharacterController.KinematicCharacterSystem.EnsureCreation();
     KinematicCharacterController.KinematicCharacterSystem.Settings.AutoSimulation = false;
+  }
 
+  private void Start() {
     // Parse command line arguments.
     var host = Hotel.Util.GetFlagValue("--host");
     var port = Hotel.Util.GetFlagValue("--port");
@@ -25,6 +29,8 @@ public class Bootstrapper : MonoBehaviour {
     // If host and port was specified via command line, start a server immediately.
     if (!string.IsNullOrEmpty(port) && !string.IsNullOrEmpty(host)) {
       StartGameAsServer(host, int.Parse(port));
+    } else {
+      SceneManager.LoadScene(initialScene);
     }
   }
 

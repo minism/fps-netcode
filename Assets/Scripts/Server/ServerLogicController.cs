@@ -56,8 +56,12 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
 
   public async Task StartServer(string host, int port, bool loadScene) {
     netChannel.StartServer(port);
+    // TODO: Determine why this extra wait is needed on the startup case.
+    // It doesnt seem to cause an error when omitted, but the POST below never happens.
+    await Hotel.HotelClient.Instance.WaitUntilInitialized();
     hotelGameServer = await Hotel.HotelClient.Instance.StartHostingServer(
         host, port, 8, "Test");
+    Debug.Log($"Registered game with master server.");
     if (loadScene) {
       LoadGameScene();
     }
