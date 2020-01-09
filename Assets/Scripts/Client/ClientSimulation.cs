@@ -70,7 +70,7 @@ public class ClientSimulation : BaseSimulation {
   }
 
   // Process a single world tick update.
-  protected override void Tick() {
+  protected override void Tick(float dt) {
     var inputs = handler.SampleInputs();
     if (!inputs.HasValue) {
       // We can't do any simulating until inputs are ready.
@@ -97,7 +97,7 @@ public class ClientSimulation : BaseSimulation {
 
     // Prediction - Apply inputs to the associated player controller and simulate the world.
     localPlayer.Controller.SetPlayerInputs(inputs.Value);
-    SimulateWorld(Time.fixedDeltaTime);
+    SimulateWorld(dt);
 
     ++WorldTick;
   }

@@ -21,6 +21,9 @@ public class ServerSimulation : BaseSimulation {
   }
   private Handler handler;
 
+  // World state broadcasts can happen at an independent rate.
+  private FixedTimer worldStateBroadcastTimer;
+
   // Monitoring.
   private int missedInputs;
 
@@ -32,6 +35,10 @@ public class ServerSimulation : BaseSimulation {
     this.debugPhysicsErrorChance = debugPhysicsErrorChance;
     this.handler = handler;
     playerInputProcessor = new PlayerInputProcessor();
+
+    // Initialize timers.
+    worldStateBroadcastTimer = new FixedTimer(Settings.ServerSendRate, BroadcastWorldState);
+    worldStateBroadcastTimer.Start();
   }
 
   public void EnqueuePlayerInput(WithPeer<NetCommand.PlayerInput> input) {
@@ -40,7 +47,7 @@ public class ServerSimulation : BaseSimulation {
   }
 
   // Process a single world tick update.
-  protected override void Tick() {
+  protected override void Tick(float dt) {
     // Apply inputs to each player.
     unprocessedPlayerIds.UnionWith(playerManager.GetPlayerIds());
     var tickInputs = playerInputProcessor.DequeueInputsForTick(WorldTick);
@@ -65,7 +72,7 @@ public class ServerSimulation : BaseSimulation {
     // TODO: Check for missing inputs and notify player here.
 
     // Advance the world simulation.
-    SimulateWorld(Time.fixedDeltaTime);
+    SimulateWorld(dt);
     if (Random.value < debugPhysicsErrorChance) {
       Debug.Log("Injecting random physics error.");
       playerManager.GetPlayers().ForEach(
@@ -73,14 +80,8 @@ public class ServerSimulation : BaseSimulation {
     }
     ++WorldTick;
 
-    // Broadcast the world state.
-    // The new world state tick is N+1, given input world tick N.
-    var worldStateCmd = new NetCommand.WorldState {
-      WorldTick = WorldTick,
-      PlayerStates = playerManager.GetPlayers().Select(
-          p => p.Controller.ToNetworkState()).ToArray(),
-    };
-    handler.BroadcastWorldState(worldStateCmd);
+    // Update post-tick timers.
+    worldStateBroadcastTimer.Update(dt);
   }
 
   protected override void PostUpdate() {
@@ -90,5 +91,14 @@ public class ServerSimulation : BaseSimulation {
     if (players.Count > 0) {
       playerInputProcessor.LogQueueStatsForPlayer(players[0], WorldTick);
     }
+  }
+
+  private void BroadcastWorldState(float dt) {
+    var worldStateCmd = new NetCommand.WorldState {
+      WorldTick = WorldTick,
+      PlayerStates = playerManager.GetPlayers().Select(
+          p => p.Controller.ToNetworkState()).ToArray(),
+    };
+    handler.BroadcastWorldState(worldStateCmd);
   }
 }

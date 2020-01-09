@@ -7,7 +7,9 @@ public abstract class BaseSimulation {
   // The interval for world update ticks (inverse of tickrate).
   // This is currently always constant, but will eventually need to fluctuate on the client
   // during re-sync events with the server.
-  protected float tickInterval = Time.fixedDeltaTime;
+  // Note that this may be independent of network transmission rates (which is confusingly
+  // often called the 'tick rate' in the gaming community).
+  protected float tickInterval = Settings.SimulationTickInterval;
 
   // Managers.
   protected PlayerManager playerManager;
@@ -24,12 +26,12 @@ public abstract class BaseSimulation {
     accumulator += dt;
     while (accumulator >= tickInterval) {
       accumulator -= tickInterval;
-      Tick();
+      Tick(tickInterval);
     }
     PostUpdate();
   }
 
-  protected abstract void Tick();
+  protected abstract void Tick(float dt);
 
   protected virtual void PostUpdate() { }
 
