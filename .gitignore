@@ -43,4 +43,4 @@ sysinfo.txt
 *.blend1.meta
 
 # Exclude some assets which should be directly imported.
-Assets/Imported
+Assets/Imported/Kinematic*
