@@ -52,8 +52,7 @@ public class ClientSimulation : BaseSimulation {
     // Extrapolate based on latency what our client tick should be.
     estimatedTickLead = (uint)(serverLatencySeconds / Time.fixedDeltaTime);
     estimatedTickLead = (estimatedTickLead < 1 ? 1 : estimatedTickLead) + 1;
-    Debug.Log("Initializing client with estimated tick lead of " + estimatedTickLead);
-    WorldTick = initialWorldTick + estimatedTickLead;
+    Debug.Log($"Initializing client with estimated tick lead of {estimatedTickLead}, ping: {serverLatencySeconds}");
 
     stats = new Stats();
   }
