@@ -164,4 +164,3 @@ public class ClientSimulation : BaseSimulation {
     DebugUI.ShowValue("cl tick lead", estimatedTickLead);
   }
 }
-ldti
