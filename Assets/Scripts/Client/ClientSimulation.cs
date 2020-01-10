@@ -37,7 +37,6 @@ public class ClientSimulation : BaseSimulation {
 
   // Exported monitoring statistics.
   public struct Stats {
-    public int receivedStates;
     public int replayedStates;
   }
   public Stats stats;
@@ -106,9 +105,7 @@ public class ClientSimulation : BaseSimulation {
     // Step through the incoming world state queue.
     // TODO: This is going to need to be structured pretty differently with other players.
     while (worldStateQueue.Count > 0) {
-      // Lookup the historical state for the world tick we got.
       var incomingState = worldStateQueue.Dequeue();
-      stats.receivedStates++;
       lastServerWorldTick = incomingState.WorldTick;
 
       bool headState = false;
@@ -119,8 +116,11 @@ public class ClientSimulation : BaseSimulation {
         Debug.LogError("Got a FUTURE tick somehow???");
       }
 
-      // TODO: Fix this assumption.
+      // Lookup the historical state for the world tick we got.
       uint bufidx = incomingState.WorldTick % 1024;
+
+      // TODO: We actually only need to store snapshots for our player I think, since thats all
+      // we diff.
       var stateSnapshot = localWorldStateSnapshots[bufidx];
 
       // Locate the data for our local player.
