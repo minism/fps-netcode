@@ -34,16 +34,6 @@ public class Player : IReadonlyPlayer {
       PlayerState = Controller.ToNetworkState(),
     };
   }
-
-  public void CopyFrom(Player other) {
-    PlayerId = other.PlayerId;
-    Metadata = other.Metadata;
-    GameObject = other.GameObject;
-    NetworkObject = other.NetworkObject;
-    Controller = other.Controller;
-    Motor = other.Motor;
-    Peer = other.Peer;
-  }
 }
 
 public interface IReadonlyPlayer {
