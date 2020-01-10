@@ -49,6 +49,7 @@ public class ServerSimulation : BaseSimulation {
   // Process a single world tick update.
   protected override void Tick(float dt) {
     // Apply inputs to each player.
+    unprocessedPlayerIds.Clear();
     unprocessedPlayerIds.UnionWith(playerManager.GetPlayerIds());
     var tickInputs = playerInputProcessor.DequeueInputsForTick(WorldTick);
     foreach (var tickInput in tickInputs) {
