@@ -53,13 +53,10 @@ public class LobbyUI : MonoBehaviour {
   private async Task RefreshServerList() {
     gameServers = await Hotel.HotelClient.Instance.ListGameServers();
     foreach (var server in gameServers) {
-      // Fetch ping info if we don't yet have it.
-      if (!serverLatencies.ContainsKey(server.id)) {
-        clientController.PingServer(server.ResolveIPEndPoint(), (latency) => {
-          serverLatencies[server.id] = latency;
-          UpdateDisplay();
-        });
-      }
+      clientController.PingServer(server.ResolveIPEndPoint(), (latency) => {
+        serverLatencies[server.id] = latency;
+        UpdateDisplay();
+      });
     }
     UpdateDisplay();
   }

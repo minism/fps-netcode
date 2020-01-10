@@ -48,8 +48,7 @@ public class ClientSimulation : BaseSimulation {
 
     // Extrapolate based on latency what our client tick should be.
     float serverLatencySeconds = serverLatencyMs / 1000f;
-    estimatedTickLead = (uint)(serverLatencySeconds / Time.fixedDeltaTime);
-    estimatedTickLead = (estimatedTickLead < 1 ? 1 : estimatedTickLead) + 1;
+    estimatedTickLead = (uint)(serverLatencySeconds * 1.5 / Time.fixedDeltaTime) + 4;
     WorldTick = initialWorldTick + estimatedTickLead;
     Debug.Log($"Initializing client with estimated tick lead of {estimatedTickLead}, ping: {serverLatencyMs}");
   }
@@ -60,15 +59,12 @@ public class ClientSimulation : BaseSimulation {
 
   // Process a single world tick update.
   protected override void Tick(float dt) {
-    var inputs = handler.SampleInputs();
-    if (!inputs.HasValue) {
-      // We can't do any simulating until inputs are ready.
-      return;
-    }
+    var sampled = handler.SampleInputs();
+    PlayerInputs inputs = sampled.HasValue ? sampled.Value : new PlayerInputs();
 
     // Update our snapshot buffers.
     uint bufidx = WorldTick % 1024;
-    localPlayerInputsSnapshots[bufidx] = inputs.Value;
+    localPlayerInputsSnapshots[bufidx] = inputs;
     localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
 
     // Send a command for all inputs not yet acknowledged from the server.
@@ -83,7 +79,7 @@ public class ClientSimulation : BaseSimulation {
     handler.SendInputs(command);
 
     // Prediction - Apply inputs to the associated player controller and simulate the world.
-    localPlayer.Controller.SetPlayerInputs(inputs.Value);
+    localPlayer.Controller.SetPlayerInputs(inputs);
     SimulateWorld(dt);
     ++WorldTick;
   }
