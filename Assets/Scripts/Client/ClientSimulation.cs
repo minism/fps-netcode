@@ -69,6 +69,7 @@ public class ClientSimulation : BaseSimulation {
 
     // Send a command for all inputs not yet acknowledged from the server.
     var unackedInputs = new List<PlayerInputs>();
+    // TODO: lastServerWorldTick is technically not the same as lastAckedInputTick, fix this.
     for (uint tick = lastServerWorldTick; tick <= WorldTick; ++tick) {
       unackedInputs.Add(localPlayerInputsSnapshots[tick % 1024]);
     }
