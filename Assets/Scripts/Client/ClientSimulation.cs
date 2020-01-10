@@ -30,11 +30,8 @@ public class ClientSimulation : BaseSimulation {
   }
   private Handler handler;
 
-  // Exported monitoring statistics.
-  public struct Stats {
-    public int replayedStates;
-  }
-  public Stats stats;
+  // Monitoring statistics.
+  private int replayedStates;
 
   public ClientSimulation(
       Player localPlayer,
@@ -55,8 +52,6 @@ public class ClientSimulation : BaseSimulation {
     estimatedTickLead = (estimatedTickLead < 1 ? 1 : estimatedTickLead) + 1;
     WorldTick = initialWorldTick + estimatedTickLead;
     Debug.Log($"Initializing client with estimated tick lead of {estimatedTickLead}, ping: {serverLatencyMs}");
-
-    stats = new Stats();
   }
 
   public void EnqueueWorldState(NetCommand.WorldState state) {
@@ -133,7 +128,7 @@ public class ClientSimulation : BaseSimulation {
       if (error.sqrMagnitude > 0.0001f) {
         if (!headState) {
           Debug.Log($"Rewind tick#{incomingState.WorldTick}, Error: {error.magnitude}, Range: {WorldTick - incomingState.WorldTick}");
-          stats.replayedStates++;
+          replayedStates++;
         }
 
         // Rewind local player state to the correct state from the server.
@@ -160,7 +155,7 @@ public class ClientSimulation : BaseSimulation {
     }
 
     // Show some debug monitoring values.
-    DebugUI.ShowValue("cl rewinds", stats.replayedStates);
+    DebugUI.ShowValue("cl rewinds", replayedStates);
     DebugUI.ShowValue("cl tick", WorldTick);
     DebugUI.ShowValue("cl est. tick lead", estimatedTickLead);
     DebugUI.ShowValue("cl rec. tick lead", WorldTick - lastServerWorldTick);
