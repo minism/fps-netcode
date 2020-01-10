@@ -17,9 +17,7 @@ public class PlayerInputProcessor {
   private Dictionary<byte, TickInput> latestPlayerInput = new Dictionary<byte, TickInput>();
 
   // Monitoring.
-  private const int QUEUE_SIZE_AVERAGE_WINDOW = 10;
-  private int[] playerInputQueueSizes = new int[QUEUE_SIZE_AVERAGE_WINDOW];
-  private int playerInputQueueSizesIdx;
+  private Ice.MovingAverage averageInputQueueSize = new Ice.MovingAverage(10);
   private int staleInputs;
 
   public void LogQueueStatsForPlayer(Player player, uint worldTick) {
@@ -30,11 +28,8 @@ public class PlayerInputProcessor {
         worldTick++;
       }
     }
-    // TODO: Moving average should go into a delegate.
-    playerInputQueueSizesIdx = (playerInputQueueSizesIdx + 1) % QUEUE_SIZE_AVERAGE_WINDOW;
-    playerInputQueueSizes[playerInputQueueSizesIdx] = count;
-    var average = playerInputQueueSizes.Sum() / playerInputQueueSizes.Length;
-    DebugUI.ShowValue("sv avg input queue", average);
+    averageInputQueueSize.Push(count);
+    DebugUI.ShowValue("sv avg input queue", averageInputQueueSize.Average());
   }
 
   public bool TryGetLatestInput(byte playerId, out TickInput ret) {
