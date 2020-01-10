@@ -41,7 +41,7 @@ public class ClientSimulation : BaseSimulation {
       PlayerManager playerManager,
       NetworkObjectManager networkObjectManager,
       Handler handler,
-      float serverLatencySeconds,
+      int serverLatencyMs,
       uint initialWorldTick) : base(playerManager, networkObjectManager) {
     this.localPlayer = localPlayer;
     this.handler = handler;
@@ -50,10 +50,11 @@ public class ClientSimulation : BaseSimulation {
     lastServerWorldTick = initialWorldTick;
 
     // Extrapolate based on latency what our client tick should be.
+    float serverLatencySeconds = serverLatencyMs / 1000f;
     estimatedTickLead = (uint)(serverLatencySeconds / Time.fixedDeltaTime);
     estimatedTickLead = (estimatedTickLead < 1 ? 1 : estimatedTickLead) + 1;
     WorldTick = initialWorldTick + estimatedTickLead;
-    Debug.Log($"Initializing client with estimated tick lead of {estimatedTickLead}, ping: {serverLatencySeconds}");
+    Debug.Log($"Initializing client with estimated tick lead of {estimatedTickLead}, ping: {serverLatencyMs}");
 
     stats = new Stats();
   }

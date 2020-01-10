@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using LiteNetLib;
 using UnityEngine.SceneManagement;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using System.Net;
 using KinematicCharacterController;
 
 /// Base component for primary logic and dependencies needed by both client and server.
@@ -45,6 +46,10 @@ public abstract class BaseLogicController : MonoBehaviour {
 
   private void OnApplicationQuit() {
     TearDownGameScene();
+  }
+
+  public void PingServer(IPEndPoint endpoint, Action<int> callback) {
+    netChannel.PingServer(endpoint, callback);
   }
 
   protected void LoadGameScene() {

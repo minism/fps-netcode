@@ -51,10 +51,10 @@ public class Bootstrapper : MonoBehaviour {
     var playerSetupData = new PlayerSetupData {
       Name = "Player",
     };
-    clientLogicController.StartClient("localhost", DEFAULT_PORT, playerSetupData);
+    clientLogicController.StartClient("localhost", DEFAULT_PORT, 0, playerSetupData);
   }
 
-  public void StartGameAsClient(Hotel.GameServer serverToJoin) {
+  public void StartGameAsClient(Hotel.GameServer serverToJoin, int initialLatency) {
     Debug.Log($"Joining server {serverToJoin.host}:{serverToJoin.port}...");
     serverLogicController.gameObject.SetActive(false);
 
@@ -62,6 +62,7 @@ public class Bootstrapper : MonoBehaviour {
     var playerSetupData = new PlayerSetupData {
       Name = "Player",
     };
-    clientLogicController.StartClient(serverToJoin.host, serverToJoin.port, playerSetupData);
+    clientLogicController.StartClient(
+        serverToJoin.host, serverToJoin.port, initialLatency, playerSetupData);
   }
 }

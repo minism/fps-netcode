@@ -13,6 +13,17 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   // Delegate that manages the world simulation, prediction, reconciliation.
   private ClientSimulation simulation;
 
+  // The most accurate server latency estimate to use for initialization.
+  private int _initialServerLatency;
+  private int bestServerLatency {
+    get {
+      if (netChannel.PeerLatency.ContainsKey(serverPeer)) {
+        return netChannel.PeerLatency[serverPeer];
+      }
+      return _initialServerLatency;
+    }
+  }
+
   protected override void Awake() {
     base.Awake();
 
@@ -32,9 +43,11 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     }
   }
 
-  public void StartClient(string host, int port, PlayerSetupData playerSetupData) {
+  public void StartClient(
+    string host, int port, int initialServerLatency, PlayerSetupData playerSetupData) {
     Debug.Log($"Connecting to host {host}:{port}...");
     this.playerSetupData = playerSetupData;
+    this._initialServerLatency = initialServerLatency;
     netChannel.ConnectToServer(host, port);
     LoadGameScene();
   }
@@ -97,7 +110,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
     // Initialize simulation.
     simulation = new ClientSimulation(
-        localPlayer, playerManager, networkObjectManager, this, 0.1f, cmd.WorldTick);
+        localPlayer, playerManager, networkObjectManager, this, bestServerLatency, cmd.WorldTick);
 
     // Create player objects for existing clients.
     foreach (var state in cmd.ExistingPlayerStates) {

@@ -13,6 +13,10 @@ public class NetChannel : INetEventListener, INetChannel {
   // TODO: This key should be obfuscated in the build somehow?
   private static string CONNECTION_KEY = "498j98dfa9sd8fh";
 
+  // Connectionless message headers.
+  private static byte PING_HEADER = 0x77;
+  private static byte PONG_HEADER = 0x78;
+
   // Listenable events.
   public Action<NetPeer> PeerConnectedHandler { get; set; }
   public Action<NetPeer, DisconnectInfo> PeerDisconnectedHandler { get; set; }
@@ -27,9 +31,17 @@ public class NetChannel : INetEventListener, INetChannel {
   private NetDataWriter netDataWriter;
   private NetMonitor netMonitor;
 
+  // Separate net manager only used for ping/pong.
+  private PingHelper pingHelper = new PingHelper();
+
+  // Callbacks for connectionless pings.
+  private Dictionary<IPEndPoint, Action<int>> unconnectedPingCallbacks =
+      new Dictionary<IPEndPoint, Action<int>>();
+
   public NetChannel(DebugNetworkSettings debugNetworkSettings) {
     netManager = new NetManager(this) {
       AutoRecycle = true,
+      UnconnectedMessagesEnabled = true, // For ping/pong
       SimulatePacketLoss = debugNetworkSettings.SimulatePacketLoss,
       SimulateLatency = debugNetworkSettings.SimulateLatency,
       SimulationPacketLossChance = debugNetworkSettings.PacketLossChance,
@@ -53,6 +65,9 @@ public class NetChannel : INetEventListener, INetChannel {
     netPacketProcessor.RegisterNestedType<PlayerState>();
     netPacketProcessor.RegisterNestedType<NetworkObjectState>();
     netPacketProcessor.RegisterNestedType<PlayerInputs>();
+
+    // The client network manager is started immediately for unconnected pings.
+    netManager.Start();
   }
 
   /// Update should be called every frame.
@@ -67,26 +82,33 @@ public class NetChannel : INetEventListener, INetChannel {
 
   /// Attempt to connect to an endpoint, the channel will act as a client.
   public void ConnectToServer(string host, int port) {
-    if (netManager.IsRunning) {
-      Debug.LogWarning("Network manager already running, doing nothing.");
-      return;
-    }
-    netManager.Start();
+    //if (netManager.IsRunning) {
+    //  Debug.LogWarning("Network manager already running, doing nothing.");
+    //  return;
+    //}
     netManager.Connect(host, port, CONNECTION_KEY);
   }
 
 	/// Starts listening for connections, the channel will act as as server.
 	public void StartServer(int port) {
-    if (netManager.IsRunning) {
-      Debug.LogWarning("Network manager already running, doing nothing.");
-      return;
-    }
+    //if (netManager.IsRunning) {
+    //  Debug.LogWarning("Network manager already running, doing nothing.");
+    //  return;
+    //}
     acceptConnections = true;
+    netManager.Stop();
     netManager.Start(port);
   }
 
   public void SetNetMonitor(NetMonitor netMonitor) {
     this.netMonitor = netMonitor;
+  }
+
+  public void PingServer(IPEndPoint endpoint, Action<int> callback) {
+    // Send a simple unconnected message to get latency.
+    Debug.Log($"Sending ping message to {endpoint}");
+    pingHelper.AddListener(endpoint, callback);
+    netManager.SendUnconnectedMessage(new byte[] { PING_HEADER }, endpoint);
   }
 
   /** INetChannel methods */
@@ -158,7 +180,16 @@ public class NetChannel : INetEventListener, INetChannel {
   }
 
   public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType) {
-    // NOP
+    var header = reader.GetByte();
+    if (header == PING_HEADER) {
+      Debug.Log($"Received PING from {remoteEndPoint}");
+      netManager.SendUnconnectedMessage(new byte[] { PONG_HEADER }, remoteEndPoint);
+    } else if (header == PONG_HEADER) {
+      Debug.Log($"Received PONG from {remoteEndPoint}");
+      pingHelper.ReceivePong(remoteEndPoint);
+    } else {
+      Debug.LogWarning("Got unexpected unconnected message. Spam/attack?");
+    }
   }
 
   public void OnNetworkError(IPEndPoint endPoint, SocketError socketError) {
