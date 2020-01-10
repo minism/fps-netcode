@@ -51,6 +51,7 @@ public class LobbyUI : MonoBehaviour {
   }
 
   private async Task RefreshServerList() {
+    ClearDisplay();
     gameServers = await Hotel.HotelClient.Instance.ListGameServers();
     foreach (var server in gameServers) {
       clientController.PingServer(server.ResolveIPEndPoint(), (latency) => {
@@ -61,12 +62,12 @@ public class LobbyUI : MonoBehaviour {
     UpdateDisplay();
   }
   
-  private void CleanupJoinButtons() {
+  private void ClearDisplay() {
     Ice.ObjectUtil.DestroyChildren(joinButtonContainer);
   }
 
   private void UpdateDisplay() {
-    CleanupJoinButtons();
+    ClearDisplay();
     foreach (var server in gameServers) {
       var obj = Instantiate(joinButtonPrototype, joinButtonContainer);
       obj.SetActive(true);
