@@ -7,7 +7,7 @@ using NetCommand;
 public class ClientLogicController : BaseLogicController, ClientSimulation.Handler {
   private NetPeer serverPeer;
   private ClientPlayerInput localPlayerInput;
-  private Player localPlayer = new Player();
+  private Player localPlayer;
   private PlayerSetupData playerSetupData;
 
   // Delegate that manages the world simulation, prediction, reconciliation.
@@ -91,9 +91,8 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     Debug.Log("Server join successful!");
 
     // Create our player object and attach client-specific components.
-    // TODO: Copy is not needed here anymore.
     Debug.Log("Local player network ID is " + cmd.YourPlayerState.NetworkObjectState.NetworkId);
-    localPlayer.CopyFrom(AddPlayerFromInitialServerState(cmd.YourPlayerState));
+    localPlayer = AddPlayerFromInitialServerState(cmd.YourPlayerState);
     InitializeLocalPlayer();
 
     // Initialize simulation.
