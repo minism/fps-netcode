@@ -75,7 +75,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
   private Player CreateServerPlayer(byte playerId, PlayerMetadata metadata) {
     // Setup the serverside object for the player.
     var position = Vector3.zero;
-    var playerNetworkObject = networkObjectManager.CreatePlayerGameObject(0, position);
+    var playerNetworkObject = networkObjectManager.CreatePlayerGameObject(0, position, false);
     var player = playerManager.AddPlayer(playerId, metadata, playerNetworkObject.gameObject);
 
     // Update kinematic caches.

@@ -59,10 +59,10 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     }
   }
 
-  private Player AddPlayerFromInitialServerState(InitialPlayerState initialState) {
+  private Player AddPlayerFromInitialServerState(InitialPlayerState initialState, bool isRemote) {
     var playerObject = networkObjectManager.CreatePlayerGameObject(
         initialState.NetworkObjectState.NetworkId,
-        initialState.PlayerState.Position).gameObject;
+        initialState.PlayerState.Position, isRemote).gameObject;
     var player = playerManager.AddPlayer(
         initialState.PlayerId, initialState.Metadata, playerObject);
 
@@ -105,7 +105,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
     // Create our player object and attach client-specific components.
     Debug.Log("Local player network ID is " + cmd.YourPlayerState.NetworkObjectState.NetworkId);
-    localPlayer = AddPlayerFromInitialServerState(cmd.YourPlayerState);
+    localPlayer = AddPlayerFromInitialServerState(cmd.YourPlayerState, false);
     InitializeLocalPlayer();
 
     // Initialize simulation.
@@ -114,13 +114,13 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
     // Create player objects for existing clients.
     foreach (var state in cmd.ExistingPlayerStates) {
-      AddPlayerFromInitialServerState(state);
+      AddPlayerFromInitialServerState(state, true);
     }
   }
 
   private void HandleOtherPlayerJoined(NetCommand.PlayerJoined cmd) {
     Debug.Log($"{cmd.PlayerState.Metadata.Name} joined the server.");
-    AddPlayerFromInitialServerState(cmd.PlayerState);
+    AddPlayerFromInitialServerState(cmd.PlayerState, true);
   }
 
   private void HandleOtherPlayerLeft(NetCommand.PlayerLeft cmd) {

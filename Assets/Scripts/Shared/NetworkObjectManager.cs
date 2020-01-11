@@ -45,10 +45,14 @@ public class NetworkObjectManager : MonoBehaviour {
     this.isAuthoritative = isAuthoritative;
   }
 
-  public NetworkObject CreatePlayerGameObject(ushort networkId, Vector3 position) {
+  public NetworkObject CreatePlayerGameObject(ushort networkId, Vector3 position, bool isRemote) {
     networkId = EnsureNetworkId(networkId);
-    position = new Vector3(10, 0, 10);
     var obj = Instantiate(basePlayerPrefab, position, Quaternion.identity);
+    if (isRemote) {
+      // TODO: This is not the correct way to handle this.
+      obj.gameObject.GetComponent<CPMPlayerController>();
+      obj.gameObject.AddComponent<RemotePlayerController>();
+    }
     obj.NetworkId = networkId;
     activeObjects[networkId] = obj;
     return obj;
