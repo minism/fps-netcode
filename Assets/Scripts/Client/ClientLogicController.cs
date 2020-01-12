@@ -32,6 +32,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     netChannel.Subscribe<NetCommand.PlayerJoined>(HandleOtherPlayerJoined);
     netChannel.Subscribe<NetCommand.PlayerLeft>(HandleOtherPlayerLeft);
     netChannel.Subscribe<NetCommand.WorldState>(HandleWorldState);
+    netChannel.Subscribe<NetCommand.AdjustSimulation>(HandleAdjustSimulation);
   }
 
   protected override void Update() {
@@ -131,6 +132,12 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
     // Update kinematic caches.
     activeKinematicMotors.Remove(player.Motor);
+  }
+
+  private void HandleAdjustSimulation(NetCommand.AdjustSimulation cmd) {
+    if (simulation != null) {
+      simulation.Adjust(cmd.ActualTickLead, cmd.TickOffset);
+    }
   }
 
   protected override void OnPeerConnected(NetPeer peer) {

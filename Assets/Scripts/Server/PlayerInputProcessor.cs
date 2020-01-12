@@ -78,7 +78,6 @@ public class PlayerInputProcessor {
       }
     } else {
       staleInputs++;
-      Debug.Log($"Discarding player inputs which are too old ({serverWorldTick - maxTick} ticks behind)");
     }
   }
 }

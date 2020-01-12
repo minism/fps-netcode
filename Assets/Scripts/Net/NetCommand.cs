@@ -43,6 +43,16 @@ namespace NetCommand {
     public PlayerState[] PlayerStates { get; set; }
   }
 
+  // Inform the client that they are running too far ahead or behind, and to adjust.
+  public class AdjustSimulation {
+    // How far the client is leading the server.
+    // A value of zero indicates means we're actually dropping (and replaying) input.
+    public int ActualTickLead { get; set; }
+
+    // The amount of ticks the client should offset their simulation by.
+    public int TickOffset { get; set; }
+  }
+
   /// Metadata about each command.
   public static class Metadata {
 
@@ -53,6 +63,7 @@ namespace NetCommand {
       { typeof(JoinAccepted), DeliveryMethod.ReliableOrdered },
       { typeof(PlayerJoined), DeliveryMethod.ReliableOrdered },
       { typeof(PlayerLeft), DeliveryMethod.ReliableOrdered },
+      { typeof(AdjustSimulation), DeliveryMethod.ReliableOrdered },
 
       // Input and world state can be unreliable since it is sent every frame, but we use
       // sequenced so that older packets are simply dropped since we don't care about them anymore.

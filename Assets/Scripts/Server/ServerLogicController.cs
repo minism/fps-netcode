@@ -72,11 +72,12 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
   }
 
   /// Setup all server authoritative state for a new player.
-  private Player CreateServerPlayer(byte playerId, PlayerMetadata metadata) {
+  private Player CreateServerPlayer(NetPeer peer, PlayerMetadata metadata) {
     // Setup the serverside object for the player.
     var position = Vector3.zero;
     var playerNetworkObject = networkObjectManager.CreatePlayerGameObject(0, position, false);
-    var player = playerManager.AddPlayer(playerId, metadata, playerNetworkObject.gameObject);
+    var player = playerManager.AddPlayer((byte)peer.Id, metadata, playerNetworkObject.gameObject);
+    player.Peer = peer;
 
     // Update kinematic caches.
     activeKinematicMotors.Add(player.Motor);
@@ -109,6 +110,13 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     netChannel.BroadcastCommand(state);
   }
 
+  public void AdjustPlayerSimulation(Player player, int actualTickLead, int tickOffset) {
+    netChannel.SendCommand(player.Peer, new NetCommand.AdjustSimulation {
+      ActualTickLead = actualTickLead,
+      TickOffset = tickOffset,
+    });
+  }
+
   /** Network command handling */
 
   private void HandleJoinRequest(NetCommand.JoinRequest cmd, NetPeer peer) {
@@ -121,8 +129,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
 
     // Initialize the server player model - Peer ID is used as player ID always.
     var existingPlayers = playerManager.GetPlayers();
-    var playerId = (byte)peer.Id;
-    var player = CreateServerPlayer(playerId, metadata);
+    var player = CreateServerPlayer(peer, metadata);
 
     // Transmit existing player state to new player and new player state to
     // existing clients. Separate RPCs with the same payload are used so that

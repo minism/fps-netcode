@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -18,9 +19,14 @@ public class ServerSimulation : BaseSimulation {
   // Synchronization states for players.
   private Dictionary<byte, bool> playerSyncState = new Dictionary<byte, bool>();
 
+  // Timestamps for adjustment commands.
+  private Dictionary<byte, DateTime> playerLastAdjustmentTimes =
+      new Dictionary<byte, DateTime>();
+
   // I/O interface for world states.
   public interface Handler {
     void BroadcastWorldState(NetCommand.WorldState state);
+    void AdjustPlayerSimulation(Player player, int actualTickLead, int tickOffset);
   }
   private Handler handler;
 
@@ -49,13 +55,19 @@ public class ServerSimulation : BaseSimulation {
   }
 
   public void EnqueuePlayerInput(WithPeer<NetCommand.PlayerInput> input) {
-    var player = playerManager.GetPlayerForPeer(input.Peer);
+    Player player;
+    try {
+      player = playerManager.GetPlayerForPeer(input.Peer);
+    } catch (KeyNotFoundException) {
+      return;  // The player already disconnected, so just ignore this packet.
+    }
     playerInputProcessor.EnqueueInput(input.Value, player, WorldTick);
   }
 
-
   // Process a single world tick update.
   protected override void Tick(float dt) {
+    var now = DateTime.Now;
+
     // Apply inputs to each player.
     unprocessedPlayerIds.Clear();
     unprocessedPlayerIds.UnionWith(playerManager.GetPlayerIds());
@@ -77,20 +89,27 @@ public class ServerSimulation : BaseSimulation {
         continue;
       }
 
+      var player = playerManager.GetPlayer(playerId);
       DebugUI.ShowValue("sv missed inputs", ++missedInputs);
       TickInput latestInput;
       if (playerInputProcessor.TryGetLatestInput(playerId, out latestInput)) {
-        playerManager.GetPlayer(playerId).Controller.SetPlayerInputs(latestInput.Inputs);
+        player.Controller.SetPlayerInputs(latestInput.Inputs);
       } else {
         Debug.LogWarning($"No inputs for player #{playerId} and no history to replay.");
       }
-    }
 
-    // TODO: Check for missing inputs and notify player here.
+      // Tell the client it needs to increase its tick lead.
+      // TODO: Come up with a smarter mechanism for determining this value.
+      if (!playerLastAdjustmentTimes.ContainsKey(playerId) ||
+          now - playerLastAdjustmentTimes[playerId] > Settings.MinClientAdjustmentInterval) {
+        playerLastAdjustmentTimes[playerId] = now;
+        handler.AdjustPlayerSimulation(player, 0, 5);
+      }
+    }
 
     // Advance the world simulation.
     SimulateWorld(dt);
-    if (Random.value < debugPhysicsErrorChance) {
+    if (UnityEngine.Random.value < debugPhysicsErrorChance) {
       Debug.Log("Injecting random physics error.");
       playerManager.GetPlayers().ForEach(
           p => p.GameObject.transform.Translate(new Vector3(1, 0, 0)));

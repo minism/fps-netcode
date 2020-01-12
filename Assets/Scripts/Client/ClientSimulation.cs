@@ -20,7 +20,6 @@ public class ClientSimulation : BaseSimulation {
   private uint lastServerWorldTick = 0;
 
   // The estimated number of ticks we're running ahead of the server.
-  // TODO: Implement a system for adjusting this on-the-fly, overwatch style.
   private uint estimatedTickLead;
 
   // I/O interface for player inputs.
@@ -55,6 +54,21 @@ public class ClientSimulation : BaseSimulation {
 
   public void EnqueueWorldState(NetCommand.WorldState state) {
     worldStateQueue.Enqueue(state);
+  }
+
+  // Adjust the simulation to a new tick offset from the server.
+  public void Adjust(int actualTickLead, int tickOffset) {
+    Debug.Log($"Adjusting client simulation by {tickOffset}");
+
+    // Update our estimate, this is only used for monitoring though.
+    estimatedTickLead = (uint) (actualTickLead + tickOffset);
+
+    // TODO: This should smoothly transition over time.
+    if (tickOffset >= 0) {
+      WorldTick += (uint)tickOffset;
+    } else {
+      WorldTick -= (uint)tickOffset;
+    }
   }
 
   // Process a single world tick update.
