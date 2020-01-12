@@ -79,9 +79,6 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     var player = playerManager.AddPlayer((byte)peer.Id, metadata, playerNetworkObject.gameObject);
     player.Peer = peer;
 
-    // Update kinematic caches.
-    activeKinematicMotors.Add(player.Motor);
-
     return player;
   }
 
@@ -95,9 +92,6 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     // Update managers.
     networkObjectManager.DestroyNetworkObject(player.NetworkObject);
     playerManager.RemovePlayer(player.PlayerId);
-
-    // Update kinematic caches.
-    activeKinematicMotors.Remove(player.Motor);
 
     // Notify peers.
     netChannel.BroadcastCommand(new NetCommand.PlayerLeft {

@@ -1,6 +1,5 @@
 using UnityEngine;
 using LiteNetLib;
-using KinematicCharacterController;
 using NetCommand;
 
 /// Primary logic controller for managing client game state.
@@ -67,9 +66,6 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     var player = playerManager.AddPlayer(
         initialState.PlayerId, initialState.Metadata, playerObject);
 
-    // Update kinematic caches.
-    activeKinematicMotors.Add(player.Motor);
-
     return player;
   }
 
@@ -129,9 +125,6 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     Debug.Log($"{player.Metadata.Name} left the server.");
     networkObjectManager.DestroyNetworkObject(player.NetworkObject);
     playerManager.RemovePlayer(player.PlayerId);
-
-    // Update kinematic caches.
-    activeKinematicMotors.Remove(player.Motor);
   }
 
   private void HandleAdjustSimulation(NetCommand.AdjustSimulation cmd) {

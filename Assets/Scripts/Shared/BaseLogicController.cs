@@ -17,10 +17,6 @@ public abstract class BaseLogicController : MonoBehaviour {
   protected NetChannel netChannel;
   protected PlayerManager playerManager;
 
-  // Cached lists for keeping track of kinematic objects in the scene.
-  protected List<KinematicCharacterMotor> activeKinematicMotors = new List<KinematicCharacterMotor>();
-  protected List<PhysicsMover> activePhysicsMovers = new List<PhysicsMover>();
-
   protected virtual void Awake() {
     networkObjectManager = GetComponent<NetworkObjectManager>();
     playerManager = new PlayerManager();
