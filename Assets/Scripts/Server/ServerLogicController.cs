@@ -88,6 +88,9 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
   private void DestroyServerPlayer(Player player) {
     Debug.Log($"{player.Metadata.Name} left the server.");
 
+    // Let the simulation clear any state for the player.
+    simulation.ClearPlayerState(player);
+
     // Update managers.
     networkObjectManager.DestroyNetworkObject(player.NetworkObject);
     playerManager.RemovePlayer(player.PlayerId);

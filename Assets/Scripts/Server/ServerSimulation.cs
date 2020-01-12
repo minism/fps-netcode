@@ -15,6 +15,9 @@ public class ServerSimulation : BaseSimulation {
   // Reusable hash set for players whose input we've checked each frame.
   private HashSet<byte> unprocessedPlayerIds = new HashSet<byte>();
 
+  // Synchronization states for players.
+  private Dictionary<byte, bool> playerSyncState = new Dictionary<byte, bool>();
+
   // I/O interface for world states.
   public interface Handler {
     void BroadcastWorldState(NetCommand.WorldState state);
@@ -41,10 +44,15 @@ public class ServerSimulation : BaseSimulation {
     worldStateBroadcastTimer.Start();
   }
 
+  public void ClearPlayerState(Player player) {
+    playerSyncState[player.PlayerId] = false;
+  }
+
   public void EnqueuePlayerInput(WithPeer<NetCommand.PlayerInput> input) {
     var player = playerManager.GetPlayerForPeer(input.Peer);
     playerInputProcessor.EnqueueInput(input.Value, player, WorldTick);
   }
+
 
   // Process a single world tick update.
   protected override void Tick(float dt) {
@@ -56,11 +64,19 @@ public class ServerSimulation : BaseSimulation {
       var player = tickInput.Player;
       player.Controller.SetPlayerInputs(tickInput.Inputs);
       unprocessedPlayerIds.Remove(player.PlayerId);
+
+      // Mark the player as synchronized.
+      playerSyncState[player.PlayerId] = true;
     }
 
     // Any remaining players without inputs have their latest input command repeated,
     // but we notify them that they need to fast-forward their simulation to improve buffering.
     foreach (var playerId in unprocessedPlayerIds) {
+      // If the player is not yet synchronized, this isn't an error.
+      if (!playerSyncState.ContainsKey(playerId) || !playerSyncState[playerId]) {
+        continue;
+      }
+
       DebugUI.ShowValue("sv missed inputs", ++missedInputs);
       TickInput latestInput;
       if (playerInputProcessor.TryGetLatestInput(playerId, out latestInput)) {
