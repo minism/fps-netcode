@@ -42,11 +42,11 @@ public class PlayerSimulationAdjuster {
     if (maxTick >= serverWorldTick) {
       uint lead = maxTick - serverWorldTick;
       DebugUI.ShowValue("deleteme", lead);
-      if (lead < Settings.ClientIdealTickLeadLimit) {
+      if (lead < Settings.ClientIdealBufferedInputLimit) {
         lastIdealInputTimes[player.PlayerId] = now;
       } else {
         // If the client has sustained a lead which is too far, it needs to decrease its lead.
-        if (now - lastIdealInputTimes[player.PlayerId] > Settings.ClientTicksTooFarInterval) {
+        if (now - lastIdealInputTimes[player.PlayerId] > Settings.ClientBufferTooHighInterval) {
           MaybeAdjust(player, (int)lead, -(int)lead/3);
         }
       }

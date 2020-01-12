@@ -9,6 +9,6 @@ public static class Settings {
 
 	// Realtime adjustment settings.
 	public static TimeSpan MinClientAdjustmentInterval = TimeSpan.FromSeconds(1);
-	public static TimeSpan ClientTicksTooFarInterval = TimeSpan.FromSeconds(5);
-	public static uint ClientIdealTickLeadLimit = 6;
+	public static TimeSpan ClientBufferTooHighInterval = TimeSpan.FromSeconds(5);
+	public static uint ClientIdealBufferedInputLimit = 3;
 }

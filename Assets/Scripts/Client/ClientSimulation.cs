@@ -61,7 +61,7 @@ public class ClientSimulation : BaseSimulation {
     Debug.Log($"Adjusting client simulation by {tickOffset}");
 
     // Update our estimate, this is only used for monitoring though.
-    estimatedTickLead = (uint) (actualTickLead + tickOffset);
+    //estimatedTickLead = (uint) (actualTickLead + tickOffset);
 
     // TODO: This should smoothly transition over time.
     if (tickOffset >= 0) {
