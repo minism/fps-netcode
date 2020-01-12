@@ -83,72 +83,16 @@ public class ClientSimulation : BaseSimulation {
     localPlayer.Controller.SetPlayerInputs(inputs);
     SimulateWorld(dt);
     ++WorldTick;
+
+    // Process a world state frame from the server if we have it.
+    ProcessServerWorldState();
   }
 
   protected override void PostUpdate() {
     // Step through the incoming world state queue.
     // TODO: This is going to need to be structured pretty differently with other players.
     while (worldStateQueue.Count > 0) {
-      var incomingState = worldStateQueue.Dequeue();
-      lastServerWorldTick = incomingState.WorldTick;
-
-      bool headState = false;
-      if (incomingState.WorldTick >= WorldTick) {
-        headState = true;
-      }
-      if (incomingState.WorldTick > WorldTick) {
-        Debug.LogError("Got a FUTURE tick somehow???");
-      }
-
-      // Lookup the historical state for the world tick we got.
-      uint bufidx = incomingState.WorldTick % 1024;
-      var stateSnapshot = localPlayerStateSnapshots[bufidx];
-
-      // Locate the data for our local player.
-      PlayerState incomingLocalPlayerState = new PlayerState();
-      foreach (var playerState in incomingState.PlayerStates) {
-        if (playerState.NetworkId == localPlayer.NetworkObject.NetworkId) {
-          incomingLocalPlayerState = playerState;
-        } else {
-          // Apply the state immediately to other players.
-          // TODO: Is this right even though this is a historical tick?  Interp should happen here.
-          var obj = networkObjectManager.GetObject(playerState.NetworkId);
-          obj.GetComponent<IPlayerController>().ApplyNetworkState(playerState);
-        }
-      }
-      if (default(PlayerState).Equals(incomingLocalPlayerState)) {
-        Debug.LogError("No local player state found!");
-      }
-
-      // Compare the historical state to see how off it was.
-      var error = incomingLocalPlayerState.Position - stateSnapshot.Position;
-      if (error.sqrMagnitude > 0.0001f) {
-        if (!headState) {
-          Debug.Log($"Rewind tick#{incomingState.WorldTick}, Error: {error.magnitude}, Range: {WorldTick - incomingState.WorldTick}");
-          replayedStates++;
-        }
-
-        // Rewind local player state to the correct state from the server.
-        // TODO: Cleanup a lot of this when its merged with how rockets are spawned.
-        localPlayer.Controller.ApplyNetworkState(incomingLocalPlayerState);
-
-        // Loop through and replay all captured input snapshots up to the current tick.
-        uint replayTick = incomingState.WorldTick;
-        while (replayTick < WorldTick) {
-          // Grab the historical input.
-          bufidx = replayTick % 1024;
-          var inputSnapshot = localPlayerInputsSnapshots[bufidx];
-
-          // Rewrite the historical sate snapshot.
-          localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
-
-          // Apply inputs to the associated player controller and simulate the world.
-          localPlayer.Controller.SetPlayerInputs(inputSnapshot);
-          SimulateWorld(Time.fixedDeltaTime);
-
-          ++replayTick;
-        }
-      }
+      ProcessServerWorldState();
     }
 
     // Show some debug monitoring values.
@@ -156,5 +100,72 @@ public class ClientSimulation : BaseSimulation {
     DebugUI.ShowValue("cl tick", WorldTick);
     DebugUI.ShowValue("cl est. tick lead", estimatedTickLead);
     DebugUI.ShowValue("cl rec. tick lead", WorldTick - lastServerWorldTick);
+  }
+
+  private void ProcessServerWorldState() {
+    if (worldStateQueue.Count < 1) {
+      return;
+    }
+
+    var incomingState = worldStateQueue.Dequeue();
+    lastServerWorldTick = incomingState.WorldTick;
+
+    bool headState = false;
+    if (incomingState.WorldTick >= WorldTick) {
+      headState = true;
+    }
+    if (incomingState.WorldTick > WorldTick) {
+      Debug.LogError("Got a FUTURE tick somehow???");
+    }
+
+    // Lookup the historical state for the world tick we got.
+    uint bufidx = incomingState.WorldTick % 1024;
+    var stateSnapshot = localPlayerStateSnapshots[bufidx];
+
+    // Locate the data for our local player.
+    PlayerState incomingLocalPlayerState = new PlayerState();
+    foreach (var playerState in incomingState.PlayerStates) {
+      if (playerState.NetworkId == localPlayer.NetworkObject.NetworkId) {
+        incomingLocalPlayerState = playerState;
+      } else {
+        // Apply the state immediately to other players.
+        // TODO: Is this right even though this is a historical tick?  Interp should happen here.
+        var obj = networkObjectManager.GetObject(playerState.NetworkId);
+        obj.GetComponent<IPlayerController>().ApplyNetworkState(playerState);
+      }
+    }
+    if (default(PlayerState).Equals(incomingLocalPlayerState)) {
+      Debug.LogError("No local player state found!");
+    }
+
+    // Compare the historical state to see how off it was.
+    var error = incomingLocalPlayerState.Position - stateSnapshot.Position;
+    if (error.sqrMagnitude > 0.0001f) {
+      if (!headState) {
+        Debug.Log($"Rewind tick#{incomingState.WorldTick}, Error: {error.magnitude}, Range: {WorldTick - incomingState.WorldTick}");
+        replayedStates++;
+      }
+
+      // Rewind local player state to the correct state from the server.
+      // TODO: Cleanup a lot of this when its merged with how rockets are spawned.
+      localPlayer.Controller.ApplyNetworkState(incomingLocalPlayerState);
+
+      // Loop through and replay all captured input snapshots up to the current tick.
+      uint replayTick = incomingState.WorldTick;
+      while (replayTick < WorldTick) {
+        // Grab the historical input.
+        bufidx = replayTick % 1024;
+        var inputSnapshot = localPlayerInputsSnapshots[bufidx];
+
+        // Rewrite the historical sate snapshot.
+        localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
+
+        // Apply inputs to the associated player controller and simulate the world.
+        localPlayer.Controller.SetPlayerInputs(inputSnapshot);
+        SimulateWorld(Time.fixedDeltaTime);
+
+        ++replayTick;
+      }
+    }
   }
 }

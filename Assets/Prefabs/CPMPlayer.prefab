@@ -89,7 +89,7 @@ MonoBehaviour:
   jumpSpeed: 8
   holdJumpToBhop: 0
   playerHead: {fileID: 1860611757}
-  playerHeadYOffset: 0.6
+  playerHeadYOffset: 1.5
   xMouseSensitivity: 200
   yMouseSensitivity: 200
 --- !u!1001 &2629139139142309991

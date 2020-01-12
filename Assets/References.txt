@@ -4,3 +4,4 @@ https://gafferongames.com/tags/networking/
 http://fabiensanglard.net/quake3/network.php
 https://docs.unrealengine.com/udk/Three/NetworkingOverview.html
 https://github.com/Saishy/TinyBirdNet-Unity
+https://www.gabrielgambetta.com/client-side-prediction-server-reconciliation.html

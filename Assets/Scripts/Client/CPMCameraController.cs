@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CPMCameraController : MonoBehaviour {
-  public Transform PlayerHead { get; set; }
+  public Transform PlayerHead;
 
   private void Update() {
     if (PlayerHead == null) {

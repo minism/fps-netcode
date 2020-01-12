@@ -8,12 +8,10 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
   private Vector3 targetPosition;
   private Quaternion targetRotation;
 
-  public void Update() {
-    Debug.Log($"remote player vel {velocity}");
-    // TODO: Real interp should go here.
-    transform.position = targetPosition;
-    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 0.1f);
-  }
+  // Interpolate between incoming server states.
+  private Queue<PlayerState> stateQueue = new Queue<PlayerState>();
+  private PlayerState? lastState = null;
+  private float stateTimer = 0;
 
   public Transform GetPlayerHeadTransform() {
     return transform;
@@ -22,7 +20,30 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
   public void SetPlayerInputs(PlayerInputs inputs) { }
 
   public void Simulate(float dt) {
-    targetPosition += velocity * dt;
+    // TODO: Do this in update for smoothness.
+    stateTimer += dt;
+    if (stateTimer > Settings.ServerSendInterval) {
+      stateTimer -= Settings.ServerSendInterval;
+      if (stateQueue.Count > 1) {
+        lastState = stateQueue.Dequeue();
+      }
+    }
+
+    // We can only interpolate if we have a previous and next world state.
+    if (!lastState.HasValue || stateQueue.Count < 1) {
+      Debug.LogWarning("RemotePlayer: not enough states to interp");
+      return;
+    }
+
+    // TODO: Probably need to handle a queue size of 3 if we've fallen behind, snap?
+    DebugUI.ShowValue("RemotePlayer q size", stateQueue.Count);
+    var nextState = stateQueue.Peek();
+    float theta = stateTimer / Settings.ServerSendInterval;
+    transform.position = Vector3.Lerp(
+        lastState.Value.Position, nextState.Position, theta);
+    var a = Quaternion.Euler(0, lastState.Value.Rotation.y, 0);
+    var b = Quaternion.Euler(0, nextState.Rotation.y, 0);
+    transform.rotation = Quaternion.Slerp(a, b, theta);
   }
 
   public PlayerState ToNetworkState() {
@@ -31,12 +52,7 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
   }
 
   public void ApplyNetworkState(PlayerState state) {
-    targetPosition = state.Position;
-    targetRotation = Quaternion.Euler(0, state.Rotation.y, 0);
-    velocity = state.Velocity;
-    if (state.Grounded) {
-      velocity.y = 0;
-    }
+    stateQueue.Enqueue(state);
   }
 }
 
