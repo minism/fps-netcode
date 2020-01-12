@@ -103,7 +103,7 @@ public class ClientSimulation : BaseSimulation {
   }
 
   protected override void PostUpdate() {
-    // Step through the incoming world state queue.
+    // Process the remaining world states if there are any, though we expect this to be empty?
     // TODO: This is going to need to be structured pretty differently with other players.
     while (worldStateQueue.Count > 0) {
       ProcessServerWorldState();
