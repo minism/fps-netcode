@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6697177392055735971}
   - component: {fileID: 1157600726214713022}
   - component: {fileID: 5086240095097298556}
+  - component: {fileID: 4084642659861900512}
   m_Layer: 0
   m_Name: RemotePlayer
   m_TagString: Untagged
@@ -57,6 +58,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cd08d00f634c854fa071ac8970251f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!143 &4084642659861900512
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6697177392055735968}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1001 &2629139139142309991
 PrefabInstance:
   m_ObjectHideFlags: 0
