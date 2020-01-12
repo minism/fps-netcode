@@ -21,8 +21,8 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   public bool holdJumpToBhop = false;           // When enabled allows player to just hold jump button to keep on bhopping
 
   /* Camera properties */
-  public Transform playerView;     // Camera or camera target which is manipulated.
-  public float playerViewYOffset = 0.6f; // The height at which the camera is bound to
+  public Transform playerHead;     // Camera or camera target which is manipulated.
+  public float playerHeadYOffset = 0.6f; // The height at which the camera is bound to
   public float xMouseSensitivity = 30.0f;
   public float yMouseSensitivity = 30.0f;
 
@@ -62,9 +62,9 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
 
   private void Start() {
     // Put the camera inside the capsule collider
-    playerView.position = new Vector3(
+    playerHead.position = new Vector3(
         transform.position.x,
-        transform.position.y + playerViewYOffset,
+        transform.position.y + playerHeadYOffset,
         transform.position.z);
   }
 
@@ -77,8 +77,8 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
    * IPlayerController interface
    */
 
-  public Transform GetPlayerViewTransform() {
-    return playerView;
+  public Transform GetPlayerHeadTransform() {
+    return playerHead;
   }
 
   public void SetPlayerInputs(PlayerInputs inputs) {
@@ -93,7 +93,7 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
     
     // Set orientation.
     transform.rotation = Quaternion.Euler(0, rotY, 0); // Rotates the collider
-    playerView.rotation = Quaternion.Euler(rotX, rotY, 0); // Rotates the camera
+    playerHead.rotation = Quaternion.Euler(rotX, rotY, 0); // Rotates the camera
 
     // Process movement.
     QueueJump();
@@ -107,9 +107,9 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
 
     //Need to move the camera after the player has been moved because otherwise the camera will clip the player if going fast enough and will always be 1 frame behind.
     // Set the camera's position to the transform
-    playerView.position = new Vector3(
+    playerHead.position = new Vector3(
         transform.position.x,
-        transform.position.y + playerViewYOffset,
+        transform.position.y + playerHeadYOffset,
         transform.position.z);
   }
 
@@ -119,6 +119,7 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
       Position = transform.position,
       Rotation = new Vector3(rotX, rotY, 0),
       Velocity = playerVelocity,
+      Grounded = controller.isGrounded,
     };
   }
 

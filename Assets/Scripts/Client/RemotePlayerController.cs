@@ -9,11 +9,13 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
   private Quaternion targetRotation;
 
   public void Update() {
-    transform.position = Vector3.Lerp(transform.position, targetPosition, 0.1f);
+    Debug.Log($"remote player vel {velocity}");
+    // TODO: Real interp should go here.
+    transform.position = targetPosition;
     transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 0.1f);
   }
 
-  public Transform GetPlayerViewTransform() {
+  public Transform GetPlayerHeadTransform() {
     return transform;
   }
 
@@ -30,8 +32,11 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
 
   public void ApplyNetworkState(PlayerState state) {
     targetPosition = state.Position;
-    targetRotation = Quaternion.LookRotation(state.Rotation, Vector3.up);
+    targetRotation = Quaternion.Euler(0, state.Rotation.y, 0);
     velocity = state.Velocity;
+    if (state.Grounded) {
+      velocity.y = 0;
+    }
   }
 }
 

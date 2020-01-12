@@ -78,7 +78,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
     // Setup camera and attach to the local player camera anchor.
     var cpmCamera = Camera.main.gameObject.AddComponent<CPMCameraController>();
-    cpmCamera.PlayerView = localPlayer.Controller.GetPlayerViewTransform();
+    cpmCamera.PlayerHead = localPlayer.Controller.GetPlayerHeadTransform();
   }
 
   /** ClientSimulation.Handler interface */

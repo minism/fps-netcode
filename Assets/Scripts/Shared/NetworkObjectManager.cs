@@ -7,6 +7,7 @@ public class NetworkObjectManager : MonoBehaviour {
   private static ushort nextId = 1;
 
   public NetworkObject basePlayerPrefab;
+  public NetworkObject remotePlayerPrefab;
 
   // Currently managed network objects indexed by their network ID.
   private Dictionary<ushort, NetworkObject> activeObjects;
@@ -47,12 +48,8 @@ public class NetworkObjectManager : MonoBehaviour {
 
   public NetworkObject CreatePlayerGameObject(ushort networkId, Vector3 position, bool isRemote) {
     networkId = EnsureNetworkId(networkId);
-    var obj = Instantiate(basePlayerPrefab, position, Quaternion.identity);
-    if (isRemote) {
-      // TODO: This is not the correct way to handle this.
-      obj.gameObject.GetComponent<CPMPlayerController>();
-      obj.gameObject.AddComponent<RemotePlayerController>();
-    }
+    var prefab = isRemote ? remotePlayerPrefab : basePlayerPrefab;
+    var obj = Instantiate(prefab, position, Quaternion.identity);
     obj.NetworkId = networkId;
     activeObjects[networkId] = obj;
     return obj;

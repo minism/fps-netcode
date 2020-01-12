@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CPMCameraController : MonoBehaviour {
-  public Transform PlayerView { get; set; }
+  public Transform PlayerHead { get; set; }
 
   private void Update() {
-    if (PlayerView == null) {
+    if (PlayerHead == null) {
       return;
     }
     if (Cursor.lockState != CursorLockMode.Locked) {
       if (Input.GetButtonDown("Fire1"))
         Cursor.lockState = CursorLockMode.Locked;
     }
-    var t = PlayerView.transform;
+    var t = PlayerHead.transform;
     transform.SetPositionAndRotation(t.position, t.rotation);
   }
 }

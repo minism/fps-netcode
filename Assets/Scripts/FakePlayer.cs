@@ -15,7 +15,7 @@ public class FakePlayer : MonoBehaviour, IPlayerController {
     velocity = state.Velocity;
   }
 
-  public Transform GetPlayerViewTransform() {
+  public Transform GetPlayerHeadTransform() {
     return transform;
   }
 

@@ -59,9 +59,9 @@ public struct InitialPlayerState : INetSerializable {
 public struct PlayerState : INetSerializable {
   public ushort NetworkId;
   public Vector3 Position;
-  //public Quaternion Rotation;
   public Vector3 Rotation;
   public Vector3 Velocity;
+  public bool Grounded;
   //public KinematicCharacterMotorState MotorState;
 
   public void Serialize(NetDataWriter writer) {
@@ -69,6 +69,7 @@ public struct PlayerState : INetSerializable {
     writer.Put(Position);
     writer.Put(Rotation);
     writer.Put(Velocity);
+    writer.Put(Grounded);
     //NetExtensions.SerializeKinematicMotorState(writer, MotorState);
   }
 
@@ -77,6 +78,7 @@ public struct PlayerState : INetSerializable {
     Position = reader.GetVector3();
     Rotation = reader.GetVector3();
     Velocity = reader.GetVector3();
+    Grounded = reader.GetBool();
     //MotorState = NetExtensions.DeserializeKinematicMotorState(reader);
   }
 }

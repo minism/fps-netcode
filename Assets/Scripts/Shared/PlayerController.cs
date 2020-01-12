@@ -39,7 +39,7 @@ public class PlayerController :
     animator = GetComponentInChildren<Animator>();
   }
 
-  public Transform GetPlayerViewTransform() {
+  public Transform GetPlayerHeadTransform() {
     return transform;
   }
 
