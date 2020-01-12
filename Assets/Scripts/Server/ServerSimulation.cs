@@ -49,7 +49,7 @@ public class ServerSimulation : BaseSimulation {
   }
 
   public void ClearPlayerState(Player player) {
-    playerSyncState[player.PlayerId] = false;
+    playerSyncState[player.Id] = false;
   }
 
   public void EnqueuePlayerInput(WithPeer<NetCommand.PlayerInput> input) {
@@ -74,10 +74,10 @@ public class ServerSimulation : BaseSimulation {
     foreach (var tickInput in tickInputs) {
       var player = tickInput.Player;
       player.Controller.SetPlayerInputs(tickInput.Inputs);
-      unprocessedPlayerIds.Remove(player.PlayerId);
+      unprocessedPlayerIds.Remove(player.Id);
 
       // Mark the player as synchronized.
-      playerSyncState[player.PlayerId] = true;
+      playerSyncState[player.Id] = true;
     }
 
     // Any remaining players without inputs have their latest input command repeated,

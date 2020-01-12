@@ -23,7 +23,7 @@ public class PlayerInputProcessor {
   public void LogQueueStatsForPlayer(Player player, uint worldTick) {
     int count = 0;
     foreach (var entry in queue) {
-      if (entry.Player.PlayerId == player.PlayerId && entry.WorldTick >= worldTick) {
+      if (entry.Player.Id == player.Id && entry.WorldTick >= worldTick) {
         count++;
         worldTick++;
       }
@@ -74,7 +74,7 @@ public class PlayerInputProcessor {
         queue.Enqueue(tickInput, worldTick);
 
         // Store the latest input in case the simulation needs to repeat missed frames.
-        latestPlayerInput[player.PlayerId] = tickInput;
+        latestPlayerInput[player.Id] = tickInput;
       }
     } else {
       staleInputs++;

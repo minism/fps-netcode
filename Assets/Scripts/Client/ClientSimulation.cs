@@ -113,7 +113,6 @@ public class ClientSimulation : BaseSimulation {
     DebugUI.ShowValue("cl rewinds", replayedStates);
     DebugUI.ShowValue("cl tick", WorldTick);
     DebugUI.ShowValue("cl est. tick lead", estimatedTickLead);
-    DebugUI.ShowValue("cl rec. tick lead", WorldTick - lastServerWorldTick);
   }
 
   private void ProcessServerWorldState() {

@@ -34,8 +34,8 @@ public class PlayerSimulationAdjuster {
       NetCommand.PlayerInput command, Player player, uint serverWorldTick) {
     // Initialize any assumptions.
     var now = DateTime.Now;
-    if (!lastIdealInputTimes.ContainsKey(player.PlayerId)) {
-      lastIdealInputTimes[player.PlayerId] = now;
+    if (!lastIdealInputTimes.ContainsKey(player.Id)) {
+      lastIdealInputTimes[player.Id] = now;
     }
 
     uint maxTick = command.StartWorldTick + (uint)command.Inputs.Length - 1;
@@ -43,10 +43,10 @@ public class PlayerSimulationAdjuster {
       uint lead = maxTick - serverWorldTick;
       DebugUI.ShowValue("deleteme", lead);
       if (lead < Settings.ClientIdealBufferedInputLimit) {
-        lastIdealInputTimes[player.PlayerId] = now;
+        lastIdealInputTimes[player.Id] = now;
       } else {
         // If the client has sustained a lead which is too far, it needs to decrease its lead.
-        if (now - lastIdealInputTimes[player.PlayerId] > Settings.ClientBufferTooHighInterval) {
+        if (now - lastIdealInputTimes[player.Id] > Settings.ClientBufferTooHighInterval) {
           MaybeAdjust(player, (int)lead, -(int)lead/3);
         }
       }
@@ -58,9 +58,9 @@ public class PlayerSimulationAdjuster {
 
   private void MaybeAdjust(Player player, int actualTickLead, int tickOffset) {
     var now = DateTime.Now;
-    if (!lastAdjustmentTimes.ContainsKey(player.PlayerId) ||
-        now - lastAdjustmentTimes[player.PlayerId] > Settings.MinClientAdjustmentInterval) {
-      lastAdjustmentTimes[player.PlayerId] = now;
+    if (!lastAdjustmentTimes.ContainsKey(player.Id) ||
+        now - lastAdjustmentTimes[player.Id] > Settings.MinClientAdjustmentInterval) {
+      lastAdjustmentTimes[player.Id] = now;
       handler.AdjustPlayerSimulation(player, actualTickLead, tickOffset);
     }
   }

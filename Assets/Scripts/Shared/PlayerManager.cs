@@ -32,12 +32,11 @@ public class PlayerManager : IPlayerLookup {
 
   public Player AddPlayer(byte playerId, PlayerMetadata metadata, GameObject playerGameObject) {
     var player = new Player {
-      PlayerId = playerId,
+      Id = playerId,
       Metadata = metadata,
       GameObject = playerGameObject,
       NetworkObject = playerGameObject.GetComponent<NetworkObject>(),
       Controller = playerGameObject.GetComponent<IPlayerController>(),
-      Motor = playerGameObject.GetComponent<KinematicCharacterController.KinematicCharacterMotor>(),
     };
     players.Add(playerId, player);
     CachePlayerIds();
@@ -55,7 +54,7 @@ public class PlayerManager : IPlayerLookup {
   }
 
   private void CachePlayerIds() {
-    playerIds = GetPlayers().Select(p => p.PlayerId).ToArray();
+    playerIds = GetPlayers().Select(p => p.Id).ToArray();
   }
 }
 

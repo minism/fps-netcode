@@ -1,6 +1,5 @@
 using UnityEngine;
 using LiteNetLib;
-using NetCommand;
 
 /// Primary logic controller for managing client game state.
 public class ClientLogicController : BaseLogicController, ClientSimulation.Handler {
@@ -13,13 +12,13 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   private ClientSimulation simulation;
 
   // The most accurate server latency estimate to use for initialization.
-  private int _initialServerLatency;
+  private int initialServerLatency;
   private int bestServerLatency {
     get {
       if (netChannel.PeerLatency.ContainsKey(serverPeer)) {
         return netChannel.PeerLatency[serverPeer];
       }
-      return _initialServerLatency;
+      return initialServerLatency;
     }
   }
 
@@ -47,7 +46,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     string host, int port, int initialServerLatency, PlayerSetupData playerSetupData) {
     Debug.Log($"Connecting to host {host}:{port}...");
     this.playerSetupData = playerSetupData;
-    this._initialServerLatency = initialServerLatency;
+    this.initialServerLatency = initialServerLatency;
     netChannel.ConnectToServer(host, port);
     LoadGameScene();
   }
@@ -86,7 +85,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     return localPlayerInput.SampleInputs();
   }
 
-  public void SendInputs(PlayerInput command) {
+  public void SendInputs(NetCommand.PlayerInput command) {
     netChannel.SendCommand(serverPeer, command);
   }
 
@@ -124,7 +123,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     var player = playerManager.GetPlayer(cmd.PlayerId);
     Debug.Log($"{player.Metadata.Name} left the server.");
     networkObjectManager.DestroyNetworkObject(player.NetworkObject);
-    playerManager.RemovePlayer(player.PlayerId);
+    playerManager.RemovePlayer(player.Id);
   }
 
   private void HandleAdjustSimulation(NetCommand.AdjustSimulation cmd) {

@@ -91,11 +91,11 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
 
     // Update managers.
     networkObjectManager.DestroyNetworkObject(player.NetworkObject);
-    playerManager.RemovePlayer(player.PlayerId);
+    playerManager.RemovePlayer(player.Id);
 
     // Notify peers.
     netChannel.BroadcastCommand(new NetCommand.PlayerLeft {
-      PlayerId = player.PlayerId,
+      PlayerId = player.Id,
     }, player.Peer);
   }
 
@@ -128,9 +128,14 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     // Transmit existing player state to new player and new player state to
     // existing clients. Separate RPCs with the same payload are used so that
     // the joining player can distinguish their own player ID.
-    var joinAcceptedCmd = CommandBuilder.BuildJoinAcceptedCmd(
-        player, existingPlayers, simulation.WorldTick);
-    var playerJoinedCmd = CommandBuilder.BuildPlayerJoinedCmd(player);
+    var joinAcceptedCmd = new NetCommand.JoinAccepted {
+      YourPlayerState = player.ToInitialPlayerState(),
+      ExistingPlayerStates = existingPlayers.Select(p => p.ToInitialPlayerState()).ToArray(),
+      WorldTick = simulation.WorldTick,
+    };
+    var playerJoinedCmd = new NetCommand.PlayerJoined {
+      PlayerState = player.ToInitialPlayerState(),
+    };
     netChannel.SendCommand(peer, joinAcceptedCmd);
     netChannel.BroadcastCommand(playerJoinedCmd, peer);
   }
