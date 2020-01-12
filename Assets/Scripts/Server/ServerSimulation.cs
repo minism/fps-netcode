@@ -10,18 +10,15 @@ public class ServerSimulation : BaseSimulation {
   // Debugging.
   public float debugPhysicsErrorChance;
 
-  // Delegate for processing input packets.
+  // Delegates with some encapsulated simulation logic for simplicity.
   private PlayerInputProcessor playerInputProcessor;
+  private PlayerSimulationAdjuster playerSimulationAdjuster;
 
   // Reusable hash set for players whose input we've checked each frame.
   private HashSet<byte> unprocessedPlayerIds = new HashSet<byte>();
 
   // Synchronization states for players.
   private Dictionary<byte, bool> playerSyncState = new Dictionary<byte, bool>();
-
-  // Timestamps for adjustment commands.
-  private Dictionary<byte, DateTime> playerLastAdjustmentTimes =
-      new Dictionary<byte, DateTime>();
 
   // I/O interface for world states.
   public interface Handler {
@@ -44,6 +41,7 @@ public class ServerSimulation : BaseSimulation {
     this.debugPhysicsErrorChance = debugPhysicsErrorChance;
     this.handler = handler;
     playerInputProcessor = new PlayerInputProcessor();
+    playerSimulationAdjuster = new PlayerSimulationAdjuster(handler);
 
     // Initialize timers.
     worldStateBroadcastTimer = new FixedTimer(Settings.ServerSendRate, BroadcastWorldState);
@@ -62,6 +60,7 @@ public class ServerSimulation : BaseSimulation {
       return;  // The player already disconnected, so just ignore this packet.
     }
     playerInputProcessor.EnqueueInput(input.Value, player, WorldTick);
+    playerSimulationAdjuster.NotifyReceivedInput(input.Value, player, WorldTick);
   }
 
   // Process a single world tick update.
@@ -97,14 +96,7 @@ public class ServerSimulation : BaseSimulation {
       } else {
         Debug.LogWarning($"No inputs for player #{playerId} and no history to replay.");
       }
-
-      // Tell the client it needs to increase its tick lead.
-      // TODO: Come up with a smarter mechanism for determining this value.
-      if (!playerLastAdjustmentTimes.ContainsKey(playerId) ||
-          now - playerLastAdjustmentTimes[playerId] > Settings.MinClientAdjustmentInterval) {
-        playerLastAdjustmentTimes[playerId] = now;
-        handler.AdjustPlayerSimulation(player, 0, 5);
-      }
+      playerSimulationAdjuster.NotifyDroppedInput(player);
     }
 
     // Advance the world simulation.

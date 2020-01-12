@@ -67,7 +67,7 @@ public class ClientSimulation : BaseSimulation {
     if (tickOffset >= 0) {
       WorldTick += (uint)tickOffset;
     } else {
-      WorldTick -= (uint)tickOffset;
+      WorldTick -= (uint)Mathf.Abs(tickOffset);
     }
   }
 
