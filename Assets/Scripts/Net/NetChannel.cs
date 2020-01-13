@@ -79,16 +79,17 @@ public class NetChannel : INetEventListener, INetChannel {
     // Handle debug timers.
     debugLargeStallsTimer += Time.deltaTime;
     if (debugNetworkSettings.SimulateLargeStalls &&
-        debugLargeStallsTimer > debugNetworkSettings.LargeStallsInterval + 2) {
+        debugLargeStallsTimer > debugNetworkSettings.LargeStallsInterval +
+            debugNetworkSettings.LargeStallsDuration) {
       ApplyDebugNetworkSettings();
       debugLargeStallsTimer = 0;
     } else if (debugNetworkSettings.SimulateLargeStalls &&
                debugLargeStallsTimer > debugNetworkSettings.LargeStallsInterval) {
       netManager.SimulatePacketLoss = true;
       netManager.SimulateLatency = true;
-      netManager.SimulationPacketLossChance = 30;
-      netManager.SimulationMinLatency = 500;
-      netManager.SimulationMaxLatency = 600;
+      netManager.SimulationPacketLossChance = debugNetworkSettings.LargeStallsPacketLoss;
+      netManager.SimulationMinLatency = debugNetworkSettings.LargeStallsLatency;
+      netManager.SimulationMaxLatency = debugNetworkSettings.LargeStallsLatency;
     }
   }
 

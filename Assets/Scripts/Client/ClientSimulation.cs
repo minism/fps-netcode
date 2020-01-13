@@ -62,6 +62,13 @@ public class ClientSimulation : BaseSimulation {
     var sampled = handler.SampleInputs();
     PlayerInputs inputs = sampled.HasValue ? sampled.Value : new PlayerInputs();
 
+    // If the oldest server state is too stale, freeze the player.
+    if (Settings.FreezeClientOnStaleServer &&
+        WorldTick - lastServerWorldTick >= Settings.MaxStaleServerStateTicks) {
+      Debug.Log("Server state is too old (is the network connection dead?)");
+      inputs = new PlayerInputs();
+    }
+
     // Update our snapshot buffers.
     uint bufidx = WorldTick % 1024;
     localPlayerInputsSnapshots[bufidx] = inputs;

@@ -13,4 +13,7 @@ public struct DebugNetworkSettings {
   // Other stuff we handle directly.
   public bool SimulateLargeStalls;
   public float LargeStallsInterval;
+  public float LargeStallsDuration;
+  public int LargeStallsLatency;
+  public int LargeStallsPacketLoss;
 }
