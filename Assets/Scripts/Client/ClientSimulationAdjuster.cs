@@ -4,8 +4,8 @@ using System.Diagnostics;
 public class ClientSimulationAdjuster : ISimulationAdjuster {
   public float AdjustedInterval { get; private set; } = 1.0f;
 
-  // The actual number of ticks our inputs are arriving ahead of the server simulation. This
-  // value should be as close to 1 as possible without going under.
+  // The actual number of ticks our inputs are arriving ahead of the server simulation.
+  // The goal of the adjuster is to get this value as close to 1 as possible without going under.
   private Ice.MovingAverage actualTickLeadAvg = new Ice.MovingAverage((int)Settings.ServerSendRate * 2);
 
   private int estimatedMissedInputs;

@@ -110,8 +110,10 @@ public class ClientSimulation : BaseSimulation {
     // Calculate our actual tick lead on the server perspective. We add one because the world
     // state the server sends to use is always 1 higher than the latest input that has been
     // processed.
-    int actualTickLead = (int) incomingState.YourLatestInputTick - (int) lastServerWorldTick + 1;
-    clientSimulationAdjuster.NotifyActualTickLead(actualTickLead);
+    if (incomingState.YourLatestInputTick > 0) {
+      int actualTickLead = (int)incomingState.YourLatestInputTick - (int)lastServerWorldTick + 1;
+      clientSimulationAdjuster.NotifyActualTickLead(actualTickLead);
+    }
 
     bool headState = false;
     if (incomingState.WorldTick >= WorldTick) {
