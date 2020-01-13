@@ -24,7 +24,7 @@ public class ClientSimulation : BaseSimulation {
   // I/O interface for player inputs.
   public interface Handler {
     PlayerInputs? SampleInputs();
-    void SendInputs(NetCommand.PlayerInput command);
+    void SendInputs(NetCommand.PlayerInputCommand command);
   }
   private Handler handler;
 
@@ -80,7 +80,7 @@ public class ClientSimulation : BaseSimulation {
     for (uint tick = lastServerWorldTick; tick <= WorldTick; ++tick) {
       unackedInputs.Add(localPlayerInputsSnapshots[tick % 1024]);
     }
-    var command = new NetCommand.PlayerInput {
+    var command = new NetCommand.PlayerInputCommand {
       StartWorldTick = lastServerWorldTick,
       Inputs = unackedInputs.ToArray(),
     };

@@ -13,10 +13,6 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
   private PlayerState? lastState = null;
   private float stateTimer = 0;
 
-  public Transform GetPlayerHeadTransform() {
-    return transform;
-  }
-
   public void SetPlayerInputs(PlayerInputs inputs) { }
 
   public void Simulate(float dt) {

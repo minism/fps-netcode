@@ -73,7 +73,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
     // Setup camera and attach to the local player camera anchor.
     var cpmCamera = Camera.main.gameObject.AddComponent<CPMCameraController>();
-    cpmCamera.PlayerHead = localPlayer.Controller.GetPlayerHeadTransform();
+    cpmCamera.followTarget = localPlayer.GameObject.transform;
   }
 
   /** ClientSimulation.Handler interface */
@@ -84,7 +84,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     return localPlayerInput.SampleInputs();
   }
 
-  public void SendInputs(NetCommand.PlayerInput command) {
+  public void SendInputs(NetCommand.PlayerInputCommand command) {
     netChannel.SendCommand(serverPeer, command);
   }
 

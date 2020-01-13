@@ -31,7 +31,7 @@ public class PlayerSimulationAdjuster {
   }
 
   public void NotifyReceivedInput(
-      NetCommand.PlayerInput command, Player player, uint serverWorldTick) {
+      NetCommand.PlayerInputCommand command, Player player, uint serverWorldTick) {
     // Initialize any assumptions.
     var now = DateTime.Now;
     if (!lastIdealInputTimes.ContainsKey(player.Id)) {

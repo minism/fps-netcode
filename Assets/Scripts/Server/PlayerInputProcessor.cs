@@ -52,7 +52,7 @@ public class PlayerInputProcessor {
     return ret;
   }
 
-  public void EnqueueInput(NetCommand.PlayerInput command, Player player, uint serverWorldTick) {
+  public void EnqueueInput(NetCommand.PlayerInputCommand command, Player player, uint serverWorldTick) {
     // Monitoring.
     DebugUI.ShowValue("sv stale inputs", staleInputs);
 

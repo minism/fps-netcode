@@ -23,7 +23,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
 
     // Setup network event handling.
     netChannel.Subscribe<NetCommand.JoinRequest>(HandleJoinRequest);
-    netChannel.Subscribe<NetCommand.PlayerInput>(HandlePlayerInput);
+    netChannel.Subscribe<NetCommand.PlayerInputCommand>(HandlePlayerInput);
   }
 
   protected override void Start() {
@@ -136,9 +136,9 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     netChannel.BroadcastCommand(playerJoinedCmd, peer);
   }
 
-  private void HandlePlayerInput(NetCommand.PlayerInput cmd, NetPeer peer) {
+  private void HandlePlayerInput(NetCommand.PlayerInputCommand cmd, NetPeer peer) {
     simulation.EnqueuePlayerInput(
-        new WithPeer<NetCommand.PlayerInput> { Peer = peer, Value = cmd });
+        new WithPeer<NetCommand.PlayerInputCommand> { Peer = peer, Value = cmd });
   }
 
   protected override void OnPeerConnected(NetPeer peer) {

@@ -63,7 +63,7 @@ public class ServerSimulation : BaseSimulation {
     InitializePlayerState(player);
   }
 
-  public void EnqueuePlayerInput(WithPeer<NetCommand.PlayerInput> input) {
+  public void EnqueuePlayerInput(WithPeer<NetCommand.PlayerInputCommand> input) {
     Player player;
     try {
       player = playerManager.GetPlayerForPeer(input.Peer);

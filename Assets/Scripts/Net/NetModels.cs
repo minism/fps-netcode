@@ -59,10 +59,10 @@ public struct InitialPlayerState : INetSerializable {
 public struct PlayerState : INetSerializable {
   public ushort NetworkId;
   public Vector3 Position;
-  public Vector3 Rotation;
+  // TODO: Compress via https://gafferongames.com/post/snapshot_compression/
+  public Quaternion Rotation;
   public Vector3 Velocity;
   public bool Grounded;
-  //public KinematicCharacterMotorState MotorState;
 
   public void Serialize(NetDataWriter writer) {
     writer.Put(NetworkId);
@@ -70,16 +70,14 @@ public struct PlayerState : INetSerializable {
     writer.Put(Rotation);
     writer.Put(Velocity);
     writer.Put(Grounded);
-    //NetExtensions.SerializeKinematicMotorState(writer, MotorState);
   }
 
   public void Deserialize(NetDataReader reader) {
     NetworkId = reader.GetUShort();
     Position = reader.GetVector3();
-    Rotation = reader.GetVector3();
+    Rotation = reader.GetQuaternion();
     Velocity = reader.GetVector3();
     Grounded = reader.GetBool();
-    //MotorState = NetExtensions.DeserializeKinematicMotorState(reader);
   }
 }
 
@@ -87,26 +85,21 @@ public struct PlayerState : INetSerializable {
 public struct PlayerInputs : INetSerializable {
   public float ForwardAxis;
   public float RightAxis;
-  public float MouseXAxis;
-  public float MouseYAxis;
-  public Quaternion CameraOrientation;
+  // TODO: Compress via https://gafferongames.com/post/snapshot_compression/
+  public Quaternion ViewDirection;
   public bool Jump;
 
   public void Serialize(NetDataWriter writer) {
     writer.Put(ForwardAxis);
     writer.Put(RightAxis);
-    writer.Put(MouseXAxis);
-    writer.Put(MouseYAxis);
-    // writer.Put(CameraOrientation);
+    writer.Put(ViewDirection);
     writer.Put(Jump);
   }
 
   public void Deserialize(NetDataReader reader) {
     ForwardAxis = reader.GetFloat();
     RightAxis = reader.GetFloat();
-    MouseXAxis = reader.GetFloat();
-    MouseYAxis = reader.GetFloat();
-    // CameraOrientation = reader.GetQuaternion();
+    ViewDirection = reader.GetQuaternion();
     Jump = reader.GetBool();
   }
 }

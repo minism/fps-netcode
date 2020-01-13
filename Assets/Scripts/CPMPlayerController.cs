@@ -20,12 +20,6 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   public float jumpSpeed = 8.0f;                // The speed at which the character's up axis gains when hitting jump
   public bool holdJumpToBhop = false;           // When enabled allows player to just hold jump button to keep on bhopping
 
-  /* Camera properties */
-  public Transform playerHead;     // Camera or camera target which is manipulated.
-  public float playerHeadYOffset = 0.6f; // The height at which the camera is bound to
-  public float xMouseSensitivity = 30.0f;
-  public float yMouseSensitivity = 30.0f;
-
   // Lazy getter.
   private CharacterController controller {
     get {
@@ -53,20 +47,8 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   // Physics state.
   private Vector3 playerVelocity = Vector3.zero;
 
-  // Camera rotations
-  private float rotX = 0.0f;
-  private float rotY = 0.0f;
-
   // Q3: players can queue the next jump just before he hits the ground
   private bool wishJump = false;
-
-  private void Start() {
-    // Put the camera inside the capsule collider
-    playerHead.position = new Vector3(
-        transform.position.x,
-        transform.position.y + playerHeadYOffset,
-        transform.position.z);
-  }
 
   private void Update() {
     // The CPM controller is simulated manually via Simulate(), for now this method does nothing.
@@ -77,23 +59,13 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
    * IPlayerController interface
    */
 
-  public Transform GetPlayerHeadTransform() {
-    return playerHead;
-  }
-
   public void SetPlayerInputs(PlayerInputs inputs) {
     this.inputs = inputs;
   }
 
   public void Simulate(float dt) {
-    /* Camera rotation stuff, mouse controls this shit */
-    rotX -= inputs.MouseYAxis * xMouseSensitivity * dt;
-    rotY += inputs.MouseXAxis * yMouseSensitivity * dt;
-    rotX = Mathf.Clamp(rotX, -90, 90);
-    
-    // Set orientation.
-    transform.rotation = Quaternion.Euler(0, rotY, 0); // Rotates the collider
-    playerHead.rotation = Quaternion.Euler(rotX, rotY, 0); // Rotates the camera
+    // Set orientation based on the view direction.
+    transform.rotation = Quaternion.Euler(0, inputs.ViewDirection.eulerAngles.y, 0);
 
     // Process movement.
     QueueJump();
@@ -104,20 +76,13 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
 
     // Apply the final velocity to the character controller.
     controller.Move(playerVelocity * dt);
-
-    //Need to move the camera after the player has been moved because otherwise the camera will clip the player if going fast enough and will always be 1 frame behind.
-    // Set the camera's position to the transform
-    playerHead.position = new Vector3(
-        transform.position.x,
-        transform.position.y + playerHeadYOffset,
-        transform.position.z);
   }
 
   public PlayerState ToNetworkState() {
     return new PlayerState {
       NetworkId = networkObject.NetworkId,
       Position = transform.position,
-      Rotation = new Vector3(rotX, rotY, 0),
+      Rotation = transform.rotation,
       Velocity = playerVelocity,
       Grounded = controller.isGrounded,
     };
@@ -131,9 +96,8 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
     // transform.position into its cache.
     controller.enabled = false;
     transform.position = state.Position;
+    transform.rotation = state.Rotation;
     controller.enabled = true;
-    rotX = state.Rotation.x;
-    rotY = state.Rotation.y;
     playerVelocity = state.Velocity;
   }
 

@@ -39,10 +39,6 @@ public class PlayerController :
     animator = GetComponentInChildren<Animator>();
   }
 
-  public Transform GetPlayerHeadTransform() {
-    return transform;
-  }
-
   // Sets the move input data to use for the next update frame.
   public void SetPlayerInputs(PlayerInputs inputs) {
     // Create a clamped movement vector to avoid the classic diagonal movement problem.            
@@ -51,12 +47,12 @@ public class PlayerController :
 
     // Determine the direction we should be moving within our plane, based on the view direction.
     var viewForward = Vector3.ProjectOnPlane(
-        inputs.CameraOrientation * Vector3.forward, Vector3.up).normalized;
+        inputs.ViewDirection * Vector3.forward, Vector3.up).normalized;
 
     // TODO: Is this needeD?
     if (viewForward.sqrMagnitude == 0f) {
       viewForward = Vector3.ProjectOnPlane(
-          inputs.CameraOrientation * Vector3.up, Vector3.up).normalized;
+          inputs.ViewDirection * Vector3.up, Vector3.up).normalized;
     }
 
     // Apply view direction to input vector.

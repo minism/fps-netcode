@@ -11,7 +11,7 @@ namespace NetCommand {
     public PlayerSetupData PlayerSetupData { get; set; }
   }
 
-  public class PlayerInput {
+  public class PlayerInputCommand {
     // The world tick for the first input in the array.
     public uint StartWorldTick { get; set; }
 
@@ -75,7 +75,7 @@ namespace NetCommand {
 
       // Input and world state can be unreliable since it is sent every frame, but we use
       // sequenced so that older packets are simply dropped since we don't care about them anymore.
-      { typeof(PlayerInput), DeliveryMethod.Sequenced },
+      { typeof(PlayerInputCommand), DeliveryMethod.Sequenced },
       { typeof(WorldState), DeliveryMethod.Sequenced },
     };
   }

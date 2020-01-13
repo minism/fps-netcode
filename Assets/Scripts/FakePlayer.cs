@@ -15,10 +15,6 @@ public class FakePlayer : MonoBehaviour, IPlayerController {
     velocity = state.Velocity;
   }
 
-  public Transform GetPlayerHeadTransform() {
-    return transform;
-  }
-
   public void SetPlayerInputs(PlayerInputs inputs) {
     input = new Vector2(inputs.ForwardAxis, inputs.RightAxis);
   }
