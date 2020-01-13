@@ -61,7 +61,7 @@ public class PlayerSimulationAdjuster {
     if (!lastAdjustmentTimes.ContainsKey(player.Id) ||
         now - lastAdjustmentTimes[player.Id] > Settings.MinClientAdjustmentInterval) {
       lastAdjustmentTimes[player.Id] = now;
-      handler.AdjustPlayerSimulation(player, actualTickLead, tickOffset);
+      //handler.AdjustPlayerSimulation(player, actualTickLead, tickOffset);
     }
   }
 }

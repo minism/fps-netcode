@@ -8,6 +8,7 @@ public static class Settings {
 	public static float ServerSendInterval = 1 / ServerSendRate;
 
 	// Realtime adjustment settings.
+	public static float ClientAdjustmentRate = 1;
 	public static TimeSpan MinClientAdjustmentInterval = TimeSpan.FromSeconds(1);
 	public static TimeSpan ClientBufferTooHighInterval = TimeSpan.FromSeconds(5);
 	public static uint ClientIdealBufferedInputLimit = 3;

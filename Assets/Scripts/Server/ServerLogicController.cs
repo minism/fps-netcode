@@ -79,6 +79,9 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     var player = playerManager.AddPlayer((byte)peer.Id, metadata, playerNetworkObject.gameObject);
     player.Peer = peer;
 
+    // Let the simulation initialize any state for the player.
+    simulation.InitializePlayerState(player);
+
     return player;
   }
 
@@ -100,15 +103,8 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
   }
 
   /** Simulation.Handler interface */
-  public void BroadcastWorldState(NetCommand.WorldState state) {
-    netChannel.BroadcastCommand(state);
-  }
-
-  public void AdjustPlayerSimulation(Player player, int actualTickLead, int tickOffset) {
-    netChannel.SendCommand(player.Peer, new NetCommand.AdjustSimulation {
-      ActualTickLead = actualTickLead,
-      TickOffset = tickOffset,
-    });
+  public void SendWorldState(Player player, NetCommand.WorldState state) {
+    netChannel.SendCommand(player.Peer, state);
   }
 
   /** Network command handling */

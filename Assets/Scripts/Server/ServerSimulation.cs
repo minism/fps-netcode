@@ -3,6 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+// Various per-player-connection data the server simulation needs to track.
+public class PlayerConnectionInfo {
+  // Whether the player is synchronized yet.
+  public bool synchronized;
+
+  // The latest (highest) input tick from the player.
+  public uint latestInputTick;
+}
+
 // Client world simulation including prediction and state rewind.
 // Inputs are state frames from the server.
 // Outputs are player command frames to the server.
@@ -12,18 +21,17 @@ public class ServerSimulation : BaseSimulation {
 
   // Delegates with some encapsulated simulation logic for simplicity.
   private PlayerInputProcessor playerInputProcessor;
-  private PlayerSimulationAdjuster playerSimulationAdjuster;
 
   // Reusable hash set for players whose input we've checked each frame.
   private HashSet<byte> unprocessedPlayerIds = new HashSet<byte>();
 
-  // Synchronization states for players.
-  private Dictionary<byte, bool> playerSyncState = new Dictionary<byte, bool>();
+  // Simulation info for each player, indexed by player ID (peer ID).
+  private Dictionary<byte, PlayerConnectionInfo> playerConnectionInfo
+      = new Dictionary<byte, PlayerConnectionInfo>();
 
   // I/O interface for world states.
   public interface Handler {
-    void BroadcastWorldState(NetCommand.WorldState state);
-    void AdjustPlayerSimulation(Player player, int actualTickLead, int tickOffset);
+    void SendWorldState(Player player, NetCommand.WorldState state);
   }
   private Handler handler;
 
@@ -41,15 +49,18 @@ public class ServerSimulation : BaseSimulation {
     this.debugPhysicsErrorChance = debugPhysicsErrorChance;
     this.handler = handler;
     playerInputProcessor = new PlayerInputProcessor();
-    playerSimulationAdjuster = new PlayerSimulationAdjuster(handler);
 
     // Initialize timers.
     worldStateBroadcastTimer = new FixedTimer(Settings.ServerSendRate, BroadcastWorldState);
     worldStateBroadcastTimer.Start();
   }
 
+  public void InitializePlayerState(Player player) {
+    playerConnectionInfo[player.Id] = new PlayerConnectionInfo();
+  }
+
   public void ClearPlayerState(Player player) {
-    playerSyncState[player.Id] = false;
+    InitializePlayerState(player);
   }
 
   public void EnqueuePlayerInput(WithPeer<NetCommand.PlayerInput> input) {
@@ -60,7 +71,10 @@ public class ServerSimulation : BaseSimulation {
       return;  // The player already disconnected, so just ignore this packet.
     }
     playerInputProcessor.EnqueueInput(input.Value, player, WorldTick);
-    playerSimulationAdjuster.NotifyReceivedInput(input.Value, player, WorldTick);
+
+    // Mark the latest tick for the player.
+    playerConnectionInfo[player.Id].latestInputTick =
+        input.Value.StartWorldTick + (uint)input.Value.Inputs.Length - 1;
   }
 
   // Process a single world tick update.
@@ -77,14 +91,15 @@ public class ServerSimulation : BaseSimulation {
       unprocessedPlayerIds.Remove(player.Id);
 
       // Mark the player as synchronized.
-      playerSyncState[player.Id] = true;
+      playerConnectionInfo[player.Id].synchronized = true;
     }
 
     // Any remaining players without inputs have their latest input command repeated,
     // but we notify them that they need to fast-forward their simulation to improve buffering.
     foreach (var playerId in unprocessedPlayerIds) {
       // If the player is not yet synchronized, this isn't an error.
-      if (!playerSyncState.ContainsKey(playerId) || !playerSyncState[playerId]) {
+      if (!playerConnectionInfo.ContainsKey(playerId) ||
+          !playerConnectionInfo[playerId].synchronized) {
         continue;
       }
 
@@ -96,7 +111,6 @@ public class ServerSimulation : BaseSimulation {
       } else {
         Debug.LogWarning($"No inputs for player #{playerId} and no history to replay.");
       }
-      playerSimulationAdjuster.NotifyDroppedInput(player);
     }
 
     // Advance the world simulation.
@@ -122,11 +136,15 @@ public class ServerSimulation : BaseSimulation {
   }
 
   private void BroadcastWorldState(float dt) {
-    var worldStateCmd = new NetCommand.WorldState {
-      WorldTick = WorldTick,
-      PlayerStates = playerManager.GetPlayers().Select(
-          p => p.Controller.ToNetworkState()).ToArray(),
-    };
-    handler.BroadcastWorldState(worldStateCmd);
+    var players = playerManager.GetPlayers();
+    var playerStates = players.Select(p => p.Controller.ToNetworkState()).ToArray();
+    foreach (var player in players) {
+      var cmd = new NetCommand.WorldState {
+        WorldTick = WorldTick,
+        YourLatestInputTick = playerConnectionInfo[player.Id].latestInputTick,
+        PlayerStates = playerStates,
+      };
+      handler.SendWorldState(player, cmd);
+    }
   }
 }
