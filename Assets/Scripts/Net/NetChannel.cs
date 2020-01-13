@@ -38,18 +38,20 @@ public class NetChannel : INetEventListener, INetChannel {
   private Dictionary<IPEndPoint, Action<int>> unconnectedPingCallbacks =
       new Dictionary<IPEndPoint, Action<int>>();
 
+  // Debugging stuff.
+  private DebugNetworkSettings debugNetworkSettings;
+  private float debugLargeStallsTimer;
+
   public NetChannel(DebugNetworkSettings debugNetworkSettings) {
     netManager = new NetManager(this) {
       AutoRecycle = true,
       UnconnectedMessagesEnabled = true, // For ping/pong
-      SimulatePacketLoss = debugNetworkSettings.SimulatePacketLoss,
-      SimulateLatency = debugNetworkSettings.SimulateLatency,
-      SimulationPacketLossChance = debugNetworkSettings.PacketLossChance,
-      SimulationMinLatency = debugNetworkSettings.MinLatency,
-      SimulationMaxLatency = debugNetworkSettings.MaxLatency,
     };
     netPacketProcessor = new NetPacketProcessor();
     netDataWriter = new NetDataWriter();
+
+    this.debugNetworkSettings = debugNetworkSettings;
+    ApplyDebugNetworkSettings();
 
     // Register nested types used in net commands.
     netPacketProcessor.RegisterNestedType(
@@ -73,6 +75,21 @@ public class NetChannel : INetEventListener, INetChannel {
   /// Update should be called every frame.
   public void Update() {
     netManager.PollEvents();
+
+    // Handle debug timers.
+    debugLargeStallsTimer += Time.deltaTime;
+    if (debugNetworkSettings.SimulateLargeStalls &&
+        debugLargeStallsTimer > debugNetworkSettings.LargeStallsInterval + 2) {
+      ApplyDebugNetworkSettings();
+      debugLargeStallsTimer = 0;
+    } else if (debugNetworkSettings.SimulateLargeStalls &&
+               debugLargeStallsTimer > debugNetworkSettings.LargeStallsInterval) {
+      netManager.SimulatePacketLoss = true;
+      netManager.SimulateLatency = true;
+      netManager.SimulationPacketLossChance = 30;
+      netManager.SimulationMinLatency = 500;
+      netManager.SimulationMaxLatency = 600;
+    }
   }
 
 	/// Stop all networking activity (shuts down the client or server).
@@ -109,6 +126,14 @@ public class NetChannel : INetEventListener, INetChannel {
     Debug.Log($"Sending ping message to {endpoint}");
     pingHelper.AddListener(endpoint, callback);
     netManager.SendUnconnectedMessage(new byte[] { PING_HEADER }, endpoint);
+  }
+
+  private void ApplyDebugNetworkSettings() {
+    netManager.SimulatePacketLoss = debugNetworkSettings.SimulatePacketLoss;
+    netManager.SimulateLatency = debugNetworkSettings.SimulateLatency;
+    netManager.SimulationPacketLossChance = debugNetworkSettings.PacketLossChance;
+    netManager.SimulationMinLatency = debugNetworkSettings.MinLatency;
+    netManager.SimulationMaxLatency = debugNetworkSettings.MaxLatency;
   }
 
   /** INetChannel methods */

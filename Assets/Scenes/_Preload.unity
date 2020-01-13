@@ -172,6 +172,8 @@ MonoBehaviour:
     PacketLossChance: 0
     MinLatency: 100
     MaxLatency: 200
+    SimulateLargeStalls: 0
+    LargeStallsInterval: 0
 --- !u!114 &289582694
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -287,6 +289,8 @@ MonoBehaviour:
     PacketLossChance: 10
     MinLatency: 100
     MaxLatency: 250
+    SimulateLargeStalls: 1
+    LargeStallsInterval: 10
   debugPhysicsErrorChance: 0
 --- !u!114 &383801353
 MonoBehaviour:
