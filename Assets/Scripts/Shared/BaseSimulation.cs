@@ -1,5 +1,13 @@
 ﻿using UnityEngine;
 
+public interface ISimulationAdjuster {
+  float AdjustedInterval { get; }
+}
+
+public class NoopAdjuster : ISimulationAdjuster {
+  public float AdjustedInterval { get; } = 1.0f;
+}
+
 public abstract class BaseSimulation {
   // The current world tick of the simulation.
   public uint WorldTick { get; protected set; } = 0;
@@ -15,6 +23,9 @@ public abstract class BaseSimulation {
   protected PlayerManager playerManager;
   protected NetworkObjectManager networkObjectManager;
 
+  // Simulation adjuster delegate which can be reassigned.
+  protected ISimulationAdjuster simulationAdjuster = new NoopAdjuster();
+
   private float accumulator;
 
   protected BaseSimulation(PlayerManager playerManager, NetworkObjectManager networkObjectManager) {
@@ -24,9 +35,14 @@ public abstract class BaseSimulation {
 
   public void Update(float dt) {
     accumulator += dt;
-    while (accumulator >= tickInterval) {
-      accumulator -= tickInterval;
-      Tick(tickInterval);
+    var adjustedTickInterval = tickInterval * simulationAdjuster.AdjustedInterval;
+    while (accumulator >= adjustedTickInterval) {
+      accumulator -= adjustedTickInterval;
+
+      // Although we can run the simulation at different speeds, the actual tick processing is
+      // *always* done with the original unmodified rate for physics accuracy.
+      // This has a time-warping effect.
+      Tick(tickInterval); 
     }
     PostUpdate();
   }

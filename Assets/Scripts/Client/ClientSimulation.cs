@@ -19,12 +19,7 @@ public class ClientSimulation : BaseSimulation {
   // The current world tick and last ack'd server world tick.
   private uint lastServerWorldTick = 0;
 
-  // The estimated number of ticks we're running ahead of the server.
-  private uint estimatedTickLead;
-
-  // The actual number of ticks our inputs are arriving ahead of the server simulation. This
-  // value should be as close to 1 as possible without going under.
-  private int actualTickLead;
+  private ClientSimulationAdjuster clientSimulationAdjuster;
 
   // I/O interface for player inputs.
   public interface Handler {
@@ -32,9 +27,6 @@ public class ClientSimulation : BaseSimulation {
     void SendInputs(NetCommand.PlayerInput command);
   }
   private Handler handler;
-
-  // Timers.
-  private FixedTimer simulationAdjustmentTimer;
 
   // Monitoring statistics.
   private int replayedStates;
@@ -49,18 +41,15 @@ public class ClientSimulation : BaseSimulation {
     this.localPlayer = localPlayer;
     this.handler = handler;
 
+    // Setup the simulation adjuster, this delegate will be responsible for time-warping the client
+    // simulation whenever we are too far ahead or behind the server simulation.
+    simulationAdjuster = clientSimulationAdjuster = new ClientSimulationAdjuster();
+
     // Set the last-acknowledged server tick.
     lastServerWorldTick = initialWorldTick;
 
-    // Extrapolate based on latency what our client tick should be.
-    float serverLatencySeconds = serverLatencyMs / 1000f;
-    estimatedTickLead = (uint)(serverLatencySeconds * 1.5 / Time.fixedDeltaTime) + 4;
-    WorldTick = initialWorldTick + estimatedTickLead;
-    Debug.Log($"Initializing client with estimated tick lead of {estimatedTickLead}, ping: {serverLatencyMs}");
-
-    // Initialize timers.
-    simulationAdjustmentTimer = new FixedTimer(Settings.ClientAdjustmentRate, AdjustSimulation);
-    simulationAdjustmentTimer.Start();
+    // Extrapolate based on latency what our client tick should start at.
+    WorldTick = clientSimulationAdjuster.GuessClientTick(initialWorldTick, serverLatencyMs);
   }
 
   public void EnqueueWorldState(NetCommand.WorldState state) {
@@ -97,9 +86,6 @@ public class ClientSimulation : BaseSimulation {
 
     // Process a world state frame from the server if we have it.
     ProcessServerWorldState();
-
-    // Update post-tick timers.
-    simulationAdjustmentTimer.Update(dt);
   }
 
   protected override void PostUpdate() {
@@ -108,12 +94,9 @@ public class ClientSimulation : BaseSimulation {
     while (worldStateQueue.Count > 0) {
       ProcessServerWorldState();
     }
-
     // Show some debug monitoring values.
     DebugUI.ShowValue("cl rewinds", replayedStates);
-    DebugUI.ShowValue("cl tick", WorldTick);
-    DebugUI.ShowValue("cl est. tick lead", estimatedTickLead);
-    DebugUI.ShowValue("cl act. tick lead", actualTickLead);
+    clientSimulationAdjuster.Monitoring();
   }
 
   private void ProcessServerWorldState() {
@@ -124,10 +107,11 @@ public class ClientSimulation : BaseSimulation {
     var incomingState = worldStateQueue.Dequeue();
     lastServerWorldTick = incomingState.WorldTick;
 
-    // Recalculate our actual tick lead on the server perspective. We add one because the world
+    // Calculate our actual tick lead on the server perspective. We add one because the world
     // state the server sends to use is always 1 higher than the latest input that has been
     // processed.
-    actualTickLead = (int) incomingState.YourLatestInputTick - (int) lastServerWorldTick + 1;
+    int actualTickLead = (int) incomingState.YourLatestInputTick - (int) lastServerWorldTick + 1;
+    clientSimulationAdjuster.NotifyActualTickLead(actualTickLead);
 
     bool headState = false;
     if (incomingState.WorldTick >= WorldTick) {
@@ -185,19 +169,6 @@ public class ClientSimulation : BaseSimulation {
 
         ++replayTick;
       }
-    }
-  }
-  
-  private void AdjustSimulation(float _) {
-    // TODO: Use time factors instead of jumps.
-    if (actualTickLead < 0) {
-      uint amount = (uint) Mathf.Abs(actualTickLead) / 3;
-      Debug.Log($"Too far behind, moving simulation forward by {amount}.");
-      WorldTick += amount;
-    } else if (actualTickLead > Settings.ClientIdealBufferedInputLimit) {
-      var amount = (uint) actualTickLead / 3;
-      Debug.Log($"Too far ahead, moving simulation backwards by {amount}.");
-      WorldTick -= amount;
     }
   }
 }
