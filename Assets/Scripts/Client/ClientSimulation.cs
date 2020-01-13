@@ -91,6 +91,13 @@ public class ClientSimulation : BaseSimulation {
     SimulateWorld(dt);
     ++WorldTick;
 
+    // Notify camera.
+    // TODO: Fix this - This is needed because the camera is not hooked into the same
+    // world simulation "Simulate()" fixed loop, it can only used its own FixedUpdate, and so
+    // it needs to be synced up a bit better.
+    // Need some interface for entities that participate.
+    GameObject.FindObjectOfType<CPMCameraController>().PlayerPositionUpdated();
+
     // Process a world state frame from the server if we have it.
     ProcessServerWorldState();
   }

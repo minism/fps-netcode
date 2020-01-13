@@ -13,14 +13,11 @@ public class PingHelper {
       new Dictionary<IPEndPoint, Listener>();
 
   public void AddListener(IPEndPoint endpoint, Action<int> callback) {
-    if (listeners.ContainsKey(endpoint)) {
-      Debug.LogWarning("Ignore second in-flight ping to the same endpoint (client should de-dupe)");
-      return;
-    }
-    listeners.Add(endpoint, new Listener {
+    var listener = new Listener {
       callback = callback,
       sendTime = DateTime.Now,
-    });
+    };
+    listeners[endpoint] = listener;
   }
 
   public void ReceivePong(IPEndPoint endpoint) {

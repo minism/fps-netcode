@@ -12,7 +12,14 @@ public class CPMCameraController : MonoBehaviour {
   private float rotX = 0.0f;
   private float rotY = 0.0f;
 
-  private void Update() {
+  private DoubleBuffer<Vector3> positionBuffer = new DoubleBuffer<Vector3>(); 
+
+  public void PlayerPositionUpdated() {
+    var targetPos = followTarget.position + Vector3.up * playerHeadHeight;
+    positionBuffer.Push(targetPos);
+  }
+
+  private void LateUpdate() {
     if (followTarget == null) {
       return;
     }
@@ -21,8 +28,10 @@ public class CPMCameraController : MonoBehaviour {
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    // Snap to the player head position.
-    transform.position = followTarget.position + Vector3.up * playerHeadHeight;
+    // Lerp position based on buffer.
+    var newPos = positionBuffer.New();
+    var oldPos = positionBuffer.Old();
+    transform.position = Vector3.Lerp(oldPos, newPos, InterpolationController.InterpolationFactor);
 
     // Process rotation input.
     rotX -= Input.GetAxisRaw("Mouse Y") * xMouseSensitivity;
