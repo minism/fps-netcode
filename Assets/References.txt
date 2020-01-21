@@ -1,7 +1,0 @@
-﻿https://www.gamedev.net/forums/topic/696756-command-frames-and-tick-synchronization/
-http://www.codersblock.org/blog/client-side-prediction-in-unity-2018
-https://gafferongames.com/tags/networking/
-http://fabiensanglard.net/quake3/network.php
-https://docs.unrealengine.com/udk/Three/NetworkingOverview.html
-https://github.com/Saishy/TinyBirdNet-Unity
-https://www.gabrielgambetta.com/client-side-prediction-server-reconciliation.html
