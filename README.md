@@ -22,6 +22,6 @@ This repository contains a small demo of a quake-style multiplayer FPS that inte
 * [TinyBirdNet](https://github.com/Saishy/TinyBirdNet-Unity)
 * https://www.gamedev.net/forums/topic/696756-command-frames-and-tick-synchronization/
 
-** Architecture **:
+**Architecture**:
 
 TODO
