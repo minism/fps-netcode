@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -17,8 +15,8 @@ public class Bootstrapper : MonoBehaviour {
 
   private void Awake() {
     // Disable kinematic auto simulation.
-    KinematicCharacterController.KinematicCharacterSystem.EnsureCreation();
-    KinematicCharacterController.KinematicCharacterSystem.Settings.AutoSimulation = false;
+    //KinematicCharacterController.KinematicCharacterSystem.EnsureCreation();
+    //KinematicCharacterController.KinematicCharacterSystem.Settings.AutoSimulation = false;
   }
 
   private void Start() {

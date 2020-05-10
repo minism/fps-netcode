@@ -1,186 +1,183 @@
-﻿using KinematicCharacterController;
-using UnityEngine;
+﻿//using UnityEngine;
 
-[RequireComponent(typeof(KinematicCharacterMotor))]
-public class PlayerController :
-    MonoBehaviour, ICharacterController, IPlayerController {
-  [Header("Physics/Movement params")]
-  public float maxSpeed = 1f;
-  public float maxAirSpeed = 1f;
-  public float airAccel = 1f;
-  public float airDrag = 0.1f;
-  public float jumpForce = 1f;
-  public bool jumpWhileSliding = false;
-  public float bunnyhopTimeWindow = 0.25f;
+//public class PlayerController : MonoBehaviour, IPlayerController {
+//  [Header("Physics/Movement params")]
+//  public float maxSpeed = 1f;
+//  public float maxAirSpeed = 1f;
+//  public float airAccel = 1f;
+//  public float airDrag = 0.1f;
+//  public float jumpForce = 1f;
+//  public bool jumpWhileSliding = false;
+//  public float bunnyhopTimeWindow = 0.25f;
 
-  [Header("Low level tweaks")]
-  public float jumpUngroundingForce = 0.1f;
+//  [Header("Low level tweaks")]
+//  public float jumpUngroundingForce = 0.1f;
 
-  // Components.
-  private KinematicCharacterMotor motor;
-  private Animator animator;
+//  // Components.
+//  private KinematicCharacterMotor motor;
+//  private Animator animator;
 
-  // Jumping state.
-  private struct JumpState {
-    public bool queuedAttempt;
-    public bool isJumping;
-    public bool jumpedThisFrame;
-    public float timeSinceAtttempt;
-  }
-  private JumpState jumpState;
+//  // Jumping state.
+//  private struct JumpState {
+//    public bool queuedAttempt;
+//    public bool isJumping;
+//    public bool jumpedThisFrame;
+//    public float timeSinceAtttempt;
+//  }
+//  private JumpState jumpState;
 
-  // The next movement vectors to use, computed from inputs.
-  private Vector3 moveVector;
-  private Vector3 lookVector;
+//  // The next movement vectors to use, computed from inputs.
+//  private Vector3 moveVector;
+//  private Vector3 lookVector;
 
-  private void Awake() {
-    motor = GetComponent<KinematicCharacterMotor>();
-    motor.CharacterController = this;
-    animator = GetComponentInChildren<Animator>();
-  }
+//  private void Awake() {
+//    motor = GetComponent<KinematicCharacterMotor>();
+//    motor.CharacterController = this;
+//    animator = GetComponentInChildren<Animator>();
+//  }
 
-  // Sets the move input data to use for the next update frame.
-  public void SetPlayerInputs(PlayerInputs inputs) {
-    // Create a clamped movement vector to avoid the classic diagonal movement problem.            
-    var inputVector = Vector3.ClampMagnitude(
-        new Vector3(inputs.RightAxis, 0, inputs.ForwardAxis), 1f);
+//  // Sets the move input data to use for the next update frame.
+//  public void SetPlayerInputs(PlayerInputs inputs) {
+//    // Create a clamped movement vector to avoid the classic diagonal movement problem.            
+//    var inputVector = Vector3.ClampMagnitude(
+//        new Vector3(inputs.RightAxis, 0, inputs.ForwardAxis), 1f);
 
-    // Determine the direction we should be moving within our plane, based on the view direction.
-    var viewForward = Vector3.ProjectOnPlane(
-        inputs.ViewDirection * Vector3.forward, Vector3.up).normalized;
+//    // Determine the direction we should be moving within our plane, based on the view direction.
+//    var viewForward = Vector3.ProjectOnPlane(
+//        inputs.ViewDirection * Vector3.forward, Vector3.up).normalized;
 
-    // TODO: Is this needeD?
-    if (viewForward.sqrMagnitude == 0f) {
-      viewForward = Vector3.ProjectOnPlane(
-          inputs.ViewDirection * Vector3.up, Vector3.up).normalized;
-    }
+//    // TODO: Is this needeD?
+//    if (viewForward.sqrMagnitude == 0f) {
+//      viewForward = Vector3.ProjectOnPlane(
+//          inputs.ViewDirection * Vector3.up, Vector3.up).normalized;
+//    }
 
-    // Apply view direction to input vector.
-    var rotation = Quaternion.LookRotation(viewForward, Vector3.up);
-    moveVector = rotation * inputVector;
-    lookVector = viewForward;
+//    // Apply view direction to input vector.
+//    var rotation = Quaternion.LookRotation(viewForward, Vector3.up);
+//    moveVector = rotation * inputVector;
+//    lookVector = viewForward;
 
-    // Process jump input.
-    if (inputs.Jump) {
-      jumpState.queuedAttempt = true;
-      jumpState.timeSinceAtttempt = 0f;
-    }
-  }
+//    // Process jump input.
+//    if (inputs.Jump) {
+//      jumpState.queuedAttempt = true;
+//      jumpState.timeSinceAtttempt = 0f;
+//    }
+//  }
 
-  private bool IsGroundJumpable() {
-    return jumpWhileSliding ?
-        motor.GroundingStatus.FoundAnyGround :
-        motor.GroundingStatus.IsStableOnGround;
-  }
+//  private bool IsGroundJumpable() {
+//    return jumpWhileSliding ?
+//        motor.GroundingStatus.FoundAnyGround :
+//        motor.GroundingStatus.IsStableOnGround;
+//  }
 
-  /**
-   * Networking details.
-   */
-  public PlayerState ToNetworkState() {
-    return new PlayerState();
-    //return new PlayerState {
-    //  SimplePosition = transform.position,
-    //  MotorState = motor.GetState(),
-    //};
-  }
+//  /**
+//   * Networking details.
+//   */
+//  public PlayerState ToNetworkState() {
+//    return new PlayerState();
+//    //return new PlayerState {
+//    //  SimplePosition = transform.position,
+//    //  MotorState = motor.GetState(),
+//    //};
+//  }
 
-  public void ApplyNetworkState(PlayerState state) {
-    //motor.ApplyState(state.MotorState);
-  }
+//  public void ApplyNetworkState(PlayerState state) {
+//    //motor.ApplyState(state.MotorState);
+//  }
 
-  public void Simulate(float dt) { }
+//  public void Simulate(float dt) { }
 
-  /**
-   * KinematicCharacterController API.
-   */
+//  /**
+//   * KinematicCharacterController API.
+//   */
 
-  public void UpdateRotation(ref Quaternion currentRotation, float deltaTime) {
-    // TODO: Turning interpolation can go here if needed.
-    if (lookVector.sqrMagnitude > 0) {
-      currentRotation = Quaternion.LookRotation(lookVector, motor.CharacterUp);
-    }
-  }
+//  public void UpdateRotation(ref Quaternion currentRotation, float deltaTime) {
+//    // TODO: Turning interpolation can go here if needed.
+//    if (lookVector.sqrMagnitude > 0) {
+//      currentRotation = Quaternion.LookRotation(lookVector, motor.CharacterUp);
+//    }
+//  }
 
-  public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime) {
-    // Handle ground movement.
-    if (motor.GroundingStatus.IsStableOnGround) {
-      // Orient the movement vector based on the ground normal
-      var right = Vector3.Cross(moveVector, motor.CharacterUp);
-      var surfaceMoveVector = Vector3.Cross(motor.GroundingStatus.GroundNormal, right);
+//  public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime) {
+//    // Handle ground movement.
+//    if (motor.GroundingStatus.IsStableOnGround) {
+//      // Orient the movement vector based on the ground normal
+//      var right = Vector3.Cross(moveVector, motor.CharacterUp);
+//      var surfaceMoveVector = Vector3.Cross(motor.GroundingStatus.GroundNormal, right);
 
-      // TODO: Velocity smoothing can go here if needed.
-      var groundSpeed = maxSpeed;
-      currentVelocity = surfaceMoveVector * groundSpeed;
-    }
-    
-    // Handle air movement.
-    else {
-      // Apply air acceleration.
-      if (moveVector.sqrMagnitude > 0f) {
-        var airSpeed = maxAirSpeed;
-        var targetVelocity = moveVector * airSpeed;
-        var diff = Vector3.ProjectOnPlane(targetVelocity - currentVelocity, Physics.gravity);
-        currentVelocity += diff * airAccel * deltaTime;
-      }
+//      // TODO: Velocity smoothing can go here if needed.
+//      var groundSpeed = maxSpeed;
+//      currentVelocity = surfaceMoveVector * groundSpeed;
+//    }
 
-      // Apply air drag.
-      currentVelocity *= (1f / (1f + (airDrag * deltaTime)));
+//    // Handle air movement.
+//    else {
+//      // Apply air acceleration.
+//      if (moveVector.sqrMagnitude > 0f) {
+//        var airSpeed = maxAirSpeed;
+//        var targetVelocity = moveVector * airSpeed;
+//        var diff = Vector3.ProjectOnPlane(targetVelocity - currentVelocity, Physics.gravity);
+//        currentVelocity += diff * airAccel * deltaTime;
+//      }
 
-      // Apply gravity.
-      currentVelocity += Physics.gravity * deltaTime;
-    }
+//      // Apply air drag.
+//      currentVelocity *= (1f / (1f + (airDrag * deltaTime)));
 
-    // Process jumping.
-    jumpState.jumpedThisFrame = false;
-    if (jumpState.queuedAttempt && IsGroundJumpable() && !jumpState.isJumping) {
-      var jumpVector = Vector3.up;
+//      // Apply gravity.
+//      currentVelocity += Physics.gravity * deltaTime;
+//    }
 
-      // Force the motor to detach itself from the ground before we apply further force.
-      motor.ForceUnground(jumpUngroundingForce);
+//    // Process jumping.
+//    jumpState.jumpedThisFrame = false;
+//    if (jumpState.queuedAttempt && IsGroundJumpable() && !jumpState.isJumping) {
+//      var jumpVector = Vector3.up;
 
-      // Apply jump velocity and update state.
-      currentVelocity +=
-          (jumpVector * jumpForce) - Vector3.Project(currentVelocity, Vector3.up);
-      jumpState.jumpedThisFrame = true;
-      jumpState.isJumping = true;
-      jumpState.queuedAttempt = false;
-    }
+//      // Force the motor to detach itself from the ground before we apply further force.
+//      motor.ForceUnground(jumpUngroundingForce);
 
-    // Update animation state.
-    //var animSpeed = new Vector2(currentVelocity.x, currentVelocity.z).sqrMagnitude > 0 ? 1f : 0;
-    //animator.SetFloat("speed", animSpeed);
-  }
+//      // Apply jump velocity and update state.
+//      currentVelocity +=
+//          (jumpVector * jumpForce) - Vector3.Project(currentVelocity, Vector3.up);
+//      jumpState.jumpedThisFrame = true;
+//      jumpState.isJumping = true;
+//      jumpState.queuedAttempt = false;
+//    }
 
-  public void BeforeCharacterUpdate(float deltaTime) {
-  }
+//    // Update animation state.
+//    //var animSpeed = new Vector2(currentVelocity.x, currentVelocity.z).sqrMagnitude > 0 ? 1f : 0;
+//    //animator.SetFloat("speed", animSpeed);
+//  }
 
-  public void AfterCharacterUpdate(float deltaTime) {
-    // Check resetting the jump state.
-    jumpState.timeSinceAtttempt += deltaTime;
-    if (jumpState.timeSinceAtttempt > bunnyhopTimeWindow) {
-      jumpState.queuedAttempt = false;
-    }
-    if (IsGroundJumpable() && !jumpState.jumpedThisFrame) {
-      jumpState.isJumping = false;
-    }
-  }
+//  public void BeforeCharacterUpdate(float deltaTime) {
+//  }
 
-  public void PostGroundingUpdate(float deltaTime) {
-  }
+//  public void AfterCharacterUpdate(float deltaTime) {
+//    // Check resetting the jump state.
+//    jumpState.timeSinceAtttempt += deltaTime;
+//    if (jumpState.timeSinceAtttempt > bunnyhopTimeWindow) {
+//      jumpState.queuedAttempt = false;
+//    }
+//    if (IsGroundJumpable() && !jumpState.jumpedThisFrame) {
+//      jumpState.isJumping = false;
+//    }
+//  }
 
-  public bool IsColliderValidForCollisions(Collider coll) {
-    return true;
-  }
+//  public void PostGroundingUpdate(float deltaTime) {
+//  }
 
-  public void OnGroundHit(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, ref HitStabilityReport hitStabilityReport) {
-  }
+//  public bool IsColliderValidForCollisions(Collider coll) {
+//    return true;
+//  }
 
-  public void OnMovementHit(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, ref HitStabilityReport hitStabilityReport) {
-  }
+//  public void OnGroundHit(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, ref HitStabilityReport hitStabilityReport) {
+//  }
 
-  public void ProcessHitStabilityReport(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, Vector3 atCharacterPosition, Quaternion atCharacterRotation, ref HitStabilityReport hitStabilityReport) {
-  }
+//  public void OnMovementHit(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, ref HitStabilityReport hitStabilityReport) {
+//  }
 
-  public void OnDiscreteCollisionDetected(Collider hitCollider) {
-  }
-}
+//  public void ProcessHitStabilityReport(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, Vector3 atCharacterPosition, Quaternion atCharacterRotation, ref HitStabilityReport hitStabilityReport) {
+//  }
+
+//  public void OnDiscreteCollisionDetected(Collider hitCollider) {
+//  }
+//}

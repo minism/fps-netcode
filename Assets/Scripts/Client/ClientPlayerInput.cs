@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// Component that first receives kb/gamepad input for the player.
 public class ClientPlayerInput : MonoBehaviour {

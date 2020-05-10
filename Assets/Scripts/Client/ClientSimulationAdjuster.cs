@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using UnityEngine;
 
 public class ClientSimulationAdjuster : ISimulationAdjuster {
   public float AdjustedInterval { get; private set; } = 1.0f;

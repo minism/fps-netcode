@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-public class DoubleBuffer<T> {
+﻿public class DoubleBuffer<T> {
   private T[] values = new T[2];
   private int swapIndex = 0;
 

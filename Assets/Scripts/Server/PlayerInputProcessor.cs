@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-using System.Linq;
+﻿using Priority_Queue;
 using System.Collections.Generic;
-using Priority_Queue;
 
 // Simple structure representing a particular players inputs at a world tick.
 public struct TickInput {
@@ -67,10 +65,10 @@ public class PlayerInputProcessor {
         // Apply inputs to the associated player controller and simulate the world.
         var worldTick = command.StartWorldTick + i;
         var tickInput = new TickInput {
-            WorldTick = (uint) worldTick,
-            Player = player,
-            Inputs = command.Inputs[i],
-          };
+          WorldTick = (uint)worldTick,
+          Player = player,
+          Inputs = command.Inputs[i],
+        };
         queue.Enqueue(tickInput, worldTick);
 
         // Store the latest input in case the simulation needs to repeat missed frames.

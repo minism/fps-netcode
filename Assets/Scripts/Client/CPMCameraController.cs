@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CPMCameraController : MonoBehaviour {
   public Transform followTarget;
@@ -12,7 +10,7 @@ public class CPMCameraController : MonoBehaviour {
   private float rotX = 0.0f;
   private float rotY = 0.0f;
 
-  private DoubleBuffer<Vector3> positionBuffer = new DoubleBuffer<Vector3>(); 
+  private DoubleBuffer<Vector3> positionBuffer = new DoubleBuffer<Vector3>();
 
   public void PlayerPositionUpdated() {
     var targetPos = followTarget.position + Vector3.up * playerHeadHeight;

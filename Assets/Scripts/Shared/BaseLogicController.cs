@@ -1,10 +1,8 @@
-﻿using UnityEngine;
-using LiteNetLib;
-using UnityEngine.SceneManagement;
+﻿using LiteNetLib;
 using System;
-using System.Collections.Generic;
 using System.Net;
-using KinematicCharacterController;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// Base component for primary logic and dependencies needed by both client and server.
 [RequireComponent(typeof(NetworkObjectManager))]

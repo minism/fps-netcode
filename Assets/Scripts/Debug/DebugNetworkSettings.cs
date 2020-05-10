@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-[System.Serializable]
+﻿[System.Serializable]
 public struct DebugNetworkSettings {
   // Sent directly to LiteNetLib.
   public bool SimulatePacketLoss;

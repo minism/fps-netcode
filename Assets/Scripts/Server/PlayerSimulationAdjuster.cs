@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 // Keeps track of how far ahead / behind clients are and notifies them
@@ -47,7 +46,7 @@ public class PlayerSimulationAdjuster {
       } else {
         // If the client has sustained a lead which is too far, it needs to decrease its lead.
         if (now - lastIdealInputTimes[player.Id] > Settings.ClientBufferTooHighInterval) {
-          MaybeAdjust(player, (int)lead, -(int)lead/3);
+          MaybeAdjust(player, (int)lead, -(int)lead / 3);
         }
       }
     } else {

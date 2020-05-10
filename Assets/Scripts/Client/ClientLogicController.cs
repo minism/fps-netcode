@@ -1,5 +1,5 @@
-using UnityEngine;
 using LiteNetLib;
+using UnityEngine;
 
 /// Primary logic controller for managing client game state.
 public class ClientLogicController : BaseLogicController, ClientSimulation.Handler {

@@ -1,11 +1,10 @@
-using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Collections.Generic;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 using UnityEngine;
-using KinematicCharacterController;
 
 /// Central controller for sending network commands and receiving network events.
 /// Used by both client and server, so logic should be relatively generic.
@@ -58,9 +57,9 @@ public class NetChannel : INetEventListener, INetChannel {
         NetExtensions.SerializeVector3, NetExtensions.DeserializeVector3);
     netPacketProcessor.RegisterNestedType(
         NetExtensions.SerializeQuaternion, NetExtensions.DeserializeQuaternion);
-    netPacketProcessor.RegisterNestedType(
-        NetExtensions.SerializeKinematicMotorState,
-        NetExtensions.DeserializeKinematicMotorState);
+    //netPacketProcessor.RegisterNestedType(
+    //    NetExtensions.SerializeKinematicMotorState,
+    //    NetExtensions.DeserializeKinematicMotorState);
     netPacketProcessor.RegisterNestedType<PlayerSetupData>();
     netPacketProcessor.RegisterNestedType<PlayerMetadata>();
     netPacketProcessor.RegisterNestedType<InitialPlayerState>();
@@ -93,8 +92,8 @@ public class NetChannel : INetEventListener, INetChannel {
     }
   }
 
-	/// Stop all networking activity (shuts down the client or server).
-	public void Stop() {
+  /// Stop all networking activity (shuts down the client or server).
+  public void Stop() {
     netManager.Stop();
   }
 
@@ -107,8 +106,8 @@ public class NetChannel : INetEventListener, INetChannel {
     netManager.Connect(host, port, CONNECTION_KEY);
   }
 
-	/// Starts listening for connections, the channel will act as as server.
-	public void StartServer(int port) {
+  /// Starts listening for connections, the channel will act as as server.
+  public void StartServer(int port) {
     //if (netManager.IsRunning) {
     //  Debug.LogWarning("Network manager already running, doing nothing.");
     //  return;

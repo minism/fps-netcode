@@ -1,8 +1,8 @@
-using UnityEngine;
 using LiteNetLib;
-using System.Threading.Tasks;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using UnityEngine;
 
 /// Primary logic controller for managing server game state.
 public class ServerLogicController : BaseLogicController, ServerSimulation.Handler {
@@ -33,7 +33,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
 
   protected override void Update() {
     base.Update();
-    
+
     if (simulation != null) {
       simulation.Update(Time.deltaTime);
     }

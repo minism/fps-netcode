@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FakePlayer : MonoBehaviour, IPlayerController {
   public float maxVelocity = 30;

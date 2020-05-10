@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using LiteNetLib;
 using UnityEngine;
 
-public class NetMonitor : MonoBehaviour, LiteNetLib.INetLogger
-{
+public class NetMonitor : MonoBehaviour, LiteNetLib.INetLogger {
   public bool enableLiteNetLogging = true;
   public UnityEngine.UI.Text pingText;
 

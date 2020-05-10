@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-public interface ISimulationAdjuster {
+﻿public interface ISimulationAdjuster {
   float AdjustedInterval { get; }
 }
 
@@ -42,7 +40,7 @@ public abstract class BaseSimulation {
       // Although we can run the simulation at different speeds, the actual tick processing is
       // *always* done with the original unmodified rate for physics accuracy.
       // This has a time-warping effect.
-      Tick(tickInterval); 
+      Tick(tickInterval);
     }
     PostUpdate();
   }

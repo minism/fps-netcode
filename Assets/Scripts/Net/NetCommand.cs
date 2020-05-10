@@ -1,7 +1,6 @@
+using LiteNetLib;
 using System;
 using System.Collections.Generic;
-using LiteNetLib;
-using UnityEngine;
 
 /// Network top-level command data structures.
 namespace NetCommand {
@@ -27,7 +26,7 @@ namespace NetCommand {
 
     // The current world tick on the server.
     // The client will initially set theirs to this plus a latency estimate.
-    public uint WorldTick { get; set; } 
+    public uint WorldTick { get; set; }
   }
 
   public class PlayerJoined {

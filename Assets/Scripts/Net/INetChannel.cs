@@ -1,6 +1,6 @@
+using LiteNetLib;
 using System;
 using System.Collections.Generic;
-using LiteNetLib;
 
 /// An interface for sending/receiving network commands.
 public interface INetChannel {

@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Net;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Net;
 
 public class PingHelper {
   private struct Listener {
