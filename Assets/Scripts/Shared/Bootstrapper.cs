@@ -13,12 +13,6 @@ public class Bootstrapper : MonoBehaviour {
   private static string DEFAULT_HOST = "localhost";
   private static int DEFAULT_PORT = 10770;
 
-  private void Awake() {
-    // Disable kinematic auto simulation.
-    //KinematicCharacterController.KinematicCharacterSystem.EnsureCreation();
-    //KinematicCharacterController.KinematicCharacterSystem.Settings.AutoSimulation = false;
-  }
-
   private void Start() {
     // Parse command line arguments.
     var host = Hotel.Util.GetFlagValue("--host");

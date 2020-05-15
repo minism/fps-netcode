@@ -9,9 +9,8 @@
 public class InterpolationController : MonoBehaviour {
   public static float InterpolationFactor { get; private set; } = 1f;
 
-  private DoubleBuffer<float> timestampBuffer = new DoubleBuffer<float>();
+  private Ice.DoubleBuffer<float> timestampBuffer = new Ice.DoubleBuffer<float>();
 
-  // TODO: Should use the simulate(dt) API instead.
   private void FixedUpdate() {
     timestampBuffer.Push(Time.fixedTime);
   }

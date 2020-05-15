@@ -105,6 +105,7 @@ public class ClientSimulation : BaseSimulation {
     // Process the remaining world states if there are any, though we expect this to be empty?
     // TODO: This is going to need to be structured pretty differently with other players.
     while (worldStateQueue.Count > 0) {
+      Debug.Log("Had extra server states to process after tick.");
       ProcessServerWorldState();
     }
     // Show some debug monitoring values.

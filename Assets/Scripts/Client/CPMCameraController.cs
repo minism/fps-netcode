@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Ice;
 
 public class CPMCameraController : MonoBehaviour {
   public Transform followTarget;
