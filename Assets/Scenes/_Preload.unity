@@ -167,9 +167,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   netMonitor: {fileID: 0}
   debugNetworkSettings:
-    SimulatePacketLoss: 0
-    SimulateLatency: 0
-    PacketLossChance: 0
+    SimulatePacketLoss: 1
+    SimulateLatency: 1
+    PacketLossChance: 10
     MinLatency: 100
     MaxLatency: 200
     SimulateLargeStalls: 0
@@ -219,7 +219,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 323191867}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7b9617221146bf428bb4e644896bba1, type: 3}
+  m_Script: {fileID: 11500000, guid: 0a4fa6fe4755241f1b1cd0b42552ec94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &323191869
@@ -292,7 +292,7 @@ MonoBehaviour:
     SimulateLatency: 1
     PacketLossChance: 10
     MinLatency: 100
-    MaxLatency: 400
+    MaxLatency: 200
     SimulateLargeStalls: 0
     LargeStallsInterval: 10
     LargeStallsDuration: 2
