@@ -33,45 +33,6 @@ public static class NetExtensions {
     return q;
   }
 
-  //public static void SerializeKinematicMotorState(
-  //    NetDataWriter writer, KinematicCharacterMotorState state) {
-  //  writer.Put(state.Position);
-  //  writer.Put(state.Rotation);
-  //  writer.Put(state.BaseVelocity);
-  //  writer.Put(state.MustUnground);
-  //  writer.Put(state.MustUngroundTime);
-  //  writer.Put(state.LastMovementIterationFoundAnyGround);
-
-  //  // TODO: This might be too much data. Let's do some monitoring to see first.
-  //  // We might be able to omit some of this since we can rely on the server doing crap better.
-  //  writer.Put(state.GroundingStatus.FoundAnyGround);
-  //  writer.Put(state.GroundingStatus.IsStableOnGround);
-  //  writer.Put(state.GroundingStatus.SnappingPrevented);
-  //  writer.Put(state.GroundingStatus.GroundNormal);
-  //  writer.Put(state.GroundingStatus.InnerGroundNormal);
-  //  writer.Put(state.GroundingStatus.OuterGroundNormal);
-
-  //  // TODO: Attached rigidbody if we need that here.
-  //}
-
-  //public static KinematicCharacterMotorState DeserializeKinematicMotorState(NetDataReader reader) {
-  //  KinematicCharacterMotorState state = new KinematicCharacterMotorState();
-  //  state.Position = reader.GetVector3();
-  //  state.Rotation = reader.GetQuaternion();
-  //  state.BaseVelocity = reader.GetVector3();
-  //  state.MustUnground = reader.GetBool();
-  //  state.MustUngroundTime = reader.GetFloat();
-  //  state.LastMovementIterationFoundAnyGround = reader.GetBool();
-  //  state.GroundingStatus = new CharacterTransientGroundingReport();
-  //  state.GroundingStatus.FoundAnyGround = reader.GetBool();
-  //  state.GroundingStatus.IsStableOnGround = reader.GetBool();
-  //  state.GroundingStatus.SnappingPrevented = reader.GetBool();
-  //  state.GroundingStatus.GroundNormal = reader.GetVector3();
-  //  state.GroundingStatus.InnerGroundNormal = reader.GetVector3();
-  //  state.GroundingStatus.OuterGroundNormal = reader.GetVector3();
-  //  return state;
-  //}
-
   public static void Put(this NetDataWriter writer, Quaternion quaternion) {
     SerializeQuaternion(writer, quaternion);
   }
