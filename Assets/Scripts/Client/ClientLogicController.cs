@@ -74,6 +74,12 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     // Setup camera and attach to the local player camera anchor.
     var cpmCamera = Camera.main.gameObject.AddComponent<CPMCameraController>();
     cpmCamera.followTarget = localPlayer.GameObject.transform;
+
+    // Disable the Player View for the local player so we don't see ourselves.
+    var localView = Ice.ObjectUtil.FindChildWithTag(localPlayer.GameObject, "PlayerView");
+    if (localView != null) {
+      localView.SetActive(false);
+    }
   }
 
   /** ClientSimulation.Handler interface */
