@@ -33,9 +33,7 @@ public abstract class BaseSimulation {
   protected BaseSimulation(PlayerManager playerManager, NetworkObjectManager networkObjectManager) {
     this.playerManager = playerManager;
     this.networkObjectManager = networkObjectManager;
-
-    // TODO: Handle this dependency better.
-    interpController = GameObject.FindObjectOfType<InterpolationController>();
+    interpController = new InterpolationController();
   }
 
   public void Update(float dt) {

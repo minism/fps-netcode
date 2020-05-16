@@ -20,13 +20,12 @@ public class CPMCameraController : MonoBehaviour {
 
   private void Update() {
     // Handle cursor lock state
-    if (Cursor.lockState != CursorLockMode.Locked) {
-      if (Input.GetButtonDown("Fire1"))
-        Cursor.lockState = CursorLockMode.Locked;
-    } else {
-      if (Input.GetKeyDown(KeyCode.Escape)) {
-        Cursor.lockState = CursorLockMode.None;
-      }
+    if (Cursor.lockState != CursorLockMode.Locked && Input.GetButtonDown("Fire1")) {
+      Cursor.visible = false;
+      Cursor.lockState = CursorLockMode.Locked;
+    } else if (Input.GetKeyDown(KeyCode.Escape)) {
+      Cursor.visible = true;
+      Cursor.lockState = CursorLockMode.None;
     }
 
     // Process rotation input.

@@ -6,7 +6,7 @@
  * Tracks the delta between monitor refresh and simulation tick rate to provide
  * an interpolation factor that view code can use.
  */
-public class InterpolationController : MonoBehaviour {
+public class InterpolationController {
   public static float InterpolationFactor { get; private set; } = 1f;
 
   private Ice.DoubleBuffer<float> timestampBuffer = new Ice.DoubleBuffer<float>();
