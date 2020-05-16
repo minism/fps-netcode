@@ -3,7 +3,7 @@
     "port": 10770,
     "supportedGameId": "fps-net-prediction",
     "maxGameServers": 1,
-    "gameServerPath": "/data/GameServer.x86_64",
+    "gameServerPath": "/data/server.x86_64",
     "gameServerFlags": [
       "-nographics",
       "-batchmode",

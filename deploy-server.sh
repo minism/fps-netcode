@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
 
 set -u
+set -e
+set -x
 
 HOST=$1
 RPATH=$2
 
-set -e
-set -x
-
 # Since we're not using a docker hub, we'll build an image locally as a tarball
 # and simply SCP it up to the server.
 
-# Build the image and tag it as "hotel".
-docker build -t fps-net-server .
+# Build the image.
+docker build . -t fps-net-server -f Docker/Dockerfile
 
 # Save the image to a tarball and compress it.
 docker image save -o /tmp/fps.tar fps-net-server
