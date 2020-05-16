@@ -15,13 +15,6 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
   private float stateTimer = 0;
 
   public void Update() {
-    // Discard everything except the most recent two states.
-    // TODO: Is this the correct procedure?
-    while (stateQueue.Count > 2) {
-      Debug.LogWarning("Discarding excess RemotePlayer states");
-      stateQueue.Dequeue();
-    }
-
     // Synchronize with the server send interval.
     // Rough strategy according to https://www.gabrielgambetta.com/entity-interpolation.html
     stateTimer += Time.deltaTime;
@@ -43,8 +36,10 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
     float theta = stateTimer / Settings.ServerSendInterval;
     transform.position = Vector3.Lerp(
         lastState.Value.Position, nextState.Position, theta);
-    var a = Quaternion.Euler(0, lastState.Value.Rotation.y, 0);
-    var b = Quaternion.Euler(0, nextState.Rotation.y, 0);
+    //var a = Quaternion.Euler(0, lastState.Value.Rotation.y, 0);
+    //var b = Quaternion.Euler(0, nextState.Rotation.y, 0);
+    var a = lastState.Value.Rotation;
+    var b = nextState.Rotation;
     transform.rotation = Quaternion.Slerp(a, b, theta);
   }
 
@@ -64,4 +59,3 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
     stateQueue.Enqueue(state);
   }
 }
-

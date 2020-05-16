@@ -20,6 +20,8 @@ public class Bootstrapper : MonoBehaviour {
 
     // If host and port was specified via command line, start a server immediately.
     if (!string.IsNullOrEmpty(port) && !string.IsNullOrEmpty(host)) {
+      // Also override the target framerate to be reasonable so we dont just burn CPU on a server.
+      Application.targetFrameRate = 60;
       StartGameAsServer(host, int.Parse(port));
     } else {
       SceneManager.LoadScene(initialScene);
