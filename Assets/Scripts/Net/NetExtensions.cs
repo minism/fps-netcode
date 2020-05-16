@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// Extensions to the LiteNetLib NetDataReader/NetDataWriter interface for other types.
 public static class NetExtensions {
-  private const float QUAT_FLOAT_PRECISION_MULT = 10000f;
+  private const float QUAT_FLOAT_PRECISION_MULT = 32767f;
 
   public static void SerializeVector3(NetDataWriter writer, Vector3 vector) {
     writer.Put(vector.x);

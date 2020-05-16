@@ -1,3 +1,3 @@
-﻿- Dynamically adjust client tick lead window using https://www.youtube.com/watch?v=W3aieHjyNvw&t=1771s
-- Camera look should be independent of physics tick rate, should send vector not input.
-- Also player inputs should compress better.
+﻿- Potential source of rewinds might be that camera look is totally clientside, but
+  its not obvious that the orientation we use for movement is exactly what the server
+  does, need to review the code.
