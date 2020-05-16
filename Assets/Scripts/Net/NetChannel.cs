@@ -28,7 +28,6 @@ public class NetChannel : INetEventListener, INetChannel {
   private NetManager netManager;
   private NetPacketProcessor netPacketProcessor;
   private NetDataWriter netDataWriter;
-  private NetMonitor netMonitor;
 
   // Separate net manager only used for ping/pong.
   private PingHelper pingHelper = new PingHelper();
@@ -40,10 +39,14 @@ public class NetChannel : INetEventListener, INetChannel {
   // Debugging stuff.
   private DebugNetworkSettings debugNetworkSettings;
   private float debugLargeStallsTimer;
+  private ulong lastBytesSent, lastBytesRecv;
+  private Ice.TimedAverage sendAverage = new Ice.TimedAverage(1);
+  private Ice.TimedAverage recvAverage = new Ice.TimedAverage(1);
 
   public NetChannel(DebugNetworkSettings debugNetworkSettings) {
     netManager = new NetManager(this) {
       AutoRecycle = true,
+      EnableStatistics = true,
       UnconnectedMessagesEnabled = true, // For ping/pong
     };
     netPacketProcessor = new NetPacketProcessor();
@@ -57,9 +60,6 @@ public class NetChannel : INetEventListener, INetChannel {
         NetExtensions.SerializeVector3, NetExtensions.DeserializeVector3);
     netPacketProcessor.RegisterNestedType(
         NetExtensions.SerializeQuaternion, NetExtensions.DeserializeQuaternion);
-    //netPacketProcessor.RegisterNestedType(
-    //    NetExtensions.SerializeKinematicMotorState,
-    //    NetExtensions.DeserializeKinematicMotorState);
     netPacketProcessor.RegisterNestedType<PlayerSetupData>();
     netPacketProcessor.RegisterNestedType<PlayerMetadata>();
     netPacketProcessor.RegisterNestedType<InitialPlayerState>();
@@ -74,6 +74,7 @@ public class NetChannel : INetEventListener, INetChannel {
   /// Update should be called every frame.
   public void Update() {
     netManager.PollEvents();
+    UpdateAccumulatedStats();
 
     // Handle debug timers.
     debugLargeStallsTimer += Time.deltaTime;
@@ -115,10 +116,6 @@ public class NetChannel : INetEventListener, INetChannel {
     acceptConnections = true;
     netManager.Stop();
     netManager.Start(port);
-  }
-
-  public void SetNetMonitor(NetMonitor netMonitor) {
-    this.netMonitor = netMonitor;
   }
 
   public void PingServer(IPEndPoint endpoint, Action<int> callback) {
@@ -179,6 +176,15 @@ public class NetChannel : INetEventListener, INetChannel {
     netManager.SendToAll(netDataWriter, deliveryMethod, excludedPeer);
   }
 
+  private void UpdateAccumulatedStats() {
+    sendAverage.Update(Time.deltaTime, netManager.Statistics.BytesSent - lastBytesSent);
+    recvAverage.Update(Time.deltaTime, netManager.Statistics.BytesReceived - lastBytesRecv);
+    DebugUI.ShowValue("send bps", sendAverage.Average);
+    DebugUI.ShowValue("recv bps", recvAverage.Average);
+    lastBytesSent = netManager.Statistics.BytesSent;
+    lastBytesRecv = netManager.Statistics.BytesReceived;
+  }
+
   /**
    * Litenet Network events.
    * 
@@ -222,9 +228,6 @@ public class NetChannel : INetEventListener, INetChannel {
   }
 
   public void OnNetworkLatencyUpdate(NetPeer peer, int latency) {
-    if (netMonitor != null) {
-      netMonitor.SetLatency(latency);
-    }
     PeerLatency[peer] = latency;
     DebugUI.ShowValue("ping", latency);
   }

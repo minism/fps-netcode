@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 /// Base component for primary logic and dependencies needed by both client and server.
 [RequireComponent(typeof(NetworkObjectManager))]
 public abstract class BaseLogicController : MonoBehaviour {
-  public NetMonitor netMonitor;
   public DebugNetworkSettings debugNetworkSettings;
 
   // Delegates.
@@ -19,9 +18,6 @@ public abstract class BaseLogicController : MonoBehaviour {
     networkObjectManager = GetComponent<NetworkObjectManager>();
     playerManager = new PlayerManager();
     netChannel = new NetChannel(debugNetworkSettings);
-    if (netMonitor != null) {
-      netChannel.SetNetMonitor(netMonitor);
-    }
 
     netChannel.PeerConnectedHandler += OnPeerConnected;
     netChannel.PeerDisconnectedHandler += OnPeerDisconnected;
@@ -31,7 +27,6 @@ public abstract class BaseLogicController : MonoBehaviour {
 
   protected virtual void Update() {
     netChannel.Update();
-
     if (Input.GetKeyDown(KeyCode.F1)) {
       TearDownGameScene();
       LoadLobbyScene();
