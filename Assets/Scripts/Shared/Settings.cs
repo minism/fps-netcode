@@ -12,9 +12,4 @@ public static class Settings {
   public static int MaxStaleServerStateTicks = Mathf.CeilToInt(
       MaxStaleServerStateAgeMs / SimulationTickRate);
   public static bool FreezeClientOnStaleServer = false;
-
-  // Realtime adjustment settings.
-  public static TimeSpan MinClientAdjustmentInterval = TimeSpan.FromSeconds(1);
-  public static TimeSpan ClientBufferTooHighInterval = TimeSpan.FromSeconds(5);
-  public static uint ClientIdealBufferedInputLimit = 3;
 }
