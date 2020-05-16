@@ -5,6 +5,10 @@
  * 
  * Tracks the delta between monitor refresh and simulation tick rate to provide
  * an interpolation factor that view code can use.
+ * 
+ * TODO: This is a general solution.  In our case, the simulator which owns the accumlator
+ * should just expose the accumluator value explicitly as the interpolation factor, this
+ * is overly complicated, but it works for now.
  */
 public class InterpolationController {
   public static float InterpolationFactor { get; private set; } = 1f;

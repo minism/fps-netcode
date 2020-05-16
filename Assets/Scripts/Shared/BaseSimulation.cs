@@ -42,7 +42,7 @@ public abstract class BaseSimulation {
     while (accumulator >= adjustedTickInterval) {
       accumulator -= adjustedTickInterval;
 
-      interpController.ExplicitFixedUpdate(tickInterval);
+      interpController.ExplicitFixedUpdate(adjustedTickInterval);
 
       // Although we can run the simulation at different speeds, the actual tick processing is
       // *always* done with the original unmodified rate for physics accuracy.

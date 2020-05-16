@@ -287,11 +287,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   netMonitor: {fileID: 0}
   debugNetworkSettings:
-    SimulatePacketLoss: 0
-    SimulateLatency: 0
-    PacketLossChance: 0
-    MinLatency: 0
-    MaxLatency: 0
+    SimulatePacketLoss: 1
+    SimulateLatency: 1
+    PacketLossChance: 15
+    MinLatency: 150
+    MaxLatency: 250
     SimulateLargeStalls: 0
     LargeStallsInterval: 10
     LargeStallsDuration: 2

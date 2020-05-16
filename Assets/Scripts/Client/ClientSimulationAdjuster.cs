@@ -32,7 +32,7 @@ public class ClientSimulationAdjuster : ISimulationAdjuster {
       droppedInputTimer.Restart();
       estimatedMissedInputs++;
     }
-    if (droppedInputTimer.IsRunning && droppedInputTimer.ElapsedMilliseconds < 1000) {
+    if (droppedInputTimer.IsRunning && droppedInputTimer.ElapsedMilliseconds < 1000 || Input.GetKey(KeyCode.F2)) {
       AdjustedInterval = 0.9375f;
       return;
     }
