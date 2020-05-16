@@ -189,6 +189,10 @@ public class ClientSimulation : BaseSimulation {
 
         ++replayTick;
       }
+
+      // TODO(important): After applying corrections, we need to interpolate the local
+      // player view with the last known position.
+      // https://www.codersblock.org/blog/client-side-prediction-in-unity-2018
     }
   }
 }
