@@ -88,10 +88,6 @@ MonoBehaviour:
   sideStrafeSpeed: 1
   jumpSpeed: 8
   holdJumpToBhop: 0
-  playerHead: {fileID: 1860611757}
-  playerHeadYOffset: 1.5
-  xMouseSensitivity: 200
-  yMouseSensitivity: 200
 --- !u!1001 &2629139139142309991
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -99,11 +95,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6697177392055735971}
     m_Modifications:
-    - target: {fileID: 2172487132254254967, guid: d05a15034b1fd144d8fea2659811b728,
-        type: 3}
-      propertyPath: m_Name
-      value: PlayerView
-      objectReference: {fileID: 0}
     - target: {fileID: 1539829439480107176, guid: d05a15034b1fd144d8fea2659811b728,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -159,17 +150,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2172487132254254967, guid: d05a15034b1fd144d8fea2659811b728,
+        type: 3}
+      propertyPath: m_Name
+      value: PlayerView
+      objectReference: {fileID: 0}
+    - target: {fileID: 2172487132254254967, guid: d05a15034b1fd144d8fea2659811b728,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d05a15034b1fd144d8fea2659811b728, type: 3}
 --- !u!4 &3540399582255106255 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1539829439480107176, guid: d05a15034b1fd144d8fea2659811b728,
-    type: 3}
-  m_PrefabInstance: {fileID: 2629139139142309991}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1860611757 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2629139140846941898, guid: d05a15034b1fd144d8fea2659811b728,
     type: 3}
   m_PrefabInstance: {fileID: 2629139139142309991}
   m_PrefabAsset: {fileID: 0}

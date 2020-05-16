@@ -18,19 +18,12 @@ public class CPMCameraController : MonoBehaviour {
     positionBuffer.Push(targetPos);
   }
 
-  private void LateUpdate() {
-    if (followTarget == null) {
-      return;
-    }
+  private void Update() {
+    // Handle cursor lock state
     if (Cursor.lockState != CursorLockMode.Locked) {
       if (Input.GetButtonDown("Fire1"))
         Cursor.lockState = CursorLockMode.Locked;
     }
-
-    // Lerp position based on buffer.
-    var newPos = positionBuffer.New();
-    var oldPos = positionBuffer.Old();
-    transform.position = Vector3.Lerp(oldPos, newPos, InterpolationController.InterpolationFactor);
 
     // Process rotation input.
     rotX -= Input.GetAxisRaw("Mouse Y") * xMouseSensitivity;
@@ -43,5 +36,11 @@ public class CPMCameraController : MonoBehaviour {
     // But this means the player can freely look around at say, 144hz, even if we're running
     // a much lower physics or network tick rate.
     transform.rotation = Quaternion.Euler(rotX, rotY, 0);
+
+    // Interpolate position.
+    transform.position = Vector3.Lerp(
+                                positionBuffer.Old(),
+                                positionBuffer.New(),
+                                InterpolationController.InterpolationFactor);
   }
 }

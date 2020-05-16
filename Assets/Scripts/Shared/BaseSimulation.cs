@@ -1,4 +1,6 @@
-﻿public interface ISimulationAdjuster {
+﻿using UnityEngine;
+
+public interface ISimulationAdjuster {
   float AdjustedInterval { get; }
 }
 
@@ -26,9 +28,14 @@ public abstract class BaseSimulation {
 
   private float accumulator;
 
+  private InterpolationController interpController;
+
   protected BaseSimulation(PlayerManager playerManager, NetworkObjectManager networkObjectManager) {
     this.playerManager = playerManager;
     this.networkObjectManager = networkObjectManager;
+
+    // TODO: Handle this dependency better.
+    interpController = GameObject.FindObjectOfType<InterpolationController>();
   }
 
   public void Update(float dt) {
@@ -37,11 +44,14 @@ public abstract class BaseSimulation {
     while (accumulator >= adjustedTickInterval) {
       accumulator -= adjustedTickInterval;
 
+      interpController.ExplicitFixedUpdate(tickInterval);
+
       // Although we can run the simulation at different speeds, the actual tick processing is
       // *always* done with the original unmodified rate for physics accuracy.
       // This has a time-warping effect.
       Tick(tickInterval);
     }
+    interpController.ExplicitUpdate(dt);
     PostUpdate();
   }
 

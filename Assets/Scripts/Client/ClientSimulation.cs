@@ -18,6 +18,7 @@ public class ClientSimulation : BaseSimulation {
   // The current world tick and last ack'd server world tick.
   private uint lastServerWorldTick = 0;
 
+  // Delegate for adjusting the simulation speed based on incoming state data.
   private ClientSimulationAdjuster clientSimulationAdjuster;
 
   // Average of the excess size the of incoming world state queue, after tick processing.

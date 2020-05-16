@@ -11,16 +11,22 @@ public class InterpolationController : MonoBehaviour {
 
   private Ice.DoubleBuffer<float> timestampBuffer = new Ice.DoubleBuffer<float>();
 
-  private void FixedUpdate() {
-    timestampBuffer.Push(Time.fixedTime);
+  private float totalFixedTime;
+  private float totalTime;
+
+  public void ExplicitFixedUpdate(float dt) {
+    totalFixedTime += dt;
+    timestampBuffer.Push(totalFixedTime);
   }
 
-  private void Update() {
+  public void ExplicitUpdate(float dt) {
+    totalTime += dt;
+
     float newTime = timestampBuffer.New();
     float oldTime = timestampBuffer.Old();
 
     if (newTime != oldTime) {
-      InterpolationFactor = (Time.time - newTime) / (newTime - oldTime);
+      InterpolationFactor = (totalTime - newTime) / (newTime - oldTime);
     } else {
       InterpolationFactor = 1;
     }
