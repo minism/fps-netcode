@@ -20,6 +20,9 @@ public class ClientSimulation : BaseSimulation {
 
   private ClientSimulationAdjuster clientSimulationAdjuster;
 
+  // Average of the excess size the of incoming world state queue, after tick processing.
+  private Ice.MovingAverage excessWorldStateAvg = new Ice.MovingAverage(10);
+
   // I/O interface for player inputs.
   public interface Handler {
     PlayerInputs? SampleInputs();
@@ -104,12 +107,13 @@ public class ClientSimulation : BaseSimulation {
   protected override void PostUpdate() {
     // Process the remaining world states if there are any, though we expect this to be empty?
     // TODO: This is going to need to be structured pretty differently with other players.
+    excessWorldStateAvg.Push(worldStateQueue.Count);
     while (worldStateQueue.Count > 0) {
-      Debug.Log("Had extra server states to process after tick.");
       ProcessServerWorldState();
     }
     // Show some debug monitoring values.
     DebugUI.ShowValue("cl rewinds", replayedStates);
+    DebugUI.ShowValue("incoming state excess", excessWorldStateAvg.Average());
     clientSimulationAdjuster.Monitoring();
   }
 
