@@ -108,9 +108,9 @@ public class ClientSimulation : BaseSimulation {
     // Process the remaining world states if there are any, though we expect this to be empty?
     // TODO: This is going to need to be structured pretty differently with other players.
     excessWorldStateAvg.Push(worldStateQueue.Count);
-    while (worldStateQueue.Count > 0) {
-      ProcessServerWorldState();
-    }
+    //while (worldStateQueue.Count > 0) {
+    //  ProcessServerWorldState();
+    //}
     // Show some debug monitoring values.
     DebugUI.ShowValue("cl rewinds", replayedStates);
     DebugUI.ShowValue("incoming state excess", excessWorldStateAvg.Average());
