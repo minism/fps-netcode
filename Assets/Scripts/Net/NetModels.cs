@@ -80,29 +80,6 @@ public struct PlayerState : INetSerializable {
   }
 }
 
-/// Player input data.
-public struct PlayerInputs : INetSerializable {
-  public float ForwardAxis;
-  public float RightAxis;
-  // TODO: Compress via https://gafferongames.com/post/snapshot_compression/
-  public Quaternion ViewDirection;
-  public bool Jump;
-
-  public void Serialize(NetDataWriter writer) {
-    writer.Put(ForwardAxis);
-    writer.Put(RightAxis);
-    writer.Put(ViewDirection);
-    writer.Put(Jump);
-  }
-
-  public void Deserialize(NetDataReader reader) {
-    ForwardAxis = reader.GetFloat();
-    RightAxis = reader.GetFloat();
-    ViewDirection = reader.GetQuaternion();
-    Jump = reader.GetBool();
-  }
-}
-
 public struct NetworkObjectState : INetSerializable {
   public ushort NetworkId;
 

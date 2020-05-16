@@ -91,7 +91,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   }
 
   public void SendInputs(NetCommand.PlayerInputCommand command) {
-    netChannel.SendCommand(serverPeer, command);
+    netChannel.SendNSCommand(serverPeer, command);
   }
 
   /** Network command handling */

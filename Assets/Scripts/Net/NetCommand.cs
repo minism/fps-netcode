@@ -1,6 +1,8 @@
 using LiteNetLib;
+using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// Network top-level command data structures.
 namespace NetCommand {
@@ -10,12 +12,38 @@ namespace NetCommand {
     public PlayerSetupData PlayerSetupData { get; set; }
   }
 
-  public class PlayerInputCommand {
+  /**
+   * Custom serializable structure for reduntant player inputs.
+   * 
+   * Uses two strategies for compression:
+   *   - Player keys are compressed using a bitfield.
+   *   - We only store ticks where keys actually changed.
+   */
+  public struct PlayerInputCommand : INetSerializable {
     // The world tick for the first input in the array.
-    public uint StartWorldTick { get; set; }
+    public uint StartWorldTick;
 
     // An array of inputs, one entry for tick.  Ticks are guaranteed to be contiguous.
-    public PlayerInputs[] Inputs { get; set; }
+    public PlayerInputs[] Inputs;
+
+    public void Serialize(NetDataWriter writer) {
+      writer.Put(StartWorldTick);
+      writer.Put(Inputs.Length);
+      foreach (var input in Inputs) {
+        writer.Put(input.ViewDirection);
+        writer.Put(input.GetKeyBitfield());
+      }
+    }
+
+    public void Deserialize(NetDataReader reader) {
+      StartWorldTick = reader.GetUInt();
+      var length = reader.GetInt();
+      Inputs = new PlayerInputs[length];
+      for (int i = 0; i < length; i++) {
+        Inputs[i].ViewDirection = reader.GetQuaternion();
+        Inputs[i].ApplyKeyBitfield(reader.GetByte());
+      }
+    }
   }
 
   /** Server -> Client commands. */

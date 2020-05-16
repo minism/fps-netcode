@@ -65,7 +65,6 @@ public class NetChannel : INetEventListener, INetChannel {
     netPacketProcessor.RegisterNestedType<InitialPlayerState>();
     netPacketProcessor.RegisterNestedType<PlayerState>();
     netPacketProcessor.RegisterNestedType<NetworkObjectState>();
-    netPacketProcessor.RegisterNestedType<PlayerInputs>();
 
     // The client network manager is started immediately for unconnected pings.
     netManager.Start();
@@ -139,8 +138,17 @@ public class NetChannel : INetEventListener, INetChannel {
     netPacketProcessor.SubscribeReusable(onReceiveHandler);
   }
 
+  public void SubscribeNS<T>(Action<T> onReceiveHandler) where T : INetSerializable, new() {
+    // TODO: Can't get reusable with this, is that ok?
+    netPacketProcessor.SubscribeNetSerializable(onReceiveHandler);
+  }
+
   public void Subscribe<T>(Action<T, NetPeer> onReceiveHandler) where T : class, new() {
     netPacketProcessor.SubscribeReusable(onReceiveHandler);
+  }
+
+  public void SubscribeNS<T>(Action<T, NetPeer> onReceiveHandler) where T : INetSerializable, new() {
+    netPacketProcessor.SubscribeNetSerializable(onReceiveHandler);
   }
 
   public void SubscribeQueue<T>(Queue<T> queue) where T : class, new() {
@@ -160,6 +168,11 @@ public class NetChannel : INetEventListener, INetChannel {
   public void SendCommand<T>(NetPeer peer, T command) where T : class, new() {
     var deliveryMethod = NetCommand.Metadata.DeliveryType[typeof(T)];
     netPacketProcessor.Send(peer, command, deliveryMethod);
+  }
+
+  public void SendNSCommand<T>(NetPeer peer, T command) where T : INetSerializable, new() {
+    var deliveryMethod = NetCommand.Metadata.DeliveryType[typeof(T)];
+    netPacketProcessor.SendNetSerializable(peer, command, deliveryMethod);
   }
 
   public void BroadcastCommand<T>(T command) where T : class, new() {
