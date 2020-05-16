@@ -11,11 +11,17 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
 
   // Interpolate between incoming server states.
   private Queue<PlayerState> stateQueue = new Queue<PlayerState>();
-  //private DoubleBuffer<PlayerState> stateBuffer = new DoubleBuffer<PlayerState>();
   private PlayerState? lastState = null;
   private float stateTimer = 0;
 
   public void Update() {
+    // Discard everything except the most recent two states.
+    // TODO: Is this the correct procedure?
+    while (stateQueue.Count > 2) {
+      Debug.LogWarning("Discarding excess RemotePlayer states");
+      stateQueue.Dequeue();
+    }
+
     // Synchronize with the server send interval.
     // Rough strategy according to https://www.gabrielgambetta.com/entity-interpolation.html
     stateTimer += Time.deltaTime;
@@ -32,8 +38,6 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
       return;
     }
 
-    // TODO: Probably need to handle a queue size of 3 if we've fallen behind, snap?
-    // Or just throw an exception, because we shouldn't get that far behind.
     DebugUI.ShowValue("RemotePlayer q size", stateQueue.Count);
     var nextState = stateQueue.Peek();
     float theta = stateTimer / Settings.ServerSendInterval;
@@ -42,16 +46,6 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
     var a = Quaternion.Euler(0, lastState.Value.Rotation.y, 0);
     var b = Quaternion.Euler(0, nextState.Rotation.y, 0);
     transform.rotation = Quaternion.Slerp(a, b, theta);
-
-
-    //transform.position = Vector3.Lerp(
-    //                            stateBuffer.Old().Position,
-    //                            stateBuffer.New().Position,
-    //                            InterpolationController.InterpolationFactor);
-    //transform.rotation = Quaternion.Slerp(
-    //                            stateBuffer.Old().Rotation,
-    //                            stateBuffer.New().Rotation,
-    //                            InterpolationController.InterpolationFactor);
   }
 
   public void Simulate(float dt) { }
@@ -68,7 +62,6 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
 
   public void ApplyNetworkState(PlayerState state) {
     stateQueue.Enqueue(state);
-    //stateBuffer.Push(state);
   }
 }
 
