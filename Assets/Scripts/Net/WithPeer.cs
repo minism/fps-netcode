@@ -1,4 +1,4 @@
-﻿using LiteNetLib;
+using LiteNetLib;
 
 public struct WithPeer<T> {
   public NetPeer Peer;

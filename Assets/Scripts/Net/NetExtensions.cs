@@ -1,4 +1,4 @@
-﻿using LiteNetLib.Utils;
+using LiteNetLib.Utils;
 using UnityEngine;
 
 /// Extensions to the LiteNetLib NetDataReader/NetDataWriter interface for other types.

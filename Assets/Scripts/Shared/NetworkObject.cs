@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 /// Indicates a synchronized presence over the network for this object.
 /// NetworkID is common to all clients and server.

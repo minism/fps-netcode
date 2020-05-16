@@ -1,4 +1,4 @@
-﻿using LiteNetLib;
+using LiteNetLib;
 using System;
 using System.Net;
 using UnityEngine;

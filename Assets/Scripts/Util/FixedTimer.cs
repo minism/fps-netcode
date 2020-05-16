@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 /// Simple timer which executes a callback at an exactly even rate. For accurate
 /// physics simulations.

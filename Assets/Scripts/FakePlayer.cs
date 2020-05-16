@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class FakePlayer : MonoBehaviour, IPlayerController {
   public float maxVelocity = 30;

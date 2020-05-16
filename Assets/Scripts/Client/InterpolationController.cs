@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 /**
  * Based on https://www.kinematicsoup.com/news/2016/8/9/rrypp5tkubynjwxhxjzd42s3o034o8

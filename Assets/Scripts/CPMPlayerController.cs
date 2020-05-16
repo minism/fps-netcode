@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 public class CPMPlayerController : MonoBehaviour, IPlayerController {

@@ -1,4 +1,4 @@
-﻿using LiteNetLib;
+using LiteNetLib;
 using UnityEngine;
 
 /// Top-level handle for an active player in the game.

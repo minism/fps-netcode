@@ -1,4 +1,4 @@
-﻿using Priority_Queue;
+using Priority_Queue;
 using System.Collections.Generic;
 
 // Simple structure representing a particular players inputs at a world tick.

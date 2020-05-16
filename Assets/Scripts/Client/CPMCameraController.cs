@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Ice;
 
 public class CPMCameraController : MonoBehaviour {
