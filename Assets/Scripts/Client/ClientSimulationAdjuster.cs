@@ -32,13 +32,20 @@ public class ClientSimulationAdjuster : ISimulationAdjuster {
       droppedInputTimer.Restart();
       estimatedMissedInputs++;
     }
+
+    var avg = actualTickLeadAvg.Average();
     if (droppedInputTimer.IsRunning && droppedInputTimer.ElapsedMilliseconds < 1000 || Input.GetKey(KeyCode.F2)) {
-      AdjustedInterval = 0.9375f;
+      if (avg <= -16) {
+        AdjustedInterval = 0.875f;
+      } else if (avg <= -8) {
+        AdjustedInterval = 0.9375f;
+      } else {
+        AdjustedInterval = 0.96875f;
+      }
       return;
     }
 
     // Check for a steady average of a healthy connection before backing off the simulation.
-    var avg = actualTickLeadAvg.Average();
     if (avg >= 16) {
       AdjustedInterval = 1.125f;
     } else if (avg >= 8) {

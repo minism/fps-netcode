@@ -87,7 +87,7 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
     // Process attacks.
     attackCooldownTimer -= dt;
     if (inputs.Fire && attackCooldownTimer <= 0) {
-      attackCooldownTimer += 1f;
+      attackCooldownTimer = 1f;
       actionHandler.CreatePlayerAttack(
           NetworkObjectType.HITSCAN_ATTACK, transform.position, inputs.ViewDirection);
     }
