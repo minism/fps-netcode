@@ -176,6 +176,7 @@ MonoBehaviour:
     LargeStallsDuration: 0
     LargeStallsLatency: 0
     LargeStallsPacketLoss: 0
+  debugAutoMovement: 0
 --- !u!114 &289582694
 MonoBehaviour:
   m_ObjectHideFlags: 0

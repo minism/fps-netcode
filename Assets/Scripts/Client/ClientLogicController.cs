@@ -3,6 +3,9 @@ using UnityEngine;
 
 /// Primary logic controller for managing client game state.
 public class ClientLogicController : BaseLogicController, ClientSimulation.Handler {
+  [Header("Client debug settings")]
+  public bool debugAutoMovement;
+
   private NetPeer serverPeer;
   private ClientPlayerInput localPlayerInput;
   private Player localPlayer;
@@ -71,6 +74,9 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   private void InitializeLocalPlayer() {
     // Create input component.
     localPlayerInput = localPlayer.GameObject.AddComponent<ClientPlayerInput>();
+    if (debugAutoMovement) {
+      localPlayerInput.DebugAutoMovement = true;
+    }
 
     // Setup camera and attach to the local player camera anchor.
     var cpmCamera = Camera.main.gameObject.AddComponent<CPMCameraController>();
