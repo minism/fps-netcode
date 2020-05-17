@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 [Flags]
-public enum PlayerKeys {
+public enum PlayerKeys : byte {
   None = 0,
   Forward = 1,
   Back = 2,

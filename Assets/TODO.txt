@@ -1,3 +1,12 @@
 ﻿- Potential source of rewinds might be that camera look is totally clientside, but
   its not obvious that the orientation we use for movement is exactly what the server
   does, need to review the code.
+
+Rough procedure for object spawning:
+
+1. Spawn the Bullet instance locally, assign it a local spawnRequestId
+2. Send an ObjectSpawnRequest message to the server with spawnRequestId
+3. Server instantiates its own version of the object and assigns it a global networkId
+4. Server broadcasts down ObjectSpawn with networkId along with playerId:spawnRequestId
+5. The creating player looks up its object via playerId:spawnRequestId, and maps the network Id to the existing object.
+6. All other players simply insert an object and start simulating.
