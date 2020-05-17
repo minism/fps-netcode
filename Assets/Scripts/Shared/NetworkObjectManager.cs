@@ -70,12 +70,23 @@ public class NetworkObjectManager : MonoBehaviour {
     }
   }
 
-  public void SpawnNetworkObject(NetworkObjectType type, Vector3 position, Quaternion orientation) {
+  public NetworkObject SpawnPlayerObject(
+      ushort networkId, NetworkObjectType type, Vector3 position, Quaternion orientation,
+      bool forLocalPlayer = false) {
     if (type != NetworkObjectType.HITSCAN_ATTACK) {
       throw new NotImplementedException();
     }
 
     var obj = Instantiate(hitscanAttackPrefab, position, orientation);
+
+    // For local players we skip the network ID for now.
+    // TODO - We'll still need to track this and assign it to the server network ID later.
+    if (!forLocalPlayer) {
+      obj.NetworkId = EnsureNetworkId(networkId);
+      activeObjects[obj.NetworkId] = obj;
+    }
+
+    return obj;
   }
 
   public void Clear() {

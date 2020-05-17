@@ -35,5 +35,5 @@ public class FakePlayer : MonoBehaviour, IPlayerController {
     };
   }
 
-  public void SetPlayerActionHandler(IPlayerActionHandler handler) { }
+  public void SetPlayerAttackDelegate(PlayerAttackDelegate d) { }
 }

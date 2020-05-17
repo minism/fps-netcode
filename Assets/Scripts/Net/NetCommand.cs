@@ -65,6 +65,22 @@ namespace NetCommand {
     public byte PlayerId { get; set; }
   }
 
+  public class SpawnObject {
+    // TODO: Should world tick go in here?
+    // TODO: Utilize network object state better.
+    public NetworkObjectState NetworkObjectState { get; set; }
+
+    // The type of object being created.
+    public NetworkObjectType Type { get; set; }
+
+    // The player that created the object.
+    public byte CreatorPlayerId { get; set; }
+
+    // Initial state for the object.
+    public Vector3 Position { get; set; }
+    public Quaternion Orientation { get; set; }
+  }
+
   public class WorldState {
     // The world tick this data represents.
     public uint WorldTick { get; set; }
@@ -99,6 +115,7 @@ namespace NetCommand {
       { typeof(PlayerJoined), DeliveryMethod.ReliableOrdered },
       { typeof(PlayerLeft), DeliveryMethod.ReliableOrdered },
       { typeof(AdjustSimulation), DeliveryMethod.ReliableOrdered },
+      { typeof(SpawnObject), DeliveryMethod.ReliableOrdered },
 
       // Input and world state can be unreliable since it is sent every frame, but we use
       // sequenced so that older packets are simply dropped since we don't care about them anymore.

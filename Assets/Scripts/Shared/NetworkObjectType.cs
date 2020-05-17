@@ -1,3 +1,3 @@
-﻿public enum NetworkObjectType {
+﻿public enum NetworkObjectType : byte {
   HITSCAN_ATTACK,
 };

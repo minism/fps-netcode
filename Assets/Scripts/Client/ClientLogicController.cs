@@ -2,8 +2,7 @@ using LiteNetLib;
 using UnityEngine;
 
 /// Primary logic controller for managing client game state.
-public class ClientLogicController : BaseLogicController,
-    ClientSimulation.Handler, IPlayerActionHandler {
+public class ClientLogicController : BaseLogicController, ClientSimulation.Handler {
   private NetPeer serverPeer;
   private ClientPlayerInput localPlayerInput;
   private Player localPlayer;
@@ -30,6 +29,7 @@ public class ClientLogicController : BaseLogicController,
     netChannel.Subscribe<NetCommand.JoinAccepted>(HandleJoinAccepted);
     netChannel.Subscribe<NetCommand.PlayerJoined>(HandleOtherPlayerJoined);
     netChannel.Subscribe<NetCommand.PlayerLeft>(HandleOtherPlayerLeft);
+    netChannel.Subscribe<NetCommand.SpawnObject>(HandleSpawnObject);
     netChannel.Subscribe<NetCommand.WorldState>(HandleWorldState);
   }
 
@@ -74,10 +74,10 @@ public class ClientLogicController : BaseLogicController,
 
     // Setup camera and attach to the local player camera anchor.
     var cpmCamera = Camera.main.gameObject.AddComponent<CPMCameraController>();
-    cpmCamera.followTarget = localPlayer.GameObject.transform;
+    cpmCamera.player = localPlayer.Controller as CPMPlayerController;
 
-    // Inject the action handler.
-    localPlayer.Controller.SetPlayerActionHandler(this);
+    // Inject the attack handler.
+    localPlayer.Controller.SetPlayerAttackDelegate(HandleLocalPlayerAttack);
 
     // Disable the Player View for the local player so we don't see ourselves.
     var localView = Ice.ObjectUtil.FindChildWithTag(localPlayer.GameObject, "PlayerView");
@@ -135,6 +135,15 @@ public class ClientLogicController : BaseLogicController,
     playerManager.RemovePlayer(player.Id);
   }
 
+  private void HandleSpawnObject(NetCommand.SpawnObject cmd) {
+    Debug.Log($"Got {cmd.NetworkObjectState.NetworkId}");
+    networkObjectManager.SpawnPlayerObject(
+        cmd.NetworkObjectState.NetworkId,
+        cmd.Type,
+        cmd.Position,
+        cmd.Orientation);
+  }
+
   protected override void OnPeerConnected(NetPeer peer) {
     Debug.Log("Connected to host: " + peer.EndPoint);
     serverPeer = peer;
@@ -162,7 +171,8 @@ public class ClientLogicController : BaseLogicController,
    * 
    * TODO - Consider breaking this into a delegate.
    */
-  public void CreatePlayerAttack(NetworkObjectType type, Vector3 position, Quaternion orientation) {
-    networkObjectManager.SpawnNetworkObject(type, position, orientation);
+  public void HandleLocalPlayerAttack(
+      NetworkObjectType type, Vector3 position, Quaternion orientation) {
+    networkObjectManager.SpawnPlayerObject(0, type, position, orientation, true);
   }
 }

@@ -2,8 +2,7 @@ using UnityEngine;
 using Ice;
 
 public class CPMCameraController : MonoBehaviour {
-  public Transform followTarget;
-  public float playerHeadHeight = 1.5f;
+  public CPMPlayerController player;
 
   public float xMouseSensitivity = 2f;
   public float yMouseSensitivity = 2f;
@@ -14,7 +13,7 @@ public class CPMCameraController : MonoBehaviour {
   private DoubleBuffer<Vector3> positionBuffer = new DoubleBuffer<Vector3>();
 
   public void PlayerPositionUpdated() {
-    var targetPos = followTarget.position + Vector3.up * playerHeadHeight;
+    var targetPos = player.transform.position + Vector3.up * player.playerHeadHeight;
     positionBuffer.Push(targetPos);
   }
 

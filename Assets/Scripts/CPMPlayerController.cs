@@ -18,6 +18,9 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   public float jumpSpeed = 8.0f;                // The speed at which the character's up axis gains when hitting jump
   public bool holdJumpToBhop = false;           // When enabled allows player to just hold jump button to keep on bhopping
 
+  // Camera/attack stuff
+  public float playerHeadHeight = 1.5f;
+
   // Lazy getter.
   private CharacterController controller {
     get {
@@ -54,11 +57,11 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   // TODO: Needs more work
   private Vector3 AttackPosition {
     get {
-      return Camera.main.transform.position + Camera.main.transform.right * 0.2f;
+      return transform.position + Vector3.up * playerHeadHeight + transform.right * 0.2f;
     }
   }
 
-  private IPlayerActionHandler actionHandler;
+  private PlayerAttackDelegate attackDelegate;
 
   private void Update() {
     // The CPM controller is simulated manually via Simulate(), for now this method does nothing.
@@ -69,8 +72,8 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
    * IPlayerController interface
    */
 
-  public void SetPlayerActionHandler(IPlayerActionHandler handler) {
-    this.actionHandler = handler;
+  public void SetPlayerAttackDelegate(PlayerAttackDelegate attackDelegate) {
+    this.attackDelegate = attackDelegate;
   }
 
   public void SetPlayerInputs(PlayerInputs inputs) {
@@ -95,7 +98,7 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
     attackCooldownTimer -= dt;
     if (inputs.Fire && attackCooldownTimer <= 0) {
       attackCooldownTimer = 1f;
-      actionHandler.CreatePlayerAttack(
+      attackDelegate(
           NetworkObjectType.HITSCAN_ATTACK, AttackPosition, inputs.ViewDirection);
     }
   }

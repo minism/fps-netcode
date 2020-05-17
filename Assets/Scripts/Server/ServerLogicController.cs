@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 /// Primary logic controller for managing server game state.
-public class ServerLogicController : BaseLogicController,
-    ServerSimulation.Handler, IPlayerActionHandler {
+public class ServerLogicController : BaseLogicController, ServerSimulation.Handler {
   // Debugging.
   public float debugPhysicsErrorChance;
 
@@ -83,8 +82,11 @@ public class ServerLogicController : BaseLogicController,
     // Let the simulation initialize any state for the player.
     simulation.InitializePlayerState(player);
 
-    // Inject the action handler.
-    player.Controller.SetPlayerActionHandler(this);
+    // Inject the attack handler.
+    player.Controller.SetPlayerAttackDelegate(
+      (NetworkObjectType type, Vector3 attackPosition, Quaternion orientation) => {
+        HandlePlayerAttack(player, type, attackPosition, orientation);
+      });
 
     return player;
   }
@@ -167,7 +169,24 @@ public class ServerLogicController : BaseLogicController,
    * 
    * TODO - Consider breaking this into a delegate.
    */
-  public void CreatePlayerAttack(NetworkObjectType type, Vector3 position, Quaternion orientation) {
-    networkObjectManager.SpawnNetworkObject(type, position, orientation);
+  public void HandlePlayerAttack(
+      Player player, NetworkObjectType type, Vector3 position, Quaternion orientation) {
+    var obj = networkObjectManager.SpawnPlayerObject(0, type, position, orientation);
+
+    // Broadcast to everyone but the creating player about the object being spawned.
+    // TODO: This system needs to be improved.  The creation should be broadcast to the
+    // original player as well, and for live objects, the original player should start
+    // syncing its locally created object via network ID for subsequent world state updates.
+    // For now this works because our only attack is hitscan, but this will be needed for
+    // rockets.
+    var spawnObjectCmd = new NetCommand.SpawnObject {
+      NetworkObjectState = obj.ToNetworkState(),
+      Type = type,
+      CreatorPlayerId = player.Id,
+      Position = obj.transform.position,
+      Orientation = obj.transform.rotation,
+    };
+    Debug.Log($"Sent {spawnObjectCmd.NetworkObjectState.NetworkId}");
+    netChannel.BroadcastCommand(spawnObjectCmd, player.Peer);
   }
 }
