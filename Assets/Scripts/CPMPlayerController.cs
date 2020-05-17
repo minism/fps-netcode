@@ -101,6 +101,11 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
       attackDelegate(
           NetworkObjectType.HITSCAN_ATTACK, AttackPosition, inputs.ViewDirection);
     }
+
+    // HACK: Reset to zero when falling off the edge for now.
+    if (transform.position.y < -10) {
+      transform.position = Vector3.zero;
+    }
   }
 
   public PlayerState ToNetworkState() {
