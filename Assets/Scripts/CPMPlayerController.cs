@@ -48,6 +48,11 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   // Q3: players can queue the next jump just before he hits the ground
   private bool wishJump = false;
 
+  // TODO: Extend this
+  private float attackCooldownTimer = 0f;
+
+  private IPlayerActionHandler actionHandler;
+
   private void Update() {
     // The CPM controller is simulated manually via Simulate(), for now this method does nothing.
     return;
@@ -56,6 +61,10 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   /**
    * IPlayerController interface
    */
+
+  public void SetPlayerActionHandler(IPlayerActionHandler handler) {
+    this.actionHandler = handler;
+  }
 
   public void SetPlayerInputs(PlayerInputs inputs) {
     this.inputs = inputs;
@@ -74,6 +83,14 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
 
     // Apply the final velocity to the character controller.
     controller.Move(playerVelocity * dt);
+
+    // Process attacks.
+    attackCooldownTimer -= dt;
+    if (inputs.Fire && attackCooldownTimer <= 0) {
+      attackCooldownTimer += 1f;
+      actionHandler.CreatePlayerAttack(
+          NetworkObjectType.HITSCAN_ATTACK, transform.position, inputs.ViewDirection);
+    }
   }
 
   public PlayerState ToNetworkState() {

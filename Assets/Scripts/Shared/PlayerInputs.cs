@@ -9,13 +9,14 @@ public enum PlayerKeys : byte {
   Right = 4,
   Left = 8,
   Jump = 16,
+  Fire = 32,
 }
 
 /// Player input data for a single frame.
 /// Note that this is not directly serializable, its meant to be embedded and
 /// compressed in a larger message combining multiple inputs.
 public struct PlayerInputs {
-  public bool Forward, Back, Left, Right, Jump;
+  public bool Forward, Back, Left, Right, Jump, Fire;
 
   // TODO: Compress via https://gafferongames.com/post/snapshot_compression/
   public Quaternion ViewDirection;
@@ -39,6 +40,7 @@ public struct PlayerInputs {
     if (Right) keyField |= PlayerKeys.Right;
     if (Left) keyField |= PlayerKeys.Left;
     if (Jump) keyField |= PlayerKeys.Jump;
+    if (Fire) keyField |= PlayerKeys.Fire;
     return (byte)keyField;
   }
 
@@ -49,5 +51,6 @@ public struct PlayerInputs {
     Right = (keyField & PlayerKeys.Right) != 0;
     Left = (keyField & PlayerKeys.Left) != 0;
     Jump = (keyField & PlayerKeys.Jump) != 0;
+    Fire = (keyField & PlayerKeys.Fire) != 0;
   }
 }

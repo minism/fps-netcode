@@ -34,4 +34,6 @@ public class FakePlayer : MonoBehaviour, IPlayerController {
       Velocity = velocity,
     };
   }
+
+  public void SetPlayerActionHandler(IPlayerActionHandler handler) { }
 }

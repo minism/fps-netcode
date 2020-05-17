@@ -12,6 +12,7 @@ public class ClientPlayerInput : MonoBehaviour {
       Left = horiz < 0,
       ViewDirection = Camera.main.transform.rotation,
       Jump = Input.GetKey(KeyCode.Space),
+      Fire = Input.GetMouseButton(0),
     };
   }
 }

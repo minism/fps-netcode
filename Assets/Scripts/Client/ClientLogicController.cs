@@ -2,7 +2,8 @@ using LiteNetLib;
 using UnityEngine;
 
 /// Primary logic controller for managing client game state.
-public class ClientLogicController : BaseLogicController, ClientSimulation.Handler {
+public class ClientLogicController : BaseLogicController,
+    ClientSimulation.Handler, IPlayerActionHandler {
   private NetPeer serverPeer;
   private ClientPlayerInput localPlayerInput;
   private Player localPlayer;
@@ -74,6 +75,9 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     // Setup camera and attach to the local player camera anchor.
     var cpmCamera = Camera.main.gameObject.AddComponent<CPMCameraController>();
     cpmCamera.followTarget = localPlayer.GameObject.transform;
+
+    // Inject the action handler.
+    localPlayer.Controller.SetPlayerActionHandler(this);
 
     // Disable the Player View for the local player so we don't see ourselves.
     var localView = Ice.ObjectUtil.FindChildWithTag(localPlayer.GameObject, "PlayerView");
@@ -151,5 +155,14 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     // Return to the lobby.
     TearDownGameScene();
     LoadLobbyScene();
+  }
+
+  /**
+   * IPlayerActionHandler interface.
+   * 
+   * TODO - Consider breaking this into a delegate.
+   */
+  public void CreatePlayerAttack(NetworkObjectType type, Vector3 position, Quaternion orientation) {
+    networkObjectManager.SpawnNetworkObject(type, position, orientation);
   }
 }

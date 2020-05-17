@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 /// Primary logic controller for managing server game state.
-public class ServerLogicController : BaseLogicController, ServerSimulation.Handler {
+public class ServerLogicController : BaseLogicController,
+    ServerSimulation.Handler, IPlayerActionHandler {
   // Debugging.
   public float debugPhysicsErrorChance;
 
@@ -82,6 +83,9 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     // Let the simulation initialize any state for the player.
     simulation.InitializePlayerState(player);
 
+    // Inject the action handler.
+    player.Controller.SetPlayerActionHandler(this);
+
     return player;
   }
 
@@ -156,5 +160,14 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     if (player != null) {
       DestroyServerPlayer(player);
     }
+  }
+
+  /**
+   * IPlayerActionHandler interface.
+   * 
+   * TODO - Consider breaking this into a delegate.
+   */
+  public void CreatePlayerAttack(NetworkObjectType type, Vector3 position, Quaternion orientation) {
+    networkObjectManager.SpawnNetworkObject(type, position, orientation);
   }
 }

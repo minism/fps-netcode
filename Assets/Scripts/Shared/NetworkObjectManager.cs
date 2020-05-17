@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -8,6 +9,7 @@ public class NetworkObjectManager : MonoBehaviour {
 
   public NetworkObject basePlayerPrefab;
   public NetworkObject remotePlayerPrefab;
+  public NetworkObject hitscanAttackPrefab;
 
   // Currently managed network objects indexed by their network ID.
   private Dictionary<ushort, NetworkObject> activeObjects;
@@ -66,6 +68,14 @@ public class NetworkObjectManager : MonoBehaviour {
     } catch (KeyNotFoundException) {
       Debug.LogError($"Couldn't destroy non-existant network object #{networkId}");
     }
+  }
+
+  public void SpawnNetworkObject(NetworkObjectType type, Vector3 position, Quaternion orientation) {
+    if (type != NetworkObjectType.HITSCAN_ATTACK) {
+      throw new NotImplementedException();
+    }
+
+    var obj = Instantiate(hitscanAttackPrefab, position, orientation);
   }
 
   public void Clear() {

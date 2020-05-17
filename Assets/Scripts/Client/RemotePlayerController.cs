@@ -45,6 +45,8 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
 
   public void Simulate(float dt) { }
 
+  public void SetPlayerActionHandler(IPlayerActionHandler handler) { }
+
   public PlayerState ToNetworkState() {
     // We dont expect this to ever be called from the client.
     throw new System.NotImplementedException();
