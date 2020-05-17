@@ -75,7 +75,7 @@ LineRenderer:
   m_SortingOrder: 0
   m_Positions:
   - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 20}
+  - {x: 0, y: 0, z: 100}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5
@@ -84,7 +84,7 @@ LineRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.31884003
+        value: 0.75362396
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -96,8 +96,8 @@ LineRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 1}
-      key1: {r: 1, g: 1, b: 1, a: 1}
+      key0: {r: 0.98122466, g: 1, b: 0.6933962, a: 1}
+      key1: {r: 0.98122466, g: 1, b: 0.6933962, a: 1}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -143,7 +143,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c7c791f07a917444a4a65fbcfda5e70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifetime: 2
+  lifetime: 1
 --- !u!114 &2434683064745019683
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -156,6 +156,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f30d31d8bc867d4bbc7b084e83fc216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fadeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.60151803
+      value: 1
+      inSlope: -0.017786134
+      outSlope: -0.017786134
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.63706917
+    - serializedVersion: 3
+      time: 0.99053955
+      value: -0.010623932
+      inSlope: -2.5978613
+      outSlope: -2.5978613
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &3376568423502494011
 MonoBehaviour:
   m_ObjectHideFlags: 0

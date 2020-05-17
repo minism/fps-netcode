@@ -51,6 +51,13 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   // TODO: Extend this
   private float attackCooldownTimer = 0f;
 
+  // TODO: Needs more work
+  private Vector3 AttackPosition {
+    get {
+      return Camera.main.transform.position + Camera.main.transform.right * 0.2f;
+    }
+  }
+
   private IPlayerActionHandler actionHandler;
 
   private void Update() {
@@ -89,7 +96,7 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
     if (inputs.Fire && attackCooldownTimer <= 0) {
       attackCooldownTimer = 1f;
       actionHandler.CreatePlayerAttack(
-          NetworkObjectType.HITSCAN_ATTACK, transform.position, inputs.ViewDirection);
+          NetworkObjectType.HITSCAN_ATTACK, AttackPosition, inputs.ViewDirection);
     }
   }
 
