@@ -165,7 +165,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ef6eab5af2e99d46a9e1253eeb2f837, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  netMonitor: {fileID: 0}
   debugNetworkSettings:
     SimulatePacketLoss: 0
     SimulateLatency: 0
@@ -285,13 +284,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 468dc8be9d6386a488c5059148232ab4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  netMonitor: {fileID: 0}
   debugNetworkSettings:
-    SimulatePacketLoss: 0
-    SimulateLatency: 0
+    SimulatePacketLoss: 1
+    SimulateLatency: 1
     PacketLossChance: 15
-    MinLatency: 150
-    MaxLatency: 250
+    MinLatency: 400
+    MaxLatency: 400
     SimulateLargeStalls: 0
     LargeStallsInterval: 10
     LargeStallsDuration: 2

@@ -44,3 +44,4 @@ sysinfo.txt
 
 # Exclude some assets which should be directly imported.
 Assets/Imported/Kinematic*
+Assets/Imported/LiteNetLib*
