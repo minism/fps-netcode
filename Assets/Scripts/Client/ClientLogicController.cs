@@ -1,5 +1,6 @@
 using LiteNetLib;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 /// Primary logic controller for managing client game state.
 public class ClientLogicController : BaseLogicController, ClientSimulation.Handler {
@@ -10,6 +11,10 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   private ClientPlayerInput localPlayerInput;
   private Player localPlayer;
   private PlayerSetupData playerSetupData;
+
+  // Audio stuff.
+  public AudioSource clientHitSound;
+  public AudioSource hitConfirmSound;
 
   // Delegate that manages the world simulation, prediction, reconciliation.
   private ClientSimulation simulation;
@@ -142,11 +147,18 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   }
 
   private void HandleSpawnObject(NetCommand.SpawnObject cmd) {
-    networkObjectManager.SpawnPlayerObject(
-        cmd.NetworkObjectState.NetworkId,
-        cmd.Type,
-        cmd.Position,
-        cmd.Orientation);
+    // Only spawn the object if it wasn't created by us.
+    // TODO: Instead we should attach to the live object.
+    if (cmd.CreatorPlayerId != localPlayer.Id) {
+      networkObjectManager.SpawnPlayerObject(
+          cmd.NetworkObjectState.NetworkId,
+          cmd.Type,
+          cmd.Position,
+          cmd.Orientation);
+    } else if (cmd.WasAttackHit) {
+      // Play a hit confirm sound for debugging purposes.
+      hitConfirmSound.Play();
+    }
   }
 
   protected override void OnPeerConnected(NetPeer peer) {
@@ -183,6 +195,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     // Check hit for logging purposes but dont do anything with this yet.
     var playerHit = obj.GetComponent<HitscanAttack>().CheckHit();
     if (playerHit != null) {
+      clientHitSound.Play();
       Debug.Log($"On our end, we hit {playerHit.name}");
     }
   }

@@ -77,6 +77,17 @@ public class ServerSimulation : BaseSimulation {
         input.Value.StartWorldTick + (uint)input.Value.Inputs.Length - 1;
   }
 
+  public bool ProcessAttack(HitscanAttack attack) {
+    // TODO: Lag compensation should go here, we should look for historical player positions.
+    var playerObjectHit = attack.CheckHit();
+    if (playerObjectHit != null) {
+      Debug.Log("Registering authoritative player hit");
+      attack.AddForceToPlayer(playerObjectHit.GetComponent<CPMPlayerController>());
+      return true;
+    }
+    return false;
+  }
+
   // Process a single world tick update.
   protected override void Tick(float dt) {
     var now = DateTime.Now;

@@ -171,29 +171,19 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
    */
   public void HandlePlayerAttack(
       Player player, NetworkObjectType type, Vector3 position, Quaternion orientation) {
+    // Create the attack object and check for hits.
     var obj = networkObjectManager.SpawnPlayerObject(0, type, position, orientation);
+    var wasHit = simulation.ProcessAttack(obj.GetComponent<HitscanAttack>());
 
-    // Broadcast to everyone but the creating player about the object being spawned.
-    // TODO: This system needs to be improved.  The creation should be broadcast to the
-    // original player as well, and for live objects, the original player should start
-    // syncing its locally created object via network ID for subsequent world state updates.
-    // For now this works because our only attack is hitscan, but this will be needed for
-    // rockets.
+    // Broadcast to all players the spawned object data.
     var spawnObjectCmd = new NetCommand.SpawnObject {
       NetworkObjectState = obj.ToNetworkState(),
       Type = type,
       CreatorPlayerId = player.Id,
       Position = obj.transform.position,
       Orientation = obj.transform.rotation,
+      WasAttackHit = wasHit,
     };
-    netChannel.BroadcastCommand(spawnObjectCmd, player.Peer);
-
-    // TODO: Lag compensation should go here, we should look for historical player positions.
-    var playerObjectHit = obj.GetComponent<HitscanAttack>().CheckHit();
-    if (playerObjectHit != null) {
-      Debug.Log("Registering authoritative player hit");
-      obj.GetComponent<HitscanAttack>().AddForceToPlayer(
-          playerObjectHit.GetComponent<CPMPlayerController>());
-    }
+    netChannel.BroadcastCommand(spawnObjectCmd);
   }
 }

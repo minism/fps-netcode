@@ -134,6 +134,10 @@ public class ClientSimulation : BaseSimulation {
       clientSimulationAdjuster.NotifyActualTickLead(actualTickLead);
     }
 
+    // For debugging purposes, log the local lead we're running at
+    var localWorldTickLead = WorldTick - lastServerWorldTick;
+    DebugUI.ShowValue("local tick lead", localWorldTickLead);
+
     bool headState = false;
     if (incomingState.WorldTick >= WorldTick) {
       headState = true;

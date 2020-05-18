@@ -76,6 +76,10 @@ namespace NetCommand {
     // The player that created the object.
     public byte CreatorPlayerId { get; set; }
 
+    // If this was an attack, indicates that it connected with a player
+    // TODO: This is obviously not the right location for this.
+    public bool WasAttackHit { get; set; }
+
     // Initial state for the object.
     public Vector3 Position { get; set; }
     public Quaternion Orientation { get; set; }
