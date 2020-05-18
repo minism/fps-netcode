@@ -186,7 +186,14 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
       Position = obj.transform.position,
       Orientation = obj.transform.rotation,
     };
-    Debug.Log($"Sent {spawnObjectCmd.NetworkObjectState.NetworkId}");
     netChannel.BroadcastCommand(spawnObjectCmd, player.Peer);
+
+    // TODO: Lag compensation should go here, we should look for historical player positions.
+    var playerObjectHit = obj.GetComponent<HitscanAttack>().CheckHit();
+    if (playerObjectHit != null) {
+      Debug.Log("Registering authoritative player hit");
+      obj.GetComponent<HitscanAttack>().AddForceToPlayer(
+          playerObjectHit.GetComponent<CPMPlayerController>());
+    }
   }
 }

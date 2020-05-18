@@ -289,7 +289,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   debugNetworkSettings:
     SimulatePacketLoss: 0
-    SimulateLatency: 1
+    SimulateLatency: 0
     PacketLossChance: 5
     MinLatency: 200
     MaxLatency: 200

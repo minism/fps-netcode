@@ -105,7 +105,13 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
     // HACK: Reset to zero when falling off the edge for now.
     if (transform.position.y < -10) {
       transform.position = Vector3.zero;
+      playerVelocity = Vector3.zero;
     }
+  }
+
+  public void AddKnockbackForce(Vector3 force) {
+    // TODO: This math isn't exactly correct.
+    playerVelocity += force;
   }
 
   public PlayerState ToNetworkState() {

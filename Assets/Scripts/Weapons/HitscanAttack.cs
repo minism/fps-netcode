@@ -7,6 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(Lifetime))]
 public class HitscanAttack : MonoBehaviour {
   public AnimationCurve fadeCurve;
+  public float force = 10f;
 
   private LineRenderer lr;
   private Lifetime lt;
@@ -26,12 +27,15 @@ public class HitscanAttack : MonoBehaviour {
   }
 
   public GameObject CheckHit() {
-    int mask = LayerMask.NameToLayer("Player");
+    int mask = LayerMask.GetMask("Player");
     RaycastHit hit;
     if (Physics.Raycast(transform.position, transform.forward, out hit, float.MaxValue, mask)) {
-      Debug.Log($"On our end, we hit {hit.collider.gameObject.name}");
       return hit.collider.gameObject;
     }
     return null;
+  }
+
+  public void AddForceToPlayer(CPMPlayerController player) {
+    player.AddKnockbackForce(transform.forward * force);
   }
 }

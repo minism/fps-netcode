@@ -189,6 +189,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  force: 100
 --- !u!114 &3376568423502494011
 MonoBehaviour:
   m_ObjectHideFlags: 0
