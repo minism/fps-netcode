@@ -52,6 +52,8 @@ public class ClientSimulationAdjuster : ISimulationAdjuster {
       AdjustedInterval = 1.0625f;
     } else if (avg >= 4) {
       AdjustedInterval = 1.03125f;
+    } else if (avg >= 2 && Settings.UseAggressiveLagReduction) {
+      AdjustedInterval = 1.015625f;
     } else {
       AdjustedInterval = 1f;
     }
