@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1157600726214713022}
   - component: {fileID: 5086240095097298556}
   - component: {fileID: 4084642659861900512}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: RemotePlayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -83,11 +83,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6697177392055735971}
     m_Modifications:
-    - target: {fileID: 2172487132254254967, guid: d05a15034b1fd144d8fea2659811b728,
-        type: 3}
-      propertyPath: m_Name
-      value: PlayerView
-      objectReference: {fileID: 0}
     - target: {fileID: 1539829439480107176, guid: d05a15034b1fd144d8fea2659811b728,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -142,6 +137,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2172487132254254967, guid: d05a15034b1fd144d8fea2659811b728,
+        type: 3}
+      propertyPath: m_Name
+      value: PlayerView
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d05a15034b1fd144d8fea2659811b728, type: 3}

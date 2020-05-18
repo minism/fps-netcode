@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1157600726214713022}
   - component: {fileID: 6697177392055735974}
   - component: {fileID: 3692819915067625501}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: CPMPlayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -88,6 +88,7 @@ MonoBehaviour:
   sideStrafeSpeed: 1
   jumpSpeed: 8
   holdJumpToBhop: 0
+  playerHeadHeight: 1.5
 --- !u!1001 &2629139139142309991
 PrefabInstance:
   m_ObjectHideFlags: 0

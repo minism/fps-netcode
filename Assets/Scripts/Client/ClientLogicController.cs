@@ -142,7 +142,6 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   }
 
   private void HandleSpawnObject(NetCommand.SpawnObject cmd) {
-    Debug.Log($"Got {cmd.NetworkObjectState.NetworkId}");
     networkObjectManager.SpawnPlayerObject(
         cmd.NetworkObjectState.NetworkId,
         cmd.Type,
@@ -179,6 +178,9 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
    */
   public void HandleLocalPlayerAttack(
       NetworkObjectType type, Vector3 position, Quaternion orientation) {
-    networkObjectManager.SpawnPlayerObject(0, type, position, orientation, true);
+    var obj = networkObjectManager.SpawnPlayerObject(0, type, position, orientation, true);
+
+    // Check hit for logging purposes but dont do anything with this yet.
+    obj.GetComponent<HitscanAttack>().CheckHit();
   }
 }

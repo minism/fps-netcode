@@ -24,4 +24,14 @@ public class HitscanAttack : MonoBehaviour {
     color.a = alpha;
     lr.material.color = color;
   }
+
+  public GameObject CheckHit() {
+    int mask = LayerMask.NameToLayer("Player");
+    RaycastHit hit;
+    if (Physics.Raycast(transform.position, transform.forward, out hit, float.MaxValue, mask)) {
+      Debug.Log($"On our end, we hit {hit.collider.gameObject.name}");
+      return hit.collider.gameObject;
+    }
+    return null;
+  }
 }
