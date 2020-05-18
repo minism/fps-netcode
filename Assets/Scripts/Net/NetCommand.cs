@@ -23,11 +23,17 @@ namespace NetCommand {
     // The world tick for the first input in the array.
     public uint StartWorldTick;
 
+    // The delta between the players client tick and the last known server world tick.
+    // The server uses this delta to determine at what tick the client perceived the world at
+    // when performing an action such as an attack.
+    public ushort ClientWorldTickDelta;
+
     // An array of inputs, one entry for tick.  Ticks are guaranteed to be contiguous.
     public PlayerInputs[] Inputs;
 
     public void Serialize(NetDataWriter writer) {
       writer.Put(StartWorldTick);
+      writer.Put(ClientWorldTickDelta);
       writer.Put(Inputs.Length);
       foreach (var input in Inputs) {
         writer.Put(input.ViewDirection);
@@ -37,6 +43,7 @@ namespace NetCommand {
 
     public void Deserialize(NetDataReader reader) {
       StartWorldTick = reader.GetUInt();
+      ClientWorldTickDelta = reader.GetUShort();
       var length = reader.GetInt();
       Inputs = new PlayerInputs[length];
       for (int i = 0; i < length; i++) {

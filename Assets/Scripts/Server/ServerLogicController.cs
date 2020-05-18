@@ -173,7 +173,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
       Player player, NetworkObjectType type, Vector3 position, Quaternion orientation) {
     // Create the attack object and check for hits.
     var obj = networkObjectManager.SpawnPlayerObject(0, type, position, orientation);
-    var wasHit = simulation.ProcessAttack(obj.GetComponent<HitscanAttack>());
+    var wasHit = simulation.ProcessPlayerAttack(player, obj.GetComponent<HitscanAttack>());
 
     // Broadcast to all players the spawned object data.
     var spawnObjectCmd = new NetCommand.SpawnObject {

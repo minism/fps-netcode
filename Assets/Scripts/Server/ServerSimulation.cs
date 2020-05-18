@@ -10,6 +10,11 @@ public class PlayerConnectionInfo {
 
   // The latest (highest) input tick from the player.
   public uint latestInputTick;
+
+  // The latest tick delta for the players client.
+  // This is roughly equivalent to half-ping, but its more exact because we can reconstruct
+  // exactly which tick the player saw the world at when they attack.
+  public uint latestTickDelta;
 }
 
 // Client world simulation including prediction and state rewind.
@@ -24,6 +29,9 @@ public class ServerSimulation : BaseSimulation {
 
   // Reusable hash set for players whose input we've checked each frame.
   private HashSet<byte> unprocessedPlayerIds = new HashSet<byte>();
+
+  // Snapshot buffers for player state history, used for attack rollbacks.
+  private Dictionary<byte, PlayerState[]> playerStateSnapshots = new Dictionary<byte, PlayerState[]>();
 
   // Simulation info for each player, indexed by player ID (peer ID).
   private Dictionary<byte, PlayerConnectionInfo> playerConnectionInfo
@@ -57,6 +65,7 @@ public class ServerSimulation : BaseSimulation {
 
   public void InitializePlayerState(Player player) {
     playerConnectionInfo[player.Id] = new PlayerConnectionInfo();
+    playerStateSnapshots[player.Id] = new PlayerState[1024];
   }
 
   public void ClearPlayerState(Player player) {
@@ -72,14 +81,38 @@ public class ServerSimulation : BaseSimulation {
     }
     playerInputProcessor.EnqueueInput(input.Value, player, WorldTick);
 
-    // Mark the latest tick for the player.
+    // Update connection info for the player.
     playerConnectionInfo[player.Id].latestInputTick =
         input.Value.StartWorldTick + (uint)input.Value.Inputs.Length - 1;
+    playerConnectionInfo[player.Id].latestTickDelta = input.Value.ClientWorldTickDelta;
   }
 
-  public bool ProcessAttack(HitscanAttack attack) {
-    // TODO: Lag compensation should go here, we should look for historical player positions.
+  public bool ProcessPlayerAttack(Player player, HitscanAttack attack) {
+    // First, rollback the state of all attackable entities (for now just players) to the
+    // world tick that the players attack was for, since thats what the player was seeing.
+    // TODO: Clean up the whole player delegate path, it sucks.
+    var connectionInfo = playerConnectionInfo[player.Id];
+    var clientViewTick = WorldTick - connectionInfo.latestTickDelta;
+    uint bufidx = clientViewTick % 1024;
+    Debug.Log($"Player input tick: {connectionInfo.latestInputTick}, Our world: {WorldTick}, delta: {connectionInfo.latestTickDelta}");
+    var head = new Dictionary<byte, PlayerState>();
+    foreach (var entry in playerStateSnapshots) {
+      var otherPlayer = playerManager.GetPlayer(entry.Key);
+      head[otherPlayer.Id] = otherPlayer.Controller.ToNetworkState();
+      var historicalState = entry.Value[bufidx];
+      otherPlayer.Controller.ApplyNetworkState(historicalState);
+    }
+
+    // Now check for collisions.
     var playerObjectHit = attack.CheckHit();
+
+    // Finally, revert all the players to their head state.
+    foreach (var entry in playerStateSnapshots) {
+      var otherPlayer = playerManager.GetPlayer(entry.Key);
+      otherPlayer.Controller.ApplyNetworkState(head[entry.Key]);
+    }
+
+    // Apply the result of the this.
     if (playerObjectHit != null) {
       Debug.Log("Registering authoritative player hit");
       attack.AddForceToPlayer(playerObjectHit.GetComponent<CPMPlayerController>());
@@ -132,6 +165,12 @@ public class ServerSimulation : BaseSimulation {
           p => p.GameObject.transform.Translate(new Vector3(1, 0, 0)));
     }
     ++WorldTick;
+
+    // Snapshot everything.
+    var bufidx = WorldTick % 1024;
+    playerManager.GetPlayers().ForEach(p => {
+      playerStateSnapshots[p.Id][bufidx] = p.Controller.ToNetworkState();
+    });
 
     // Update post-tick timers.
     worldStateBroadcastTimer.Update(dt);

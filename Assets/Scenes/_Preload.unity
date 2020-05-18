@@ -303,7 +303,7 @@ MonoBehaviour:
     LargeStallsDuration: 0
     LargeStallsLatency: 0
     LargeStallsPacketLoss: 0
-  debugAutoMovement: 0
+  debugAutoMovement: 1
   clientHitSound: {fileID: 1922334926}
   hitConfirmSound: {fileID: 199811825}
 --- !u!114 &289582694

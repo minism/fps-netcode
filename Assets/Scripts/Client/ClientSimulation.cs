@@ -15,7 +15,7 @@ public class ClientSimulation : BaseSimulation {
   // Queue for incoming world states.
   private Queue<NetCommand.WorldState> worldStateQueue = new Queue<NetCommand.WorldState>();
 
-  // The current world tick and last ack'd server world tick.
+  // The last ack'd server world tick.
   private uint lastServerWorldTick = 0;
 
   // Delegate for adjusting the simulation speed based on incoming state data.
@@ -85,6 +85,9 @@ public class ClientSimulation : BaseSimulation {
     }
     var command = new NetCommand.PlayerInputCommand {
       StartWorldTick = lastServerWorldTick,
+      // TODO: Need to handle overflow even though at that point your connection
+      // would basically be dead.
+      ClientWorldTickDelta = (ushort)(WorldTick - lastServerWorldTick),
       Inputs = unackedInputs.ToArray(),
     };
     handler.SendInputs(command);
