@@ -420,9 +420,9 @@ MonoBehaviour:
   debugNetworkSettings:
     SimulatePacketLoss: 0
     SimulateLatency: 1
-    PacketLossChance: 5
-    MinLatency: 30
-    MaxLatency: 30
+    PacketLossChance: 0
+    MinLatency: 80
+    MaxLatency: 80
     SimulateLargeStalls: 0
     LargeStallsInterval: 10
     LargeStallsDuration: 2

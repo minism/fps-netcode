@@ -92,7 +92,8 @@ public class ServerSimulation : BaseSimulation {
     // world tick that the players attack was for, since thats what the player was seeing.
     // TODO: Clean up the whole player delegate path, it sucks.
     var connectionInfo = playerConnectionInfo[player.Id];
-    var clientViewTick = WorldTick - connectionInfo.latestTickDelta;
+    // Subtract 1 to account for interpolation, but this is probably still wrong.
+    var clientViewTick = WorldTick - connectionInfo.latestTickDelta - 2;
     uint bufidx = clientViewTick % 1024;
     Debug.Log($"Player input tick: {connectionInfo.latestInputTick}, Our world: {WorldTick}, delta: {connectionInfo.latestTickDelta}");
     var head = new Dictionary<byte, PlayerState>();

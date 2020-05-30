@@ -1,6 +1,6 @@
 ﻿using Ice;
 using System.Collections;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
@@ -26,13 +26,20 @@ public class HitscanAttack : MonoBehaviour {
     lr.material.color = color;
   }
 
-  public GameObject CheckHit() {
+  public GameObject CheckHit(bool excludeLocalPlayer = false) {
     int mask = LayerMask.GetMask("Player");
-    RaycastHit hit;
-    if (Physics.Raycast(transform.position, transform.forward, out hit, float.MaxValue, mask)) {
-      return hit.collider.gameObject;
+    var hits = Physics.RaycastAll(transform.position, transform.forward, float.MaxValue, mask);
+    if (!excludeLocalPlayer) {
+      return hits.Length > 0 ? hits[0].collider.gameObject : null;
     }
-    return null;
+
+    // Exclude the local player.
+    // TODO: Better solution for this.
+    var first = hits.FirstOrDefault(hit => hit.collider.GetComponent<CPMPlayerController>() == null);
+    if (first.Equals(default(RaycastHit))) {
+      return null;
+    }
+    return first.collider.gameObject;
   }
 
   public void AddForceToPlayer(CPMPlayerController player) {

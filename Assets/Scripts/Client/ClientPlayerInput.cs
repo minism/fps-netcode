@@ -29,7 +29,7 @@ public class ClientPlayerInput : MonoBehaviour {
   private PlayerInputs GetDebugAutoInputs() {
     if (Time.time - debugAutoMoveTime > debugAutoMoveTimer) {
       debugAutoMoveTime = Time.time;
-      debugAutoMoveTimer = Random.Range(0.5f, 1);
+      debugAutoMoveTimer = Random.Range(0.2f, 0.4f);
 
       var vert = Random.value;
       var horiz = Random.value;

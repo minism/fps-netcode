@@ -193,7 +193,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     var obj = networkObjectManager.SpawnPlayerObject(0, type, position, orientation, true);
 
     // Check hit for logging purposes but dont do anything with this yet.
-    var playerHit = obj.GetComponent<HitscanAttack>().CheckHit();
+    var playerHit = obj.GetComponent<HitscanAttack>().CheckHit(true);
     if (playerHit != null) {
       clientHitSound.Play();
       Debug.Log($"On our end, we hit {playerHit.name}");
