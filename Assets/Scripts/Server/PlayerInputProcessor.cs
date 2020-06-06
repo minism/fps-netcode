@@ -4,6 +4,11 @@ using System.Collections.Generic;
 // Simple structure representing a particular players inputs at a world tick.
 public struct TickInput {
   public uint WorldTick;
+
+  // The remote world tick the player saw other entities at for this input.
+  // (This is equivalent to lastServerWorldTick on the client).
+  public uint RemoteViewTick;
+
   public Player Player;
   public PlayerInputs Inputs;
 }
@@ -66,6 +71,7 @@ public class PlayerInputProcessor {
         var worldTick = command.StartWorldTick + i;
         var tickInput = new TickInput {
           WorldTick = (uint)worldTick,
+          RemoteViewTick = (uint)(worldTick - command.ClientWorldTickDeltas[i]),
           Player = player,
           Inputs = command.Inputs[i],
         };

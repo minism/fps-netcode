@@ -7,6 +7,10 @@ public static class Settings {
   public static float ServerSendRate = SimulationTickRate / 2;
   public static float ServerSendInterval = 1 / ServerSendRate;
 
+  // Whether to interpolate remote entities on the client for smoothness.
+  // Similar to source cl_interp=1.
+  public static bool UseClientInterp = false;
+
   public static bool UseAggressiveLagReduction = true;
 
   // The maximum age of the last server state in milliseconds the client will continue simulating.

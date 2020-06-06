@@ -303,7 +303,7 @@ MonoBehaviour:
     LargeStallsDuration: 0
     LargeStallsLatency: 0
     LargeStallsPacketLoss: 0
-  debugAutoMovement: 1
+  debugAutoMovement: 0
   clientHitSound: {fileID: 1922334926}
   hitConfirmSound: {fileID: 199811825}
 --- !u!114 &289582694
@@ -421,8 +421,8 @@ MonoBehaviour:
     SimulatePacketLoss: 0
     SimulateLatency: 1
     PacketLossChance: 0
-    MinLatency: 80
-    MaxLatency: 80
+    MinLatency: 100
+    MaxLatency: 100
     SimulateLargeStalls: 0
     LargeStallsInterval: 10
     LargeStallsDuration: 2

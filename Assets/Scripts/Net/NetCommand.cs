@@ -23,32 +23,37 @@ namespace NetCommand {
     // The world tick for the first input in the array.
     public uint StartWorldTick;
 
-    // The delta between the players client tick and the last known server world tick.
-    // The server uses this delta to determine at what tick the client perceived the world at
-    // when performing an action such as an attack.
-    public ushort ClientWorldTickDelta;
-
     // An array of inputs, one entry for tick.  Ticks are guaranteed to be contiguous.
     public PlayerInputs[] Inputs;
 
+    // For each input:
+    // Delta between the input world tick and the tick the server was at for that input.
+    // TODO: This may be overkill, determining an average is probably better, but for now
+    // this will give us 100% accuracy over lag compensation.
+    public short[] ClientWorldTickDeltas;
+
     public void Serialize(NetDataWriter writer) {
       writer.Put(StartWorldTick);
-      writer.Put(ClientWorldTickDelta);
       writer.Put(Inputs.Length);
-      foreach (var input in Inputs) {
-        writer.Put(input.ViewDirection);
-        writer.Put(input.GetKeyBitfield());
+      for (int i = 0; i < Inputs.Length; i++) {
+        // Input.
+        writer.Put(Inputs[i].GetKeyBitfield());
+        writer.Put(Inputs[i].ViewDirection);
+
+        // Tick delta.
+        writer.Put(ClientWorldTickDeltas[i]);
       }
     }
 
     public void Deserialize(NetDataReader reader) {
       StartWorldTick = reader.GetUInt();
-      ClientWorldTickDelta = reader.GetUShort();
       var length = reader.GetInt();
       Inputs = new PlayerInputs[length];
+      ClientWorldTickDeltas = new short[length];
       for (int i = 0; i < length; i++) {
-        Inputs[i].ViewDirection = reader.GetQuaternion();
         Inputs[i].ApplyKeyBitfield(reader.GetByte());
+        Inputs[i].ViewDirection = reader.GetQuaternion();
+        ClientWorldTickDeltas[i] = reader.GetShort();
       }
     }
   }

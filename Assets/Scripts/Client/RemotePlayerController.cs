@@ -15,6 +15,10 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
   private float stateTimer = 0;
 
   public void Update() {
+    if (!Settings.UseClientInterp) {
+      return;
+    }
+
     // Synchronize with the server send interval.
     // Rough strategy according to https://www.gabrielgambetta.com/entity-interpolation.html
     stateTimer += Time.deltaTime;
@@ -61,6 +65,11 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
   }
 
   public void ApplyNetworkState(PlayerState state) {
-    stateQueue.Enqueue(state);
+    if (Settings.UseClientInterp) {
+      stateQueue.Enqueue(state);
+    } else {
+      transform.position = state.Position;
+      transform.rotation = state.Rotation;
+    }
   }
 }

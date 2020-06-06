@@ -3,14 +3,16 @@ using UnityEngine;
 /// Component that first receives kb/gamepad input for the player.
 public class ClientPlayerInput : MonoBehaviour {
   // Debug stuff.
-  public bool DebugAutoMovement { get; set; }
+  public int DebugAutoMovement { get; set; } = 0;
   private float debugAutoMoveTime = 0;
   private float debugAutoMoveTimer = 1;
   private PlayerInputs debugAutoMoveInputs;
 
   public PlayerInputs SampleInputs() {
-    if (DebugAutoMovement) {
-      return GetDebugAutoInputs();
+    if (DebugAutoMovement == 1) {
+      return GetDebugRandInputs();
+    } else if (DebugAutoMovement == 2) {
+      return GetDebugLinearInputs();
     }
 
     var vert = Input.GetAxisRaw("Vertical");
@@ -26,7 +28,7 @@ public class ClientPlayerInput : MonoBehaviour {
     };
   }
 
-  private PlayerInputs GetDebugAutoInputs() {
+  private PlayerInputs GetDebugRandInputs() {
     if (Time.time - debugAutoMoveTime > debugAutoMoveTimer) {
       debugAutoMoveTime = Time.time;
       debugAutoMoveTimer = Random.Range(0.2f, 0.4f);
@@ -46,5 +48,17 @@ public class ClientPlayerInput : MonoBehaviour {
     }
 
     return debugAutoMoveInputs;
+  }
+
+  private PlayerInputs GetDebugLinearInputs() {
+    return new PlayerInputs {
+      Forward = true,
+      Back = false,
+      Right = false,
+      Left = false,
+      Jump = false,
+      ViewDirection = Camera.main.transform.rotation,
+      Fire = false,
+    };
   }
 }

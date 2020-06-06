@@ -5,7 +5,7 @@ using UnityEngine.SocialPlatforms;
 /// Primary logic controller for managing client game state.
 public class ClientLogicController : BaseLogicController, ClientSimulation.Handler {
   [Header("Client debug settings")]
-  public bool debugAutoMovement;
+  public int debugAutoMovement = 0;
 
   private NetPeer serverPeer;
   private ClientPlayerInput localPlayerInput;
@@ -79,9 +79,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   private void InitializeLocalPlayer() {
     // Create input component.
     localPlayerInput = localPlayer.GameObject.AddComponent<ClientPlayerInput>();
-    if (debugAutoMovement) {
-      localPlayerInput.DebugAutoMovement = true;
-    }
+    localPlayerInput.DebugAutoMovement = debugAutoMovement;
 
     // Setup camera and attach to the local player camera anchor.
     var cpmCamera = Camera.main.gameObject.AddComponent<CPMCameraController>();
@@ -196,7 +194,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     var playerHit = obj.GetComponent<HitscanAttack>().CheckHit(true);
     if (playerHit != null) {
       clientHitSound.Play();
-      Debug.Log($"On our end, we hit {playerHit.name}");
+      Debug.Log($"Local hit {playerHit.name} at ${playerHit.transform.position} server world tick ${simulation.lastServerWorldTick}");
     }
   }
 }

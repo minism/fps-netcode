@@ -12,11 +12,15 @@ public class ClientSimulation : BaseSimulation {
   private PlayerInputs[] localPlayerInputsSnapshots = new PlayerInputs[1024];
   private PlayerState[] localPlayerStateSnapshots = new PlayerState[1024];
 
+  // The server world tick for each local tick.
+  private uint[] localPlayerWorldTickSnapshots = new uint[1024];
+
   // Queue for incoming world states.
   private Queue<NetCommand.WorldState> worldStateQueue = new Queue<NetCommand.WorldState>();
 
   // The last ack'd server world tick.
-  private uint lastServerWorldTick = 0;
+  // TODO Not public
+  public uint lastServerWorldTick = 0;
 
   // Delegate for adjusting the simulation speed based on incoming state data.
   private ClientSimulationAdjuster clientSimulationAdjuster;
@@ -76,19 +80,20 @@ public class ClientSimulation : BaseSimulation {
     uint bufidx = WorldTick % 1024;
     localPlayerInputsSnapshots[bufidx] = inputs;
     localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
+    localPlayerWorldTickSnapshots[bufidx] = lastServerWorldTick;
 
     // Send a command for all inputs not yet acknowledged from the server.
     var unackedInputs = new List<PlayerInputs>();
+    var clientWorldTickDeltas = new List<short>();
     // TODO: lastServerWorldTick is technically not the same as lastAckedInputTick, fix this.
     for (uint tick = lastServerWorldTick; tick <= WorldTick; ++tick) {
       unackedInputs.Add(localPlayerInputsSnapshots[tick % 1024]);
+      clientWorldTickDeltas.Add((short)(tick - localPlayerWorldTickSnapshots[tick % 1024]));
     }
     var command = new NetCommand.PlayerInputCommand {
       StartWorldTick = lastServerWorldTick,
-      // TODO: Need to handle overflow even though at that point your connection
-      // would basically be dead.
-      ClientWorldTickDelta = (ushort)(WorldTick - lastServerWorldTick),
       Inputs = unackedInputs.ToArray(),
+      ClientWorldTickDeltas = clientWorldTickDeltas.ToArray(),
     };
     handler.SendInputs(command);
 

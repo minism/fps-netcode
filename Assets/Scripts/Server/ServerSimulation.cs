@@ -10,11 +10,6 @@ public class PlayerConnectionInfo {
 
   // The latest (highest) input tick from the player.
   public uint latestInputTick;
-
-  // The latest tick delta for the players client.
-  // This is roughly equivalent to half-ping, but its more exact because we can reconstruct
-  // exactly which tick the player saw the world at when they attack.
-  public uint latestTickDelta;
 }
 
 // Client world simulation including prediction and state rewind.
@@ -36,6 +31,11 @@ public class ServerSimulation : BaseSimulation {
   // Simulation info for each player, indexed by player ID (peer ID).
   private Dictionary<byte, PlayerConnectionInfo> playerConnectionInfo
       = new Dictionary<byte, PlayerConnectionInfo>();
+
+  // Current input struct for each player.
+  // This is only needed because the ProcessAttack delegate flow is a bit too complicated.
+  // TODO: Simplify this.
+  private Dictionary<byte, TickInput> currentPlayerInput = new Dictionary<byte, TickInput>();
 
   // I/O interface for world states.
   public interface Handler {
@@ -84,18 +84,16 @@ public class ServerSimulation : BaseSimulation {
     // Update connection info for the player.
     playerConnectionInfo[player.Id].latestInputTick =
         input.Value.StartWorldTick + (uint)input.Value.Inputs.Length - 1;
-    playerConnectionInfo[player.Id].latestTickDelta = input.Value.ClientWorldTickDelta;
   }
 
   public bool ProcessPlayerAttack(Player player, HitscanAttack attack) {
-    // First, rollback the state of all attackable entities (for now just players) to the
-    // world tick that the players attack was for, since thats what the player was seeing.
+    // First, rollback the state of all attackable entities (for now just players).
+    // The world is not rolled back to the tick the players input was for, but rather
+    // the tick of the server world state the player was seeing at the time of attack.
     // TODO: Clean up the whole player delegate path, it sucks.
-    var connectionInfo = playerConnectionInfo[player.Id];
-    // Subtract 1 to account for interpolation, but this is probably still wrong.
-    var clientViewTick = WorldTick - connectionInfo.latestTickDelta - 2;
-    uint bufidx = clientViewTick % 1024;
-    Debug.Log($"Player input tick: {connectionInfo.latestInputTick}, Our world: {WorldTick}, delta: {connectionInfo.latestTickDelta}");
+    var remoteViewTick = currentPlayerInput[player.Id].RemoteViewTick;
+
+    uint bufidx = remoteViewTick % 1024;
     var head = new Dictionary<byte, PlayerState>();
     foreach (var entry in playerStateSnapshots) {
       var otherPlayer = playerManager.GetPlayer(entry.Key);
@@ -106,6 +104,14 @@ public class ServerSimulation : BaseSimulation {
 
     // Now check for collisions.
     var playerObjectHit = attack.CheckHit();
+
+    // Debugging.
+    foreach (var entry in playerStateSnapshots) {
+      var otherPlayer = playerManager.GetPlayer(entry.Key);
+      if (otherPlayer.Id != player.Id) {
+        Debug.Log($"Other player at ${otherPlayer.GameObject.transform.position} for remote view tick ${remoteViewTick}");
+      }
+    }
 
     // Finally, revert all the players to their head state.
     foreach (var entry in playerStateSnapshots) {
@@ -133,6 +139,7 @@ public class ServerSimulation : BaseSimulation {
     foreach (var tickInput in tickInputs) {
       var player = tickInput.Player;
       player.Controller.SetPlayerInputs(tickInput.Inputs);
+      currentPlayerInput[player.Id] = tickInput;
       unprocessedPlayerIds.Remove(player.Id);
 
       // Mark the player as synchronized.
