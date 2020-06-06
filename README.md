@@ -6,8 +6,8 @@ This repository contains a small demo of a quake-style multiplayer FPS that inte
 * Client-side interpolation of remote entities
 * Backwards reconciliation and replay
 * Real-time adjustment of client simulation speed to optimize server's input buffer (Overwatch's method).
-* (TODO) Server-side lag compensation
-* (TODO) Hitscan weapons
+* Server-side lag compensation
+* Hitscan weapons
 * (TODO) Projectile weapons
 * Master server to manage discovery and connection (via [hotel](https://github.com/minism/hotel))
 
