@@ -93,6 +93,12 @@ public class ServerSimulation : BaseSimulation {
     // TODO: Clean up the whole player delegate path, it sucks.
     var remoteViewTick = currentPlayerInput[player.Id].RemoteViewTick;
 
+    // If client interp is enabled, we estimate by subtracting another tick, but I'm not sure
+    // if this is correct or not, needs more work.
+    if (Settings.UseClientInterp) {
+      remoteViewTick--;
+    }
+
     uint bufidx = remoteViewTick % 1024;
     var head = new Dictionary<byte, PlayerState>();
     foreach (var entry in playerStateSnapshots) {

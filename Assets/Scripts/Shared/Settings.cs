@@ -9,7 +9,7 @@ public static class Settings {
 
   // Whether to interpolate remote entities on the client for smoothness.
   // Similar to source cl_interp=1.
-  public static bool UseClientInterp = false;
+  public static bool UseClientInterp = true;
 
   public static bool UseAggressiveLagReduction = true;
 

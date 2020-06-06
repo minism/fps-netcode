@@ -66,6 +66,11 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
 
   public void ApplyNetworkState(PlayerState state) {
     if (Settings.UseClientInterp) {
+      // TODO: This whole thing needs to be simplified a bit more, but at least make sure
+      // we're not buffering more than we should be.
+      while (stateQueue.Count >= 2) {
+        stateQueue.Dequeue();
+      }
       stateQueue.Enqueue(state);
     } else {
       transform.position = state.Position;
