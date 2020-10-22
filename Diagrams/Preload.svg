@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="200px" preserveAspectRatio="none" style="width:153px;height:200px;" version="1.1" viewBox="0 0 153 200" width="153px" zoomAndPan="magnify"><defs><filter height="300%" id="fpcd8697119lw" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[34c9a9e571f7faca5c47ce9633e93030]
+class Preload--><rect fill="#FEFECE" filter="url(#fpcd8697119lw)" height="73.6094" id="Preload" style="stroke: #A80036; stroke-width: 1.5;" width="136" x="6" y="116"/><ellipse cx="46.2" cy="132" fill="#ADD1B2" rx="11" ry="11" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M49.1688,137.6406 Q48.5906,137.9375 47.95,138.0781 Q47.3094,138.2344 46.6063,138.2344 Q44.1063,138.2344 42.7781,136.5938 Q41.4656,134.9375 41.4656,131.8125 Q41.4656,128.6875 42.7781,127.0313 Q44.1063,125.375 46.6063,125.375 Q47.3094,125.375 47.95,125.5313 Q48.6063,125.6875 49.1688,125.9844 L49.1688,128.7031 Q48.5438,128.125 47.95,127.8594 Q47.3563,127.5781 46.7313,127.5781 Q45.3875,127.5781 44.7,128.6563 Q44.0125,129.7188 44.0125,131.8125 Q44.0125,133.9063 44.7,134.9844 Q45.3875,136.0469 46.7313,136.0469 Q47.3563,136.0469 47.95,135.7813 Q48.5438,135.5 49.1688,134.9219 L49.1688,137.6406 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="48" x="65.8" y="136.1543">Preload</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="7" x2="141" y1="148" y2="148"/><ellipse cx="17" cy="159" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="110" x="26" y="162.2104">initialScene : string</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="7" x2="141" y1="168.8047" y2="168.8047"/><rect fill="#F24D5C" height="6" style="stroke: #C82930; stroke-width: 1.0;" width="6" x="14" y="176.8047"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="79" x="26" y="183.0151">Awake() : void</text><!--MD5=[83b3cf3d23d77c6f1e1b5291a241bc2a]
+class MonoBehaviour--><rect fill="#FEFECE" filter="url(#fpcd8697119lw)" height="48" id="MonoBehaviour" style="stroke: #A80036; stroke-width: 1.5;" width="128" x="10" y="8"/><ellipse cx="25" cy="24" fill="#ADD1B2" rx="11" ry="11" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M27.9688,29.6406 Q27.3906,29.9375 26.75,30.0781 Q26.1094,30.2344 25.4063,30.2344 Q22.9063,30.2344 21.5781,28.5938 Q20.2656,26.9375 20.2656,23.8125 Q20.2656,20.6875 21.5781,19.0313 Q22.9063,17.375 25.4063,17.375 Q26.1094,17.375 26.75,17.5313 Q27.4063,17.6875 27.9688,17.9844 L27.9688,20.7031 Q27.3438,20.125 26.75,19.8594 Q26.1563,19.5781 25.5313,19.5781 Q24.1875,19.5781 23.5,20.6563 Q22.8125,21.7188 22.8125,23.8125 Q22.8125,25.9063 23.5,26.9844 Q24.1875,28.0469 25.5313,28.0469 Q26.1563,28.0469 26.75,27.7813 Q27.3438,27.5 27.9688,26.9219 L27.9688,29.6406 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="96" x="39" y="28.1543">MonoBehaviour</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="11" x2="137" y1="40" y2="40"/><line style="stroke: #A80036; stroke-width: 1.5;" x1="11" x2="137" y1="48" y2="48"/><!--MD5=[8205af3225e458c773791bf66e772f45]
+reverse link MonoBehaviour to Preload--><path d="M74,76.43 C74,89.33 74,103.32 74,115.71 " fill="none" id="MonoBehaviour&lt;-Preload" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="67,76.23,74,56.23,81,76.23,67,76.23" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[ee44bd54b5fc2193c93766c866f85c94]
+@startuml
+class Preload {
+    + initialScene : string
+    - Awake() : void
+}
+MonoBehaviour <|- - Preload
+@enduml
+
+PlantUML version 1.2020.08(Sun Apr 26 14:08:22 GMT 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 15-ea+10
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
