@@ -215,6 +215,8 @@ TextureImporter:
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -224,11 +226,11 @@ TextureImporter:
   textureSettings:
     serializedVersion: 2
     filterMode: 0
-    aniso: -1
-    mipBias: -100
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
-    wrapW: -1
+    wrapW: 0
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
@@ -246,9 +248,12 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  ignorePngGamma: 0
   applyGammaDecoding: 1
   platformSettings:
   - serializedVersion: 3
@@ -1644,6 +1649,71 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      crosshairs64_0: 6306658050632196185
+      crosshairs64_18: 1329973660212012799
+      crosshairs64_29: -7291687782449242445
+      crosshairs64_40: 9201863267422657251
+      crosshairs64_25: -7866789035841366064
+      crosshairs64_3: 8063117908576333087
+      crosshairs64_17: 9183441386203570020
+      crosshairs64_52: -4374802437259943226
+      crosshairs64_32: 3154971605567996937
+      crosshairs64_1: -3207236822287176621
+      crosshairs64_37: 150117454121975427
+      crosshairs64_42: -5262488866350825663
+      crosshairs64_50: 2398655335923880399
+      crosshairs64_39: 5270710134310834739
+      crosshairs64_61: -4674923938913381518
+      crosshairs64_56: 5430277628118554117
+      crosshairs64_23: 3230421270603355048
+      crosshairs64_49: -6368874459378257250
+      crosshairs64_36: -7815249767767653138
+      crosshairs64_5: -3003432221690862243
+      crosshairs64_26: 5716787406560419972
+      crosshairs64_13: -499657259591991558
+      crosshairs64_12: -4853396300488217227
+      crosshairs64_60: -4369600851567830412
+      crosshairs64_43: -5616789029788196407
+      crosshairs64_58: 5330678036248402159
+      crosshairs64_31: 1180089745234162838
+      crosshairs64_6: -230030023181497484
+      crosshairs64_59: 5462929514829369477
+      crosshairs64_7: -8785547897371829847
+      crosshairs64_45: 6764268193677610859
+      crosshairs64_19: -2275066053787641828
+      crosshairs64_28: 1302701703598660610
+      crosshairs64_21: -7583107441173627730
+      crosshairs64_44: -7729313678460341768
+      crosshairs64_16: 8408591322428169094
+      crosshairs64_34: 5420206296884627999
+      crosshairs64_15: 3072176612330631885
+      crosshairs64_54: -1541713431582115134
+      crosshairs64_53: 8259582865956434407
+      crosshairs64_46: -7015781733339814737
+      crosshairs64_22: 4912455957270990406
+      crosshairs64_48: 3173639165340601320
+      crosshairs64_11: -5228675815425978455
+      crosshairs64_51: 601791599457330555
+      crosshairs64_24: 6842413765209044857
+      crosshairs64_14: -8054167844845630135
+      crosshairs64_55: -6307194670947944112
+      crosshairs64_30: 5617785473291272692
+      crosshairs64_33: -8853918352464007284
+      crosshairs64_38: 5792207441326148124
+      crosshairs64_8: -8058495108266584115
+      crosshairs64_20: -5459074835656324813
+      crosshairs64_9: 5270259550388422492
+      crosshairs64_4: 5704805819143090384
+      crosshairs64_27: 8220804345321289414
+      crosshairs64_35: -3639782272204617949
+      crosshairs64_57: -1993869676878181351
+      crosshairs64_41: 3738318885906949150
+      crosshairs64_62: -4808689078249601236
+      crosshairs64_63: -4778020575500208806
+      crosshairs64_2: 2952475408694990368
+      crosshairs64_10: -2185857081015659025
+      crosshairs64_47: -3409058149369955457
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
