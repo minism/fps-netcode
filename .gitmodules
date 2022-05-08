@@ -3,4 +3,4 @@
 	url = git@github.com:minism/unity-icechest.git
 [submodule "Assets/Submodules/hotel-client-unity"]
 	path = Assets/Submodules/hotel-client-unity
-	url = git@gitlab.com:minism/hotel-client-unity.git
+	url = git@github.com:minism/hotel-client-unity.git
