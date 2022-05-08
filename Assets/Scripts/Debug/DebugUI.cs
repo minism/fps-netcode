@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -36,8 +38,9 @@ public class DebugUI : MonoBehaviour {
 
   private void Refresh() {
     StringBuilder builder = new StringBuilder();
-    foreach (var item in debugValues) {
-      builder.AppendLine($"[{item.Key}] {item.Value}");
+    var keys = debugValues.Keys.OrderBy(k => k);
+    foreach (var key in keys) {
+      builder.AppendLine($"[{key}] {debugValues[key]}");
     }
     debugText.text = builder.ToString();
   }

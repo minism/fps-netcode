@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// Better debug logger which prepends class name.
@@ -23,5 +24,4 @@ public static class LogExtensions {
     var className = obj.GetType().Name;
     return $"({className}) {message}";
   }
-
 }

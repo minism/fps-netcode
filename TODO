@@ -1,5 +1,3 @@
-- Sort debug ui
-- Log with module name
 - Use accessors rather than inetserializable where possible
 
 - Use a pattern similar to TinyIdentity -> ITinyNetComponent https://github.com/Saishy/TinyBirdNet-Unity/blob/1264374a4745469d8c1b6703047d9bcb50f42ae0/Assets/TinyBirdNet/TinyNetIdentity.cs
