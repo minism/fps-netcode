@@ -52,7 +52,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
   public void StartClient(
     string host, int port, int initialServerLatency, PlayerSetupData playerSetupData) {
-    Debug.Log($"Connecting to host {host}:{port}...");
+    this.Log($"Connecting to host {host}:{port}...");
     this.playerSetupData = playerSetupData;
     this.initialServerLatency = initialServerLatency;
     netChannel.ConnectToServer(host, port);
@@ -115,10 +115,10 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   }
 
   private void HandleJoinAccepted(NetCommand.JoinAccepted cmd) {
-    Debug.Log("Server join successful!");
+    this.Log("Server join successful!");
 
     // Create our player object and attach client-specific components.
-    Debug.Log("Local player network ID is " + cmd.YourPlayerState.NetworkObjectState.NetworkId);
+    this.Log("Local player network ID is " + cmd.YourPlayerState.NetworkObjectState.NetworkId);
     localPlayer = AddPlayerFromInitialServerState(cmd.YourPlayerState, false);
     InitializeLocalPlayer();
 
@@ -133,13 +133,13 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   }
 
   private void HandleOtherPlayerJoined(NetCommand.PlayerJoined cmd) {
-    Debug.Log($"{cmd.PlayerState.Metadata.Name} joined the server.");
+    this.Log($"{cmd.PlayerState.Metadata.Name} joined the server.");
     AddPlayerFromInitialServerState(cmd.PlayerState, true);
   }
 
   private void HandleOtherPlayerLeft(NetCommand.PlayerLeft cmd) {
     var player = playerManager.GetPlayer(cmd.PlayerId);
-    Debug.Log($"{player.Metadata.Name} left the server.");
+    this.Log($"{player.Metadata.Name} left the server.");
     networkObjectManager.DestroyNetworkObject(player.NetworkObject);
     playerManager.RemovePlayer(player.Id);
   }
@@ -160,7 +160,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   }
 
   protected override void OnPeerConnected(NetPeer peer) {
-    Debug.Log("Connected to host: " + peer.EndPoint);
+    this.Log("Connected to host: " + peer.EndPoint);
     serverPeer = peer;
 
     // Send a join request.
@@ -171,9 +171,9 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
   protected override void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo) {
     if (serverPeer != null && peer != serverPeer) {
-      Debug.LogError("Unexpected mismatch between disconnect peer and server peer!");
+      this.LogError("Unexpected mismatch between disconnect peer and server peer!");
     }
-    Debug.Log("Disconnected from host: " + disconnectInfo.Reason);
+    this.Log("Disconnected from host: " + disconnectInfo.Reason);
     serverPeer = null;
 
     // Return to the lobby.
@@ -194,7 +194,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     var playerHit = obj.GetComponent<HitscanAttack>().CheckHit(true);
     if (playerHit != null) {
       clientHitSound.Play();
-      Debug.Log($"Local hit {playerHit.name} at ${playerHit.transform.position} server world tick ${simulation.lastServerWorldTick}");
+      this.Log($"Local hit {playerHit.name} at ${playerHit.transform.position} server world tick ${simulation.lastServerWorldTick}");
     }
   }
 }

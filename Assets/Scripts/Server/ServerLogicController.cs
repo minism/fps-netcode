@@ -61,7 +61,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     await Hotel.HotelClient.Instance.WaitUntilInitialized();
     hotelGameServer = await Hotel.HotelClient.Instance.StartHostingServer(
         host, port, 8, "Test");
-    Debug.Log($"Registered game with master server.");
+    this.Log($"Registered game with master server.");
     if (loadScene) {
       LoadGameScene();
     }
@@ -93,7 +93,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
 
   /// Tear down all server authoritative state for a player.
   private void DestroyServerPlayer(Player player) {
-    Debug.Log($"{player.Metadata.Name} left the server.");
+    this.Log($"{player.Metadata.Name} left the server.");
 
     // Let the simulation clear any state for the player.
     simulation.ClearPlayerState(player);
@@ -118,7 +118,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
   private void HandleJoinRequest(NetCommand.JoinRequest cmd, NetPeer peer) {
     // TODO: Validation should occur here, if any.
     var playerName = cmd.PlayerSetupData.Name;
-    Debug.Log($"{playerName} connected to the server.");
+    this.Log($"{playerName} connected to the server.");
     var metadata = new PlayerMetadata {
       Name = playerName,
     };
@@ -144,7 +144,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
 
   private void HandlePlayerInput(NetCommand.PlayerInputCommand cmd, NetPeer peer) {
     if (cmd.Inputs == null) {
-      Debug.LogError("Shouldnt be null here");
+      this.LogError("Shouldnt be null here");
     }
     simulation.EnqueuePlayerInput(
         new WithPeer<NetCommand.PlayerInputCommand> { Peer = peer, Value = cmd });

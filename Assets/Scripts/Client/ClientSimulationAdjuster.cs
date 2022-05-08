@@ -16,7 +16,7 @@ public class ClientSimulationAdjuster : ISimulationAdjuster {
   public uint GuessClientTick(uint receivedServerTick, int serverLatencyMs) {
     float serverLatencySeconds = serverLatencyMs / 1000f;
     uint estimatedTickLead = (uint)(serverLatencySeconds * 1.5 / Time.fixedDeltaTime) + 4;
-    UnityEngine.Debug.Log($"Initializing client with estimated tick lead of {estimatedTickLead}, ping: {serverLatencyMs}");
+    this.Log($"Initializing client with estimated tick lead of {estimatedTickLead}, ping: {serverLatencyMs}");
     return receivedServerTick + estimatedTickLead;
   }
 
@@ -28,7 +28,7 @@ public class ClientSimulationAdjuster : ISimulationAdjuster {
     // Negative lead means dropped inputs which is worse than buffering, so immediately move the
     // simulation forward.
     if (actualTickLead < 0) {
-      UnityEngine.Debug.Log("Dropped an input, got an actual tick lead of " + actualTickLead);
+      this.Log("Dropped an input, got an actual tick lead of " + actualTickLead);
       droppedInputTimer.Restart();
       estimatedMissedInputs++;
     }

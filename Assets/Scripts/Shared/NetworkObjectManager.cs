@@ -66,7 +66,7 @@ public class NetworkObjectManager : MonoBehaviour {
     try {
       Destroy(activeObjects[networkId]);
     } catch (KeyNotFoundException) {
-      Debug.LogError($"Couldn't destroy non-existant network object #{networkId}");
+      this.LogError($"Couldn't destroy non-existant network object #{networkId}");
     }
   }
 

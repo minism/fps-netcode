@@ -46,7 +46,7 @@ public abstract class BaseLogicController : MonoBehaviour {
   }
 
   protected virtual void TearDownGameScene() {
-    Debug.Log("Stopping network stack.");
+    this.Log("Stopping network stack.");
     Cursor.lockState = CursorLockMode.None;
     playerManager.Clear();
     networkObjectManager.Clear();

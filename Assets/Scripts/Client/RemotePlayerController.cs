@@ -31,7 +31,7 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
 
     // We can only interpolate if we have a previous and next world state.
     if (!lastState.HasValue || stateQueue.Count < 1) {
-      Debug.LogWarning("RemotePlayer: not enough states to interp");
+      this.LogWarning("RemotePlayer: not enough states to interp");
       return;
     }
 

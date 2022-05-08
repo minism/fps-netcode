@@ -33,13 +33,13 @@ public class Bootstrapper : MonoBehaviour {
   }
 
   public async void StartGameAsServer(string host, int port) {
-    Debug.Log($"Starting game as dedicated server on port {port}.");
+    this.Log($"Starting game as dedicated server on port {port}.");
     clientLogicController.gameObject.SetActive(false);
     await serverLogicController.StartServer(host, port);
   }
 
   public async void StartGameAsListenServer() {
-    Debug.Log("Starting game as a listen server.");
+    this.Log("Starting game as a listen server.");
     await serverLogicController.StartServer(DEFAULT_HOST, DEFAULT_PORT, false);
     // Fake player data for now.
     var playerSetupData = new PlayerSetupData {
@@ -49,7 +49,7 @@ public class Bootstrapper : MonoBehaviour {
   }
 
   public void StartGameAsClient(Hotel.GameServer serverToJoin, int initialLatency) {
-    Debug.Log($"Joining server {serverToJoin.host}:{serverToJoin.port}...");
+    this.Log($"Joining server {serverToJoin.host}:{serverToJoin.port}...");
     serverLogicController.gameObject.SetActive(false);
 
     // Fake player data for now.

@@ -72,7 +72,7 @@ public class ClientSimulation : BaseSimulation {
     // If the oldest server state is too stale, freeze the player.
     if (Settings.FreezeClientOnStaleServer &&
         WorldTick - lastServerWorldTick >= Settings.MaxStaleServerStateTicks) {
-      Debug.Log("Server state is too old (is the network connection dead?)");
+      this.Log("Server state is too old (is the network connection dead?)");
       inputs = new PlayerInputs();
     }
 
@@ -151,7 +151,7 @@ public class ClientSimulation : BaseSimulation {
       headState = true;
     }
     if (incomingState.WorldTick > WorldTick) {
-      Debug.LogError("Got a FUTURE tick somehow???");
+      this.LogError("Got a FUTURE tick somehow???");
     }
 
     // Lookup the historical state for the world tick we got.
@@ -171,14 +171,14 @@ public class ClientSimulation : BaseSimulation {
       }
     }
     if (default(PlayerState).Equals(incomingLocalPlayerState)) {
-      Debug.LogError("No local player state found!");
+      this.LogError("No local player state found!");
     }
 
     // Compare the historical state to see how off it was.
     var error = incomingLocalPlayerState.Position - stateSnapshot.Position;
     if (error.sqrMagnitude > 0.0001f) {
       if (!headState) {
-        Debug.Log($"Rewind tick#{incomingState.WorldTick}, Error: {error.magnitude}, Range: {WorldTick - incomingState.WorldTick}");
+        this.Log($"Rewind tick#{incomingState.WorldTick}, Error: {error.magnitude}, Range: {WorldTick - incomingState.WorldTick}");
         replayedStates++;
       }
 

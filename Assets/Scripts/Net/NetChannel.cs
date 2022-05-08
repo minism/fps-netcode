@@ -100,7 +100,7 @@ public class NetChannel : INetEventListener, INetChannel {
   /// Attempt to connect to an endpoint, the channel will act as a client.
   public void ConnectToServer(string host, int port) {
     //if (netManager.IsRunning) {
-    //  Debug.LogWarning("Network manager already running, doing nothing.");
+    //  this.LogWarning("Network manager already running, doing nothing.");
     //  return;
     //}
     netManager.Connect(host, port, CONNECTION_KEY);
@@ -109,7 +109,7 @@ public class NetChannel : INetEventListener, INetChannel {
   /// Starts listening for connections, the channel will act as as server.
   public void StartServer(int port) {
     //if (netManager.IsRunning) {
-    //  Debug.LogWarning("Network manager already running, doing nothing.");
+    //  this.LogWarning("Network manager already running, doing nothing.");
     //  return;
     //}
     acceptConnections = true;
@@ -119,7 +119,7 @@ public class NetChannel : INetEventListener, INetChannel {
 
   public void PingServer(IPEndPoint endpoint, Action<int> callback) {
     // Send a simple unconnected message to get latency.
-    Debug.Log($"Sending ping message to {endpoint}");
+    this.Log($"Sending ping message to {endpoint}");
     pingHelper.AddListener(endpoint, callback);
     netManager.SendUnconnectedMessage(new byte[] { PING_HEADER }, endpoint);
   }
@@ -226,18 +226,18 @@ public class NetChannel : INetEventListener, INetChannel {
   public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType) {
     var header = reader.GetByte();
     if (header == PING_HEADER) {
-      Debug.Log($"Received PING from {remoteEndPoint}");
+      this.Log($"Received PING from {remoteEndPoint}");
       netManager.SendUnconnectedMessage(new byte[] { PONG_HEADER }, remoteEndPoint);
     } else if (header == PONG_HEADER) {
-      Debug.Log($"Received PONG from {remoteEndPoint}");
+      this.Log($"Received PONG from {remoteEndPoint}");
       pingHelper.ReceivePong(remoteEndPoint);
     } else {
-      Debug.LogWarning("Got unexpected unconnected message. Spam/attack?");
+      this.LogWarning("Got unexpected unconnected message. Spam/attack?");
     }
   }
 
   public void OnNetworkError(IPEndPoint endPoint, SocketError socketError) {
-    Debug.LogWarning("Network error - " + socketError);
+    this.LogWarning("Network error - " + socketError);
   }
 
   public void OnNetworkLatencyUpdate(NetPeer peer, int latency) {

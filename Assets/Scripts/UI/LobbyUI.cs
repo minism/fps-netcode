@@ -19,18 +19,18 @@ public class LobbyUI : MonoBehaviour {
     clientController = FindObjectOfType<ClientLogicController>();
     var button = joinButtonContainer.GetComponentInChildren<Button>();
     if (button == null) {
-      Debug.LogError("Expected a prototype join button in the container.");
+      this.LogError("Expected a prototype join button in the container.");
     } else {
       joinButtonPrototype = button.gameObject;
       joinButtonPrototype.SetActive(false);
       joinButtonPrototype.transform.parent = null;
     }
 
-    Debug.Log("Waiting for hotel client to start...");
+    this.Log("Waiting for hotel client to start...");
     await Hotel.HotelClient.Instance.WaitUntilInitialized();
-    Debug.Log("Loading initial server list...");
+    this.Log("Loading initial server list...");
     await RefreshServerList();
-    Debug.Log("Servers loaded.");
+    this.Log("Servers loaded.");
   }
 
   public async void Refresh() {

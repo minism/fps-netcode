@@ -115,7 +115,7 @@ public class ServerSimulation : BaseSimulation {
     foreach (var entry in playerStateSnapshots) {
       var otherPlayer = playerManager.GetPlayer(entry.Key);
       if (otherPlayer.Id != player.Id) {
-        Debug.Log($"Other player at ${otherPlayer.GameObject.transform.position} for remote view tick ${remoteViewTick}");
+        this.Log($"Other player at ${otherPlayer.GameObject.transform.position} for remote view tick ${remoteViewTick}");
       }
     }
 
@@ -127,7 +127,7 @@ public class ServerSimulation : BaseSimulation {
 
     // Apply the result of the this.
     if (playerObjectHit != null) {
-      Debug.Log("Registering authoritative player hit");
+      this.Log("Registering authoritative player hit");
       attack.AddForceToPlayer(playerObjectHit.GetComponent<CPMPlayerController>());
       return true;
     }
@@ -167,14 +167,14 @@ public class ServerSimulation : BaseSimulation {
       if (playerInputProcessor.TryGetLatestInput(playerId, out latestInput)) {
         player.Controller.SetPlayerInputs(latestInput.Inputs);
       } else {
-        Debug.LogWarning($"No inputs for player #{playerId} and no history to replay.");
+        this.LogWarning($"No inputs for player #{playerId} and no history to replay.");
       }
     }
 
     // Advance the world simulation.
     SimulateWorld(dt);
     if (UnityEngine.Random.value < debugPhysicsErrorChance) {
-      Debug.Log("Injecting random physics error.");
+      this.Log("Injecting random physics error.");
       playerManager.GetPlayers().ForEach(
           p => p.GameObject.transform.Translate(new Vector3(1, 0, 0)));
     }
