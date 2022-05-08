@@ -28,17 +28,17 @@ public class Bootstrapper : MonoBehaviour {
     }
   }
 
-  public async Task StartGameAsServer() {
+  public void StartGameAsServer() {
     StartGameAsServer(DEFAULT_HOST, DEFAULT_PORT);
   }
 
-  public async Task StartGameAsServer(string host, int port) {
+  public async void StartGameAsServer(string host, int port) {
     Debug.Log($"Starting game as dedicated server on port {port}.");
     clientLogicController.gameObject.SetActive(false);
     await serverLogicController.StartServer(host, port);
   }
 
-  public async Task StartGameAsListenServer() {
+  public async void StartGameAsListenServer() {
     Debug.Log("Starting game as a listen server.");
     await serverLogicController.StartServer(DEFAULT_HOST, DEFAULT_PORT, false);
     // Fake player data for now.

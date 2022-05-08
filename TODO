@@ -1,9 +1,13 @@
+- Sort debug ui
+- Log with module name
+- Use accessors rather than inetserializable where possible
+
 - Use a pattern similar to TinyIdentity -> ITinyNetComponent https://github.com/Saishy/TinyBirdNet-Unity/blob/1264374a4745469d8c1b6703047d9bcb50f42ae0/Assets/TinyBirdNet/TinyNetIdentity.cs
 
 - Since network objects will have their own separate state messages, for this you can simply use byte[] with a netwriter, i.e. https://github.com/Saishy/TinyBirdNet-Unity/blob/536314ba49e004dcd48aa6d771d1265bc3d533aa/Assets/TinyBirdNet/TinyNetMessages.cs#L497
 
-- At 588e7, the replaying inputs feature works great with only using WASD, the client hardly replays states at all.  But, while turning
-  the view with the mouse, replays happen heavily.  I think this is likely something to do with what data we're actually sending
+- At 588e7, the replaying inputs feature works great with only using WASD, the client hardly replays states at all. But, while turning
+  the view with the mouse, replays happen heavily. I think this is likely something to do with what data we're actually sending
   for inputs, i wonder if it should be dx/dy, or view direction, or what.
 
 - There needs to be a "player synchronizing" sequence when a client first connects, before the player prefab is spawned in either scene.

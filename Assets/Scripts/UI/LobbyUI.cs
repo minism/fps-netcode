@@ -33,8 +33,8 @@ public class LobbyUI : MonoBehaviour {
     Debug.Log("Servers loaded.");
   }
 
-  public void Refresh() {
-    RefreshServerList();
+  public async void Refresh() {
+    await RefreshServerList();
   }
 
   public void Host() {
