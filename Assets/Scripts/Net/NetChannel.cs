@@ -56,15 +56,7 @@ public class NetChannel : INetEventListener, INetChannel {
     ApplyDebugNetworkSettings();
 
     // Register nested types used in net commands.
-    netPacketProcessor.RegisterNestedType(
-        NetExtensions.SerializeVector3, NetExtensions.DeserializeVector3);
-    netPacketProcessor.RegisterNestedType(
-        NetExtensions.SerializeQuaternion, NetExtensions.DeserializeQuaternion);
-    netPacketProcessor.RegisterNestedType<PlayerSetupData>();
-    netPacketProcessor.RegisterNestedType<PlayerMetadata>();
-    netPacketProcessor.RegisterNestedType<InitialPlayerState>();
-    netPacketProcessor.RegisterNestedType<PlayerState>();
-    netPacketProcessor.RegisterNestedType<NetworkObjectState>();
+    NetModels.RegisterAllNetworkNestedTypes(netPacketProcessor);
 
     // The client network manager is started immediately for unconnected pings.
     netManager.Start();

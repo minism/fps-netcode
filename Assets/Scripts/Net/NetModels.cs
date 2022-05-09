@@ -3,6 +3,19 @@ using UnityEngine;
 
 
 /// Shared network data structures.
+public static class NetModels {
+  public static void RegisterAllNetworkNestedTypes(NetPacketProcessor processor) {
+    processor.RegisterNestedType(
+        NetExtensions.SerializeVector3, NetExtensions.DeserializeVector3);
+    processor.RegisterNestedType(
+        NetExtensions.SerializeQuaternion, NetExtensions.DeserializeQuaternion);
+    processor.RegisterNestedType<PlayerSetupData>();
+    processor.RegisterNestedType<PlayerMetadata>();
+    processor.RegisterNestedType<InitialPlayerState>();
+    processor.RegisterNestedType<PlayerState>();
+    processor.RegisterNestedType<NetworkObjectState>();
+  }
+}
 
 /// Data entered by a player when joining a game.
 public struct PlayerSetupData : INetSerializable {
