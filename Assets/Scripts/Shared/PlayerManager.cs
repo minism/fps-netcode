@@ -34,6 +34,10 @@ public class PlayerManager : IPlayerLookup {
     return players[(byte)peer.Id];
   }
 
+  public bool TryGetPlayerForPeer(NetPeer peer, out Player player) {
+    return TryGetPlayer((byte)peer.Id, out player);
+  }
+
   public Player AddPlayer(byte playerId, PlayerMetadata metadata, GameObject playerGameObject) {
     var player = new Player {
       Id = playerId,

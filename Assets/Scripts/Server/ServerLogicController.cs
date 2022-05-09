@@ -147,8 +147,12 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     if (cmd.Inputs == null) {
       this.LogError("Shouldnt be null here");
     }
-    simulation.EnqueuePlayerInput(
-        new WithPeer<NetCommand.PlayerInputCommand> { Peer = peer, Value = cmd });
+    Player player;
+    if (!playerManager.TryGetPlayerForPeer(peer, out player)) {
+      // The player already disconnected, so just ignore this packet.
+      return;
+    }
+    simulation.EnqueuePlayerInput(cmd, player);
   }
 
   protected override void OnPeerConnected(NetPeer peer) {

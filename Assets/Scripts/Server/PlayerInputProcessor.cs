@@ -1,4 +1,5 @@
 using Priority_Queue;
+using System;
 using System.Collections.Generic;
 
 // Simple structure representing a particular players inputs at a world tick.
@@ -22,7 +23,6 @@ public class PlayerInputProcessor {
 
   // Monitoring.
   private Ice.MovingAverage averageInputQueueSize = new Ice.MovingAverage(10);
-  private int staleInputs;
 
   public void LogQueueStatsForPlayer(Player player, uint worldTick) {
     int count = 0;
@@ -34,6 +34,14 @@ public class PlayerInputProcessor {
     }
     averageInputQueueSize.Push(count);
     DebugUI.ShowValue("sv avg input queue", averageInputQueueSize.Average());
+  }
+
+  public uint GetLatestPlayerInputTick(byte playerId) {
+    TickInput input;
+    if (!TryGetLatestInput(playerId, out input)) {
+      return 0;
+    }
+    return input.WorldTick;
   }
 
   public bool TryGetLatestInput(byte playerId, out TickInput ret) {
@@ -56,33 +64,32 @@ public class PlayerInputProcessor {
     return ret;
   }
 
-  public void EnqueueInput(NetCommand.PlayerInputCommand command, Player player, uint serverWorldTick) {
-    // Monitoring.
-    DebugUI.ShowValue("sv stale inputs", staleInputs);
-
+  public void EnqueueInput(NetCommand.PlayerInputCommand command, Player player, uint lastAckedInputTick) {
     // Calculate the last tick in the incoming command.
     uint maxTick = command.StartWorldTick + (uint)command.Inputs.Length - 1;
 
-    // Scan for inputs which haven't been handled yet.
-    if (maxTick >= serverWorldTick) {
-      uint start = serverWorldTick > command.StartWorldTick
-          ? serverWorldTick - command.StartWorldTick : 0;
-      for (int i = (int)start; i < command.Inputs.Length; ++i) {
-        // Apply inputs to the associated player controller and simulate the world.
-        var worldTick = command.StartWorldTick + i;
-        var tickInput = new TickInput {
-          WorldTick = (uint)worldTick,
-          RemoteViewTick = (uint)(worldTick - command.ClientWorldTickDeltas[i]),
-          Player = player,
-          Inputs = command.Inputs[i],
-        };
-        queue.Enqueue(tickInput, worldTick);
+    // Queue any inputs we haven't yet acked.
+    uint startIndex = lastAckedInputTick >= command.StartWorldTick
+      ? lastAckedInputTick - command.StartWorldTick + 1
+      : 0;
 
-        // Store the latest input in case the simulation needs to repeat missed frames.
-        latestPlayerInput[player.Id] = tickInput;
-      }
-    } else {
-      staleInputs++;
+    // Note that even if the client is behind, we still want to queue historical
+    // inputs so we can use the "best" (most recent) input when filling gaps.
+
+    // Scan for inputs which haven't been handled yet.
+    for (int i = (int)startIndex; i < command.Inputs.Length; ++i) {
+      // Apply inputs to the associated player controller and simulate the world.
+      var worldTick = command.StartWorldTick + i;
+      var tickInput = new TickInput {
+        WorldTick = (uint)worldTick,
+        RemoteViewTick = (uint)(worldTick - command.ClientWorldTickDeltas[i]),
+        Player = player,
+        Inputs = command.Inputs[i],
+      };
+      queue.Enqueue(tickInput, worldTick);
+
+      // Store the latest input in case the simulation needs to repeat missed frames.
+      latestPlayerInput[player.Id] = tickInput;
     }
   }
 }

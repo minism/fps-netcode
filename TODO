@@ -12,3 +12,5 @@
 - Implement compression according to https://gafferongames.com/post/snapshot_compression/
 
 - Use direct net writer/reader for input and state fields, and do input compression. Only use packet processor for reliable messaging (convenience).
+
+- Time dialation adjustment should have a timer before it starts correcting again to assume that a loss might be grouped.

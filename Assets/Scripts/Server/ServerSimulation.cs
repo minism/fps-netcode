@@ -73,18 +73,14 @@ public class ServerSimulation : BaseSimulation {
     playerStateSnapshots.Remove(player.Id);
   }
 
-  public void EnqueuePlayerInput(WithPeer<NetCommand.PlayerInputCommand> input) {
-    Player player;
-    try {
-      player = playerManager.GetPlayerForPeer(input.Peer);
-    } catch (KeyNotFoundException) {
-      return;  // The player already disconnected, so just ignore this packet.
-    }
-    playerInputProcessor.EnqueueInput(input.Value, player, WorldTick);
+  public void EnqueuePlayerInput(NetCommand.PlayerInputCommand command, Player player) {
+    var lastAckedInputTick = playerConnectionInfo[player.Id].latestInputTick;
+    playerInputProcessor.EnqueueInput(command, player, lastAckedInputTick);
 
     // Update connection info for the player.
     playerConnectionInfo[player.Id].latestInputTick =
-        input.Value.StartWorldTick + (uint)input.Value.Inputs.Length - 1;
+        playerInputProcessor.GetLatestPlayerInputTick(player.Id);
+    // command.StartWorldTick + (uint)command.Inputs.Length - 1;
   }
 
   public bool ProcessPlayerAttack(Player player, HitscanAttack attack) {

@@ -18,9 +18,12 @@ public class ClientSimulation : BaseSimulation {
   // Queue for incoming world states.
   private Queue<NetCommand.WorldState> worldStateQueue = new Queue<NetCommand.WorldState>();
 
-  // The last ack'd server world tick.
+  // The last received server world tick.
   // TODO Not public
   public uint lastServerWorldTick = 0;
+
+  // The last tick that the server has acknowledged our input for.
+  private uint lastAckedInputTick = 0;
 
   // Delegate for adjusting the simulation speed based on incoming state data.
   private ClientSimulationAdjuster clientSimulationAdjuster;
@@ -54,6 +57,7 @@ public class ClientSimulation : BaseSimulation {
 
     // Set the last-acknowledged server tick.
     lastServerWorldTick = initialWorldTick;
+    lastAckedInputTick = initialWorldTick;
 
     // Extrapolate based on latency what our client tick should start at.
     WorldTick = clientSimulationAdjuster.GuessClientTick(initialWorldTick, serverLatencyMs);
@@ -85,13 +89,12 @@ public class ClientSimulation : BaseSimulation {
     // Send a command for all inputs not yet acknowledged from the server.
     var unackedInputs = new List<PlayerInputs>();
     var clientWorldTickDeltas = new List<short>();
-    // TODO: lastServerWorldTick is technically not the same as lastAckedInputTick, fix this.
-    for (uint tick = lastServerWorldTick; tick <= WorldTick; ++tick) {
+    for (uint tick = lastAckedInputTick; tick <= WorldTick; ++tick) {
       unackedInputs.Add(localPlayerInputsSnapshots[tick % 1024]);
       clientWorldTickDeltas.Add((short)(tick - localPlayerWorldTickSnapshots[tick % 1024]));
     }
     var command = new NetCommand.PlayerInputCommand {
-      StartWorldTick = lastServerWorldTick,
+      StartWorldTick = lastAckedInputTick,
       Inputs = unackedInputs.ToArray(),
       ClientWorldTickDeltas = clientWorldTickDeltas.ToArray(),
     };
@@ -121,7 +124,7 @@ public class ClientSimulation : BaseSimulation {
     //  ProcessServerWorldState();
     //}
     // Show some debug monitoring values.
-    DebugUI.ShowValue("cl rewinds", replayedStates);
+    DebugUI.ShowValue("cl reconciliations", replayedStates);
     DebugUI.ShowValue("incoming state excess", excessWorldStateAvg.Average());
     clientSimulationAdjuster.Monitoring();
   }
@@ -134,11 +137,14 @@ public class ClientSimulation : BaseSimulation {
     var incomingState = worldStateQueue.Dequeue();
     lastServerWorldTick = incomingState.WorldTick;
 
-    // Calculate our actual tick lead on the server perspective. We add one because the world
-    // state the server sends to use is always 1 higher than the latest input that has been
-    // processed.
+    // During initialization the server will send zeroes for this field.
     if (incomingState.YourLatestInputTick > 0) {
-      int actualTickLead = (int)incomingState.YourLatestInputTick - (int)lastServerWorldTick + 1;
+      lastAckedInputTick = incomingState.YourLatestInputTick;
+
+      // Calculate our actual tick lead on the server perspective. We add one because the world
+      // state the server sends to use is always 1 higher than the latest input that has been
+      // processed.
+      int actualTickLead = (int)lastAckedInputTick - (int)lastServerWorldTick + 1;
       clientSimulationAdjuster.NotifyActualTickLead(actualTickLead);
     }
 
