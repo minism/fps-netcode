@@ -17,8 +17,6 @@ public enum PlayerKeys : byte {
 /// compressed in a larger message combining multiple inputs.
 public struct PlayerInputs {
   public bool Forward, Back, Left, Right, Jump, Fire;
-
-  // TODO: Compress via https://gafferongames.com/post/snapshot_compression/
   public Quaternion ViewDirection;
 
   public float ForwardAxis {

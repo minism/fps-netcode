@@ -1,5 +1,3 @@
-- Use accessors rather than inetserializable where possible
-
 - Use a pattern similar to TinyIdentity -> ITinyNetComponent https://github.com/Saishy/TinyBirdNet-Unity/blob/1264374a4745469d8c1b6703047d9bcb50f42ae0/Assets/TinyBirdNet/TinyNetIdentity.cs
 
 - Since network objects will have their own separate state messages, for this you can simply use byte[] with a netwriter, i.e. https://github.com/Saishy/TinyBirdNet-Unity/blob/536314ba49e004dcd48aa6d771d1265bc3d533aa/Assets/TinyBirdNet/TinyNetMessages.cs#L497
