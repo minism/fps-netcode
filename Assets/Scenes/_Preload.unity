@@ -300,12 +300,12 @@ MonoBehaviour:
     SimulatePacketLoss: 0
     SimulateLatency: 0
     PacketLossChance: 10
-    MinLatency: 150
-    MaxLatency: 150
+    MinLatency: 100
+    MaxLatency: 100
     SimulateLargeStalls: 0
     LargeStallsInterval: 10
-    LargeStallsDuration: 0
-    LargeStallsLatency: 0
+    LargeStallsDuration: 3
+    LargeStallsLatency: 700
     LargeStallsPacketLoss: 0
   debugAutoMovement: 0
   clientHitSound: {fileID: 1922334926}
@@ -425,14 +425,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   debugNetworkSettings:
     SimulatePacketLoss: 0
-    SimulateLatency: 0
+    SimulateLatency: 1
     PacketLossChance: 0
     MinLatency: 100
     MaxLatency: 100
-    SimulateLargeStalls: 0
+    SimulateLargeStalls: 1
     LargeStallsInterval: 10
     LargeStallsDuration: 2
-    LargeStallsLatency: 1000
+    LargeStallsLatency: 800
     LargeStallsPacketLoss: 0
   debugPhysicsErrorChance: 0
 --- !u!114 &383801353

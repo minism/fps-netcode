@@ -10,8 +10,6 @@ public class ClientSimulationAdjuster : ISimulationAdjuster {
 
   private int estimatedMissedInputs;
 
-  private Stopwatch droppedInputTimer = new Stopwatch();
-
   // Extrapolate based on latency what our client tick should be.
   public uint GuessClientTick(uint receivedServerTick, int serverLatencyMs) {
     float serverLatencySeconds = serverLatencyMs / 1000f;
@@ -26,27 +24,24 @@ public class ClientSimulationAdjuster : ISimulationAdjuster {
     // TODO: This logic needs significant tuning.
 
     // Negative lead means dropped inputs which is worse than buffering, so immediately move the
-    // simulation forward.
+    // simulation forward rather than waiting for the average to catch up.
     if (actualTickLead < 0) {
       this.Log("Dropped an input, got an actual tick lead of " + actualTickLead);
-      droppedInputTimer.Restart();
+      actualTickLeadAvg.ForceSet(actualTickLead);
       estimatedMissedInputs++;
     }
 
-    var avg = actualTickLeadAvg.Average();
-    if (droppedInputTimer.IsRunning && droppedInputTimer.ElapsedMilliseconds < 1000 || Input.GetKey(KeyCode.F2)) {
-      if (avg <= -16) {
-        AdjustedInterval = 0.875f;
-      } else if (avg <= -8) {
-        AdjustedInterval = 0.9375f;
-      } else {
-        AdjustedInterval = 0.96875f;
-      }
-      return;
-    }
-
     // Check for a steady average of a healthy connection before backing off the simulation.
-    if (avg >= 16) {
+    var avg = actualTickLeadAvg.Average();
+    if (avg <= -16) {
+      AdjustedInterval = 0.875f;
+    } else if (avg <= -8) {
+      AdjustedInterval = 0.9375f;
+    } else if (avg < 0) {
+      AdjustedInterval = 0.75f;
+    } else if (avg < 0) {
+      AdjustedInterval = 0.96875f;
+    } else if (avg >= 16) {
       AdjustedInterval = 1.125f;
     } else if (avg >= 8) {
       AdjustedInterval = 1.0625f;
