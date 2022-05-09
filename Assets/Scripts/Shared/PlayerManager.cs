@@ -14,6 +14,10 @@ public class PlayerManager : IPlayerLookup {
     players = new Dictionary<byte, Player>();
   }
 
+  public bool TryGetPlayer(byte id, out Player player) {
+    return players.TryGetValue(id, out player);
+  }
+
   public Player GetPlayer(byte id) {
     return players[id];
   }

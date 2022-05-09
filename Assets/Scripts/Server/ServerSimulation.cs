@@ -69,7 +69,8 @@ public class ServerSimulation : BaseSimulation {
   }
 
   public void ClearPlayerState(Player player) {
-    InitializePlayerState(player);
+    playerConnectionInfo.Remove(player.Id);
+    playerStateSnapshots.Remove(player.Id);
   }
 
   public void EnqueuePlayerInput(WithPeer<NetCommand.PlayerInputCommand> input) {
@@ -154,7 +155,9 @@ public class ServerSimulation : BaseSimulation {
       unprocessedPlayerIds.Remove(player.Id);
 
       // Mark the player as synchronized.
-      playerConnectionInfo[player.Id].synchronized = true;
+      if (playerConnectionInfo.ContainsKey(player.Id)) {
+        playerConnectionInfo[player.Id].synchronized = true;
+      }
     }
 
     // Any remaining players without inputs have their latest input command repeated,
