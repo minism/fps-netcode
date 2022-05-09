@@ -31,9 +31,12 @@ public class Player : IReadonlyPlayer {
       PlayerState = Controller.ToNetworkState(),
     };
   }
+
+  public string DebugName => $"{Metadata.Name} (id={Id})";
 }
 
 public interface IReadonlyPlayer {
   byte Id { get; }
   PlayerMetadata Metadata { get; }
+  string DebugName { get; }
 }

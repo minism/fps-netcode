@@ -88,12 +88,14 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
         HandlePlayerAttack(player, type, attackPosition, orientation);
       });
 
+    this.Log($"{player.DebugName} joined the server.");
+
     return player;
   }
 
   /// Tear down all server authoritative state for a player.
   private void DestroyServerPlayer(Player player) {
-    this.Log($"{player.Metadata.Name} left the server.");
+    this.Log($"{player.DebugName} left the server.");
 
     // Let the simulation clear any state for the player.
     simulation.ClearPlayerState(player);
@@ -118,7 +120,6 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
   private void HandleJoinRequest(NetCommand.JoinRequest cmd, NetPeer peer) {
     // TODO: Validation should occur here, if any.
     var playerName = cmd.PlayerSetupData.Name;
-    this.Log($"{playerName} connected to the server.");
     var metadata = new PlayerMetadata {
       Name = playerName,
     };
