@@ -88,8 +88,13 @@ public class ServerSimulation : BaseSimulation {
 
   public bool ProcessPlayerAttack(Player player, HitscanAttack attack) {
     // First, rollback the state of all attackable entities (for now just players).
-    // The world is not rolled back to the tick the players input was for, but rather
-    // the tick of the server world state the player was seeing at the time of attack.
+    // The world is not rolled back to the tick the players input was for, since
+    // players are running ahead of the simulation (tick lead). Rather, we
+    // rollback to the the tick of the server world state the player was seeing
+    // at the time of attack on their client.
+    // This is typically known as "Lag Compensation": 
+    // @see https://developer.valvesoftware.com/wiki/Latency_Compensating_Methods_in_Client/Server_In-game_Protocol_Design_and_Optimization#:~:text=Lag%20compensation%20is%20a%20method,the%20user%20performed%20some%20action.
+
     // TODO: Clean up the whole player delegate path, it sucks.
     var remoteViewTick = currentPlayerInput[player.Id].RemoteViewTick;
 

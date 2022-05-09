@@ -6,6 +6,7 @@ public struct TickInput {
   public uint WorldTick;
 
   // The remote world tick the player saw other entities at for this input.
+  // Needed for server-side lag compensation.
   // (This is equivalent to lastServerWorldTick on the client).
   public uint RemoteViewTick;
 
