@@ -152,19 +152,7 @@ public class ClientSimulation : BaseSimulation {
     var localWorldTickLead = WorldTick - lastServerWorldTick;
     DebugUI.ShowValue("local tick lead", localWorldTickLead);
 
-    bool headState = false;
-    if (incomingState.WorldTick >= WorldTick) {
-      headState = true;
-    }
-    if (incomingState.WorldTick > WorldTick) {
-      this.LogError("Got a FUTURE tick somehow???");
-    }
-
-    // Lookup the historical state for the world tick we got.
-    uint bufidx = incomingState.WorldTick % 1024;
-    var stateSnapshot = localPlayerStateSnapshots[bufidx];
-
-    // Locate the data for our local player.
+    // Parse the player data and separate out our own incoming state.
     PlayerState incomingLocalPlayerState = new PlayerState();
     foreach (var playerState in incomingState.PlayerStates) {
       if (playerState.NetworkId == localPlayer.NetworkObject.NetworkId) {
@@ -176,17 +164,38 @@ public class ClientSimulation : BaseSimulation {
         obj.GetComponent<IPlayerController>().ApplyNetworkState(playerState);
       }
     }
+
     if (default(PlayerState).Equals(incomingLocalPlayerState)) {
+      // This is unexpected.
       this.LogError("No local player state found!");
     }
+
+    if (incomingState.WorldTick >= WorldTick) {
+      // We're running behind the server at this point, which can happen
+      // if the application is suspended for some reason, so just snap our 
+      // state.
+      // TODO: Look into interpolation here as well.
+      this.Log("Got a future world state, snapping to latest state.");
+      // TODO: We need to add local estimated latency here like we do during init.
+      WorldTick = incomingState.WorldTick;
+      localPlayer.Controller.ApplyNetworkState(incomingLocalPlayerState);
+      return;
+    }
+
+    // Otherwise, continue with reconciliation procedure.
+
+    // Lookup the historical state for the world tick we got.
+    // TODO: This is nonsensical when we're behind server.
+    uint bufidx = incomingState.WorldTick % 1024;
+    var stateSnapshot = localPlayerStateSnapshots[bufidx];
 
     // Compare the historical state to see how off it was.
     var error = incomingLocalPlayerState.Position - stateSnapshot.Position;
     if (error.sqrMagnitude > 0.0001f) {
-      if (!headState) {
-        this.Log($"Rewind tick#{incomingState.WorldTick}, Error: {error.magnitude}, Range: {WorldTick - incomingState.WorldTick}");
-        replayedStates++;
-      }
+      this.Log($"Rewind tick#{incomingState.WorldTick}, Error: {error.magnitude}, Range: {WorldTick - incomingState.WorldTick}");
+      replayedStates++;
+
+      // TODO: If the error was too high, snap rather than interpolate.
 
       // Rewind local player state to the correct state from the server.
       // TODO: Cleanup a lot of this when its merged with how rockets are spawned.
