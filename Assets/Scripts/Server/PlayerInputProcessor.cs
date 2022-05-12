@@ -33,7 +33,7 @@ public class PlayerInputProcessor {
       }
     }
     averageInputQueueSize.Push(count);
-    DebugUI.ShowValue("sv avg input queue", averageInputQueueSize.Average());
+    this.LogValue("sv avg input queue", averageInputQueueSize.Average());
   }
 
   public uint GetLatestPlayerInputTick(byte playerId) {

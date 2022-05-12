@@ -35,7 +35,7 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
       return;
     }
 
-    DebugUI.ShowValue("RemotePlayer q size", stateQueue.Count);
+    this.LogValue("RemotePlayer q size", stateQueue.Count);
     var nextState = stateQueue.Peek();
     float theta = stateTimer / Settings.ServerSendInterval;
     transform.position = Vector3.Lerp(

@@ -184,8 +184,8 @@ public class NetChannel : INetEventListener, INetChannel {
   private void UpdateAccumulatedStats() {
     sendAverage.Update(Time.deltaTime, netManager.Statistics.BytesSent - lastBytesSent);
     recvAverage.Update(Time.deltaTime, netManager.Statistics.BytesReceived - lastBytesRecv);
-    DebugUI.ShowValue("send bps", sendAverage.Average);
-    DebugUI.ShowValue("recv bps", recvAverage.Average);
+    this.LogValue("send bps", sendAverage.Average);
+    this.LogValue("recv bps", recvAverage.Average);
     lastBytesSent = netManager.Statistics.BytesSent;
     lastBytesRecv = netManager.Statistics.BytesReceived;
   }
@@ -234,6 +234,6 @@ public class NetChannel : INetEventListener, INetChannel {
 
   public void OnNetworkLatencyUpdate(NetPeer peer, int latency) {
     PeerLatency[peer] = latency;
-    DebugUI.ShowValue("ping", latency);
+    this.LogValue("ping", latency);
   }
 }

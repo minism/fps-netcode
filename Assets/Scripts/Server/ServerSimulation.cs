@@ -166,7 +166,7 @@ public class ServerSimulation : BaseSimulation {
       }
 
       var player = playerManager.GetPlayer(playerId);
-      DebugUI.ShowValue("sv missed inputs", ++missedInputs);
+      this.LogValue("sv missed inputs", ++missedInputs);
       TickInput latestInput;
       if (playerInputProcessor.TryGetLatestInput(playerId, out latestInput)) {
         player.Controller.SetPlayerInputs(latestInput.Inputs);

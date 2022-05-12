@@ -124,8 +124,8 @@ public class ClientSimulation : BaseSimulation {
     //  ProcessServerWorldState();
     //}
     // Show some debug monitoring values.
-    DebugUI.ShowValue("cl reconciliations", replayedStates);
-    DebugUI.ShowValue("incoming state excess", excessWorldStateAvg.Average());
+    this.LogValue("cl reconciliations", replayedStates);
+    this.LogValue("incoming state excess", excessWorldStateAvg.Average());
     clientSimulationAdjuster.Monitoring();
   }
 
@@ -150,7 +150,7 @@ public class ClientSimulation : BaseSimulation {
 
     // For debugging purposes, log the local lead we're running at
     var localWorldTickLead = WorldTick - lastServerWorldTick;
-    DebugUI.ShowValue("local tick lead", localWorldTickLead);
+    this.LogValue("local tick lead", localWorldTickLead);
 
     // Parse the player data and separate out our own incoming state.
     PlayerState incomingLocalPlayerState = new PlayerState();

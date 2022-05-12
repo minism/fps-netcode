@@ -20,6 +20,11 @@ public static class LogExtensions {
     Debug.LogWarning(FormatMessage(obj, message));
   }
 
+  public static void LogValue(this object obj, string key, object val) {
+    var category = obj.GetType().Name;
+    DebugUI.ShowValue(category, key, val);
+  }
+
   private static string FormatMessage(this object obj, object message) {
     var className = obj.GetType().Name;
     return $"({className}) {message}";

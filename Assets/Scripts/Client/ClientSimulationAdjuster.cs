@@ -55,8 +55,8 @@ public class ClientSimulationAdjuster : ISimulationAdjuster {
   }
 
   public void Monitoring() {
-    DebugUI.ShowValue("cl tick lead avg", actualTickLeadAvg.Average());
-    DebugUI.ShowValue("cl sim factor", AdjustedInterval);
-    DebugUI.ShowValue("cl est. missed inputs", estimatedMissedInputs);
+    this.LogValue("cl tick lead avg", actualTickLeadAvg.Average());
+    this.LogValue("cl sim factor", AdjustedInterval);
+    this.LogValue("cl est. missed inputs", estimatedMissedInputs);
   }
 }
