@@ -14,6 +14,7 @@ This repository contains a small demo of a quake-style multiplayer FPS that inte
 **References & Research**:
 
 * [Quake 3 Networking Code Review](http://fabiensanglard.net/quake3/network.php)
+* [Quake 3 Network Protocol](https://www.jfedor.org/quake3/)
 * [Client-Side Prediction With Physics in Unity](http://www.codersblock.org/blog/client-side-prediction-in-unity-2018)
 * [Gaffer On Games Networking](https://gafferongames.com/tags/networking/)
 * [Unreal Networking Overview](https://docs.unrealengine.com/udk/Three/NetworkingOverview.html)
