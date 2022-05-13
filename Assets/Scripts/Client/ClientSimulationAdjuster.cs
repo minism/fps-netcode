@@ -11,9 +11,9 @@ public class ClientSimulationAdjuster : ISimulationAdjuster {
   private int estimatedMissedInputs;
 
   // Extrapolate based on latency what our client tick should be.
-  public uint GuessClientTick(uint receivedServerTick, int serverLatencyMs) {
+  public int GuessClientTick(int receivedServerTick, int serverLatencyMs) {
     float serverLatencySeconds = serverLatencyMs / 1000f;
-    uint estimatedTickLead = (uint)(serverLatencySeconds * 1.5 / Time.fixedDeltaTime) + 4;
+    int estimatedTickLead = (int)(serverLatencySeconds * 1.5 / Time.fixedDeltaTime) + 4;
     this.Log($"Initializing client with estimated tick lead of {estimatedTickLead}, ping: {serverLatencyMs}");
     return receivedServerTick + estimatedTickLead;
   }

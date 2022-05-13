@@ -21,7 +21,7 @@ namespace NetCommand {
    */
   public struct PlayerInputCommand : INetSerializable {
     // The world tick for the first input in the array.
-    public uint StartWorldTick;
+    public int StartWorldTick;
 
     // An array of inputs, one entry for tick.  Ticks are guaranteed to be contiguous.
     public PlayerInputs[] Inputs;
@@ -46,7 +46,7 @@ namespace NetCommand {
     }
 
     public void Deserialize(NetDataReader reader) {
-      StartWorldTick = reader.GetUInt();
+      StartWorldTick = reader.GetInt();
       var length = reader.GetInt();
       Inputs = new PlayerInputs[length];
       ClientWorldTickDeltas = new short[length];
@@ -66,7 +66,7 @@ namespace NetCommand {
 
     // The current world tick on the server.
     // The client will initially set theirs to this plus a latency estimate.
-    public uint WorldTick { get; set; }
+    public int WorldTick { get; set; }
   }
 
   public class PlayerJoined {
@@ -99,12 +99,12 @@ namespace NetCommand {
 
   public class WorldState {
     // The world tick this data represents.
-    public uint WorldTick { get; set; }
+    public int WorldTick { get; set; }
 
     // The last world tick the server acknowledged for you.
     // The client should use this to determine the last acked input, as well as to compute
     // its relative simulation offset.
-    public uint YourLatestInputTick { get; set; }
+    public int YourLatestInputTick { get; set; }
 
     // States for all active players.
     public PlayerState[] PlayerStates { get; set; }

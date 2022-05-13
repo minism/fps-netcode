@@ -13,17 +13,17 @@ public class ClientSimulation : BaseSimulation {
   private PlayerState[] localPlayerStateSnapshots = new PlayerState[1024];
 
   // The server world tick for each local tick.
-  private uint[] localPlayerWorldTickSnapshots = new uint[1024];
+  private int[] localPlayerWorldTickSnapshots = new int[1024];
 
   // Queue for incoming world states.
   private Queue<NetCommand.WorldState> worldStateQueue = new Queue<NetCommand.WorldState>();
 
   // The last received server world tick.
   // TODO Not public
-  public uint lastServerWorldTick = 0;
+  public int lastServerWorldTick = 0;
 
   // The last tick that the server has acknowledged our input for.
-  private uint lastAckedInputTick = 0;
+  private int lastAckedInputTick = 0;
 
   // Delegate for adjusting the simulation speed based on incoming state data.
   private ClientSimulationAdjuster clientSimulationAdjuster;
@@ -47,7 +47,7 @@ public class ClientSimulation : BaseSimulation {
       NetworkObjectManager networkObjectManager,
       Handler handler,
       int serverLatencyMs,
-      uint initialWorldTick) : base(playerManager, networkObjectManager) {
+      int initialWorldTick) : base(playerManager, networkObjectManager) {
     this.localPlayer = localPlayer;
     this.handler = handler;
 
@@ -81,7 +81,7 @@ public class ClientSimulation : BaseSimulation {
     }
 
     // Update our snapshot buffers.
-    uint bufidx = WorldTick % 1024;
+    int bufidx = WorldTick % 1024;
     localPlayerInputsSnapshots[bufidx] = inputs;
     localPlayerStateSnapshots[bufidx] = localPlayer.Controller.ToNetworkState();
     localPlayerWorldTickSnapshots[bufidx] = lastServerWorldTick;
@@ -124,9 +124,9 @@ public class ClientSimulation : BaseSimulation {
     // Prepare a command for all inputs not yet acknowledged from the server.
     // Limit this to ClientMaxHistoricalInputs to preserve bandwidth.
     int offset = Mathf.Min(
-        (int)WorldTick - (int)lastAckedInputTick,
+        WorldTick - lastAckedInputTick,
         Settings.ClientMaxHistoricalInputs);
-    int startingTick = (int)WorldTick - offset + 1;
+    int startingTick = WorldTick - offset + 1;
 
     var inputsToSend = new List<PlayerInputs>();
     var clientWorldTickDeltas = new List<short>();
@@ -135,7 +135,7 @@ public class ClientSimulation : BaseSimulation {
       clientWorldTickDeltas.Add((short)(tick - localPlayerWorldTickSnapshots[tick % 1024]));
     }
     var command = new NetCommand.PlayerInputCommand {
-      StartWorldTick = (uint)startingTick,
+      StartWorldTick = startingTick,
       Inputs = inputsToSend.ToArray(),
       ClientWorldTickDeltas = clientWorldTickDeltas.ToArray(),
     };
@@ -157,7 +157,7 @@ public class ClientSimulation : BaseSimulation {
       // Calculate our actual tick lead on the server perspective. We add one because the world
       // state the server sends to use is always 1 higher than the latest input that has been
       // processed.
-      int actualTickLead = (int)lastAckedInputTick - (int)lastServerWorldTick + 1;
+      int actualTickLead = lastAckedInputTick - lastServerWorldTick + 1;
       clientSimulationAdjuster.NotifyActualTickLead(actualTickLead);
     }
 
@@ -199,7 +199,7 @@ public class ClientSimulation : BaseSimulation {
 
     // Lookup the historical state for the world tick we got.
     // TODO: This is nonsensical when we're behind server.
-    uint bufidx = incomingState.WorldTick % 1024;
+    int bufidx = incomingState.WorldTick % 1024;
     var stateSnapshot = localPlayerStateSnapshots[bufidx];
 
     // Compare the historical state to see how off it was.
@@ -215,7 +215,7 @@ public class ClientSimulation : BaseSimulation {
       localPlayer.Controller.ApplyNetworkState(incomingLocalPlayerState);
 
       // Loop through and replay all captured input snapshots up to the current tick.
-      uint replayTick = incomingState.WorldTick;
+      int replayTick = incomingState.WorldTick;
       while (replayTick < WorldTick) {
         // Grab the historical input.
         bufidx = replayTick % 1024;

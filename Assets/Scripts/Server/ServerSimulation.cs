@@ -9,7 +9,7 @@ public class PlayerConnectionInfo {
   public bool synchronized;
 
   // The latest (highest) input tick from the player.
-  public uint latestInputTick;
+  public int latestInputTick;
 }
 
 // Client world simulation including prediction and state rewind.
@@ -100,7 +100,7 @@ public class ServerSimulation : BaseSimulation {
       remoteViewTick--;
     }
 
-    uint bufidx = remoteViewTick % 1024;
+    int bufidx = remoteViewTick % 1024;
     var head = new Dictionary<byte, PlayerState>();
     foreach (var entry in playerStateSnapshots) {
       var otherPlayer = playerManager.GetPlayer(entry.Key);

@@ -10,7 +10,7 @@ public class NoopAdjuster : ISimulationAdjuster {
 
 public abstract class BaseSimulation {
   // The current world tick of the simulation.
-  public uint WorldTick { get; protected set; } = 0;
+  public int WorldTick { get; protected set; } = 0;
 
   // The interval for world update ticks (inverse of tickrate).
   // This is currently always constant, but will eventually need to fluctuate on the client
