@@ -17,6 +17,9 @@ public static class Settings {
   // (Overwatch's netcode method).
   public static bool ClientEnableTimeDialation = false;
 
+  // Whether to estimate the offset to the server on connection.
+  public static bool ClientEstimateInitialServerOffset = false;
+
   // Whether to interpolate remote entities on the client for smoothness.
   // Similar to source cl_interp=1.
   public static bool UseClientInterp = true;
