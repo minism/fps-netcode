@@ -31,6 +31,10 @@ public class ClientSimulationAdjuster : ISimulationAdjuster {
       estimatedMissedInputs++;
     }
 
+    if (!Settings.ClientEnableTimeDialation) {
+      return;
+    }
+
     // Check for a steady average of a healthy connection before backing off the simulation.
     var avg = actualTickLeadAvg.Average();
     if (avg <= -16) {

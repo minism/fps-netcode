@@ -2,10 +2,20 @@ using System;
 using UnityEngine;
 
 public static class Settings {
-  public static float SimulationTickRate = 1 / Time.fixedDeltaTime;
-  public static float SimulationTickInterval = Time.fixedDeltaTime;
-  public static float ServerSendRate = SimulationTickRate / 2;
+  // The rate of the world simulation. This is equivalent on client and server.
+  public static float SimulationTickRate = 30;
+  public static float SimulationTickInterval = 1 / SimulationTickRate;
+
+  // The rate that the server sends world snapshots to the client.
+  public static float ServerSendRate = 30;
   public static float ServerSendInterval = 1 / ServerSendRate;
+
+  // The maximum number of historical inputs the client sends to the server.
+  public static int ClientMaxHistoricalInputs = 10;
+
+  // Whether to enable time dialation on the client to improve input buffer
+  // (Overwatch's netcode method).
+  public static bool ClientEnableTimeDialation = false;
 
   // Whether to interpolate remote entities on the client for smoothness.
   // Similar to source cl_interp=1.
