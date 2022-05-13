@@ -87,18 +87,9 @@ public class ClientSimulation : BaseSimulation {
     localPlayerWorldTickSnapshots[bufidx] = lastServerWorldTick;
 
     // Send a command for all inputs not yet acknowledged from the server.
-    var unackedInputs = new List<PlayerInputs>();
-    var clientWorldTickDeltas = new List<short>();
-    for (uint tick = lastAckedInputTick; tick <= WorldTick; ++tick) {
-      unackedInputs.Add(localPlayerInputsSnapshots[tick % 1024]);
-      clientWorldTickDeltas.Add((short)(tick - localPlayerWorldTickSnapshots[tick % 1024]));
-    }
-    var command = new NetCommand.PlayerInputCommand {
-      StartWorldTick = lastAckedInputTick,
-      Inputs = unackedInputs.ToArray(),
-      ClientWorldTickDeltas = clientWorldTickDeltas.ToArray(),
-    };
-    handler.SendInputs(command);
+    var inputsCommand = PreparePlayerInputs();
+    handler.SendInputs(inputsCommand);
+    this.LogValue("num sent inputs", inputsCommand.Inputs.Length);
 
     // Prediction - Apply inputs to the associated player controller and simulate the world.
     localPlayer.Controller.SetPlayerInputs(inputs);
@@ -127,6 +118,28 @@ public class ClientSimulation : BaseSimulation {
     this.LogValue("cl reconciliations", replayedStates);
     this.LogValue("incoming state excess", excessWorldStateAvg.Average());
     clientSimulationAdjuster.Monitoring();
+  }
+
+  private NetCommand.PlayerInputCommand PreparePlayerInputs() {
+    // Prepare a command for all inputs not yet acknowledged from the server.
+    // Limit this to ClientMaxHistoricalInputs to preserve bandwidth.
+    int offset = Mathf.Min(
+        (int)WorldTick - (int)lastAckedInputTick,
+        Settings.ClientMaxHistoricalInputs);
+    int startingTick = (int)WorldTick - offset + 1;
+
+    var inputsToSend = new List<PlayerInputs>();
+    var clientWorldTickDeltas = new List<short>();
+    for (int tick = startingTick; tick <= WorldTick; ++tick) {
+      inputsToSend.Add(localPlayerInputsSnapshots[tick % 1024]);
+      clientWorldTickDeltas.Add((short)(tick - localPlayerWorldTickSnapshots[tick % 1024]));
+    }
+    var command = new NetCommand.PlayerInputCommand {
+      StartWorldTick = (uint)startingTick,
+      Inputs = inputsToSend.ToArray(),
+      ClientWorldTickDeltas = clientWorldTickDeltas.ToArray(),
+    };
+    return command;
   }
 
   private void ProcessServerWorldState() {

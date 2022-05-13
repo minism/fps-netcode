@@ -11,7 +11,7 @@ public static class Settings {
   public static float ServerSendInterval = 1 / ServerSendRate;
 
   // The maximum number of historical inputs the client sends to the server.
-  public static int ClientMaxHistoricalInputs = 10;
+  public static int ClientMaxHistoricalInputs = 5;
 
   // Whether to enable time dialation on the client to improve input buffer
   // (Overwatch's netcode method).

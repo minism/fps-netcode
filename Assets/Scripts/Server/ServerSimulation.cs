@@ -80,7 +80,6 @@ public class ServerSimulation : BaseSimulation {
     // Update connection info for the player.
     playerConnectionInfo[player.Id].latestInputTick =
         playerInputProcessor.GetLatestPlayerInputTick(player.Id);
-    // command.StartWorldTick + (uint)command.Inputs.Length - 1;
   }
 
   public bool ProcessPlayerAttack(Player player, HitscanAttack attack) {

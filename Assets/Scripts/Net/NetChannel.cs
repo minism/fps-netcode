@@ -184,8 +184,8 @@ public class NetChannel : INetEventListener, INetChannel {
   private void UpdateAccumulatedStats() {
     sendAverage.Update(Time.deltaTime, netManager.Statistics.BytesSent - lastBytesSent);
     recvAverage.Update(Time.deltaTime, netManager.Statistics.BytesReceived - lastBytesRecv);
-    this.LogValue("send bps", sendAverage.Average);
-    this.LogValue("recv bps", recvAverage.Average);
+    this.LogValue("send bytes/s", sendAverage.Average);
+    this.LogValue("recv bytes/s", recvAverage.Average);
     lastBytesSent = netManager.Statistics.BytesSent;
     lastBytesRecv = netManager.Statistics.BytesReceived;
   }
