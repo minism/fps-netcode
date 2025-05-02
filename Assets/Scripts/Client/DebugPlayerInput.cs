@@ -15,5 +15,4 @@ public class DebugPlayerInput : MonoBehaviour {
     playerController.SetPlayerInputs(clientPlayerInput.SampleInputs());
     playerController.Simulate(Time.deltaTime);
   }
-
 }

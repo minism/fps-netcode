@@ -8,8 +8,7 @@ public class PingHelper {
     public DateTime sendTime;
   }
 
-  private Dictionary<IPEndPoint, Listener> listeners =
-      new Dictionary<IPEndPoint, Listener>();
+  private Dictionary<IPEndPoint, Listener> listeners = new();
 
   public void AddListener(IPEndPoint endpoint, Action<int> callback) {
     var listener = new Listener {

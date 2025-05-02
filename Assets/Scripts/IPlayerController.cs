@@ -1,7 +1,7 @@
 using UnityEngine;
 
 public delegate void PlayerAttackDelegate(
-    NetworkObjectType type, Vector3 position, Quaternion orientation);
+  NetworkObjectType type, Vector3 position, Quaternion orientation);
 
 public interface IPlayerController {
   PlayerState ToNetworkState();

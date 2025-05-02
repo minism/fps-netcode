@@ -37,10 +37,12 @@ public class NetworkObjectManager : MonoBehaviour {
       Assert.IsFalse(isAuthoritative, "Manager is authoritative, a network ID is unexpected.");
       return networkId;
     }
+
     Assert.IsTrue(isAuthoritative, "Manager is not authoritative, a network ID is expected.");
     if (nextId >= ushort.MaxValue) {
-      throw new System.Exception("Maximum number of network objects reached!");
+      throw new Exception("Maximum number of network objects reached!");
     }
+
     return nextId++;
   }
 
@@ -71,8 +73,8 @@ public class NetworkObjectManager : MonoBehaviour {
   }
 
   public NetworkObject SpawnPlayerObject(
-      ushort networkId, NetworkObjectType type, Vector3 position, Quaternion orientation,
-      bool forLocalPlayer = false) {
+    ushort networkId, NetworkObjectType type, Vector3 position, Quaternion orientation,
+    bool forLocalPlayer = false) {
     if (type != NetworkObjectType.HITSCAN_ATTACK) {
       throw new NotImplementedException();
     }

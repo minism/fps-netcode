@@ -9,6 +9,7 @@ public static class GamePrefs {
     if (!PlayerPrefs.HasKey(NAME_KEY)) {
       return "Player";
     }
+
     return PlayerPrefs.GetString(NAME_KEY);
   }
 

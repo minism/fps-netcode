@@ -4,8 +4,7 @@ using UnityEngine.SocialPlatforms;
 
 /// Primary logic controller for managing client game state.
 public class ClientLogicController : BaseLogicController, ClientSimulation.Handler {
-  [Header("Client debug settings")]
-  public int debugAutoMovement = 0;
+  [Header("Client debug settings")] public int debugAutoMovement = 0;
 
   private NetPeer serverPeer;
   private ClientPlayerInput localPlayerInput;
@@ -21,11 +20,13 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
   // The most accurate server latency estimate to use for initialization.
   private int initialServerLatency;
+
   private int bestServerLatency {
     get {
       if (netChannel.PeerLatency.ContainsKey(serverPeer)) {
         return netChannel.PeerLatency[serverPeer];
       }
+
       return initialServerLatency;
     }
   }
@@ -68,10 +69,10 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
   private Player AddPlayerFromInitialServerState(InitialPlayerState initialState, bool isRemote) {
     var playerObject = networkObjectManager.CreatePlayerGameObject(
-        initialState.NetworkObjectState.NetworkId,
-        initialState.PlayerState.Position, isRemote).gameObject;
+      initialState.NetworkObjectState.NetworkId,
+      initialState.PlayerState.Position, isRemote).gameObject;
     var player = playerManager.AddPlayer(
-        initialState.PlayerId, initialState.Metadata, playerObject);
+      initialState.PlayerId, initialState.Metadata, playerObject);
 
     return player;
   }
@@ -100,6 +101,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     if (localPlayerInput == null) {
       return null;
     }
+
     return localPlayerInput.SampleInputs();
   }
 
@@ -124,12 +126,10 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
     // Initialize simulation.
     simulation = new ClientSimulation(
-        localPlayer, playerManager, networkObjectManager, this, bestServerLatency, cmd.WorldTick);
+      localPlayer, playerManager, networkObjectManager, this, bestServerLatency, cmd.WorldTick);
 
     // Create player objects for existing clients.
-    foreach (var state in cmd.ExistingPlayerStates) {
-      AddPlayerFromInitialServerState(state, true);
-    }
+    foreach (var state in cmd.ExistingPlayerStates) AddPlayerFromInitialServerState(state, true);
   }
 
   private void HandleOtherPlayerJoined(NetCommand.PlayerJoined cmd) {
@@ -149,10 +149,10 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     // TODO: Instead we should attach to the live object.
     if (cmd.CreatorPlayerId != localPlayer.Id) {
       networkObjectManager.SpawnPlayerObject(
-          cmd.NetworkObjectState.NetworkId,
-          cmd.Type,
-          cmd.Position,
-          cmd.Orientation);
+        cmd.NetworkObjectState.NetworkId,
+        cmd.Type,
+        cmd.Position,
+        cmd.Orientation);
     } else if (cmd.WasAttackHit) {
       // Play a hit confirm sound for debugging purposes.
       hitConfirmSound.Play();
@@ -160,12 +160,12 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   }
 
   protected override void OnPeerConnected(NetPeer peer) {
-    this.Log("Connected to host: " + peer.EndPoint);
+    this.Log("Connected to host: " + peer.Address);
     serverPeer = peer;
 
     // Send a join request.
     netChannel.SendCommand(serverPeer, new NetCommand.JoinRequest {
-      PlayerSetupData = playerSetupData
+      PlayerSetupData = playerSetupData,
     });
   }
 
@@ -173,6 +173,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
     if (serverPeer != null && peer != serverPeer) {
       this.LogError("Unexpected mismatch between disconnect peer and server peer!");
     }
+
     this.Log("Disconnected from host: " + disconnectInfo.Reason);
     serverPeer = null;
 
@@ -183,18 +184,19 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
 
   /**
    * IPlayerActionHandler interface.
-   * 
+   *
    * TODO - Consider breaking this into a delegate.
    */
   public void HandleLocalPlayerAttack(
-      NetworkObjectType type, Vector3 position, Quaternion orientation) {
+    NetworkObjectType type, Vector3 position, Quaternion orientation) {
     var obj = networkObjectManager.SpawnPlayerObject(0, type, position, orientation, true);
 
     // Check hit for logging purposes but dont do anything with this yet.
     var playerHit = obj.GetComponent<HitscanAttack>().CheckHit(true);
     if (playerHit != null) {
       clientHitSound.Play();
-      this.Log($"Local hit {playerHit.name} at ${playerHit.transform.position} server world tick ${simulation.lastServerWorldTick}");
+      this.Log(
+        $"Local hit {playerHit.name} at ${playerHit.transform.position} server world tick ${simulation.lastServerWorldTick}");
     }
   }
 }

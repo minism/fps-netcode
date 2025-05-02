@@ -19,26 +19,36 @@ public struct PlayerInputs {
   public bool Forward, Back, Left, Right, Jump, Fire;
   public Quaternion ViewDirection;
 
-  public float ForwardAxis {
-    get {
-      return Forward ? 1f : Back ? -1f : 0f;
-    }
-  }
+  public float ForwardAxis => Forward ? 1f : Back ? -1f : 0f;
 
-  public float RightAxis {
-    get {
-      return Right ? 1f : Left ? -1f : 0f;
-    }
-  }
+  public float RightAxis => Right ? 1f : Left ? -1f : 0f;
 
   public byte GetKeyBitfield() {
     var keyField = PlayerKeys.None;
-    if (Forward) keyField |= PlayerKeys.Forward;
-    if (Back) keyField |= PlayerKeys.Back;
-    if (Right) keyField |= PlayerKeys.Right;
-    if (Left) keyField |= PlayerKeys.Left;
-    if (Jump) keyField |= PlayerKeys.Jump;
-    if (Fire) keyField |= PlayerKeys.Fire;
+    if (Forward) {
+      keyField |= PlayerKeys.Forward;
+    }
+
+    if (Back) {
+      keyField |= PlayerKeys.Back;
+    }
+
+    if (Right) {
+      keyField |= PlayerKeys.Right;
+    }
+
+    if (Left) {
+      keyField |= PlayerKeys.Left;
+    }
+
+    if (Jump) {
+      keyField |= PlayerKeys.Jump;
+    }
+
+    if (Fire) {
+      keyField |= PlayerKeys.Fire;
+    }
+
     return (byte)keyField;
   }
 

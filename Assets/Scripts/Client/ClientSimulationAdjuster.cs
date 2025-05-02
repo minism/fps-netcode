@@ -6,17 +6,18 @@ public class ClientSimulationAdjuster : ISimulationAdjuster {
 
   // The actual number of ticks our inputs are arriving ahead of the server simulation.
   // The goal of the adjuster is to get this value as close to 1 as possible without going under.
-  private Ice.MovingAverage actualTickLeadAvg = new Ice.MovingAverage((int)Settings.ServerSendRate * 2);
+  private Ice.MovingAverage actualTickLeadAvg = new((int)Settings.ServerSendRate * 2);
 
   private int estimatedMissedInputs;
 
   // Extrapolate based on latency what our client tick should be.
   public int GuessClientTick(int receivedServerTick, int serverLatencyMs) {
-    float serverLatencySeconds = serverLatencyMs / 1000f;
-    int estimatedTickLead = 0;
+    var serverLatencySeconds = serverLatencyMs / 1000f;
+    var estimatedTickLead = 0;
     if (Settings.ClientEstimateInitialServerOffset) {
       estimatedTickLead = (int)(serverLatencySeconds * 1.5 * Settings.SimulationTickRate) + 4;
     }
+
     this.Log($"Initializing client with estimated tick lead of {estimatedTickLead}, ping: {serverLatencyMs}");
     return receivedServerTick + estimatedTickLead;
   }

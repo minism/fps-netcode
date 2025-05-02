@@ -27,7 +27,7 @@ public class HitscanAttack : MonoBehaviour {
   }
 
   public GameObject CheckHit(bool excludeLocalPlayer = false) {
-    int mask = LayerMask.GetMask("Player");
+    var mask = LayerMask.GetMask("Player");
     var hits = Physics.RaycastAll(transform.position, transform.forward, float.MaxValue, mask);
     if (!excludeLocalPlayer) {
       return hits.Length > 0 ? hits[0].collider.gameObject : null;
@@ -39,6 +39,7 @@ public class HitscanAttack : MonoBehaviour {
     if (first.Equals(default(RaycastHit))) {
       return null;
     }
+
     return first.collider.gameObject;
   }
 

@@ -11,7 +11,7 @@ public class LobbyUI : MonoBehaviour {
 
   private GameObject joinButtonPrototype;
   private Hotel.GameServer[] gameServers;
-  private Dictionary<int, int> serverLatencies = new Dictionary<int, int>();
+  private Dictionary<int, int> serverLatencies = new();
 
   private async void Start() {
     // Setup references.
@@ -52,12 +52,11 @@ public class LobbyUI : MonoBehaviour {
   private async Task RefreshServerList() {
     ClearDisplay();
     gameServers = await Hotel.HotelClient.Instance.ListGameServers();
-    foreach (var server in gameServers) {
+    foreach (var server in gameServers)
       clientController.PingServer(server.ResolveIPEndPoint(), (latency) => {
         serverLatencies[server.id] = latency;
         UpdateDisplay();
       });
-    }
     UpdateDisplay();
   }
 

@@ -10,7 +10,7 @@ public class CPMCameraController : MonoBehaviour {
   private float rotX = 0.0f;
   private float rotY = 0.0f;
 
-  private DoubleBuffer<Vector3> positionBuffer = new DoubleBuffer<Vector3>();
+  private DoubleBuffer<Vector3> positionBuffer = new();
 
   public void PlayerPositionUpdated() {
     var targetPos = player.transform.position + Vector3.up * player.playerHeadHeight;
@@ -41,8 +41,8 @@ public class CPMCameraController : MonoBehaviour {
 
     // Interpolate position.
     transform.position = Vector3.Lerp(
-                                positionBuffer.Old(),
-                                positionBuffer.New(),
-                                InterpolationController.InterpolationFactor);
+      positionBuffer.Old(),
+      positionBuffer.New(),
+      InterpolationController.InterpolationFactor);
   }
 }

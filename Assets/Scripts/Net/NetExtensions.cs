@@ -23,7 +23,7 @@ public static class NetExtensions {
     // Utilize "Smallest three" strategy.
     // Reference: https://gafferongames.com/post/snapshot_compression/
     byte maxIndex = 0;
-    float maxValue = float.MinValue;
+    var maxValue = float.MinValue;
     float maxValueSign = 1;
 
     // Find the largest value in the quaternion and save its index.
@@ -74,13 +74,13 @@ public static class NetExtensions {
 
   public static Quaternion DeserializeQuaternion(NetDataReader reader) {
     // Read values from the wire and map back to normal float precision.
-    byte maxIndex = reader.GetByte();
-    float a = reader.GetShort() / QUAT_FLOAT_PRECISION_MULT;
-    float b = reader.GetShort() / QUAT_FLOAT_PRECISION_MULT;
-    float c = reader.GetShort() / QUAT_FLOAT_PRECISION_MULT;
+    var maxIndex = reader.GetByte();
+    var a = reader.GetShort() / QUAT_FLOAT_PRECISION_MULT;
+    var b = reader.GetShort() / QUAT_FLOAT_PRECISION_MULT;
+    var c = reader.GetShort() / QUAT_FLOAT_PRECISION_MULT;
 
     // Reconstruct the fourth value.
-    float d = Mathf.Sqrt(1f - (a * a + b * b + c * c));
+    var d = Mathf.Sqrt(1f - (a * a + b * b + c * c));
     switch (maxIndex) {
       case 0:
         return new Quaternion(d, a, b, c);
@@ -113,17 +113,13 @@ public static class NetExtensions {
 
   public static void PutArray<T>(this NetDataWriter writer, T[] array) where T : INetSerializable {
     writer.Put((ushort)array.Length);
-    foreach (var obj in array) {
-      writer.Put<T>(obj);
-    }
+    foreach (var obj in array) writer.Put<T>(obj);
   }
 
-  public static T[] GetArray<T>(this NetDataReader reader) where T : INetSerializable, new() {
+  public static T[] GetArray<T>(this NetDataReader reader) where T : struct, INetSerializable {
     var len = reader.GetUShort();
     var array = new T[len];
-    for (int i = 0; i < len; i++) {
-      array[i] = reader.Get<T>();
-    }
+    for (var i = 0; i < len; i++) array[i] = reader.Get<T>();
     return array;
   }
 }

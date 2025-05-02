@@ -23,24 +23,24 @@ public class ServerSimulation : BaseSimulation {
   private PlayerInputProcessor playerInputProcessor;
 
   // Reusable hash set for players whose input we've checked each frame.
-  private HashSet<byte> unprocessedPlayerIds = new HashSet<byte>();
+  private HashSet<byte> unprocessedPlayerIds = new();
 
   // Snapshot buffers for player state history, used for attack rollbacks.
-  private Dictionary<byte, PlayerState[]> playerStateSnapshots = new Dictionary<byte, PlayerState[]>();
+  private Dictionary<byte, PlayerState[]> playerStateSnapshots = new();
 
   // Simulation info for each player, indexed by player ID (peer ID).
-  private Dictionary<byte, PlayerConnectionInfo> playerConnectionInfo
-      = new Dictionary<byte, PlayerConnectionInfo>();
+  private Dictionary<byte, PlayerConnectionInfo> playerConnectionInfo = new();
 
   // Current input struct for each player.
   // This is only needed because the ProcessAttack delegate flow is a bit too complicated.
   // TODO: Simplify this.
-  private Dictionary<byte, TickInput> currentPlayerInput = new Dictionary<byte, TickInput>();
+  private Dictionary<byte, TickInput> currentPlayerInput = new();
 
   // I/O interface for world states.
   public interface Handler {
     void SendWorldState(Player player, NetCommand.WorldState state);
   }
+
   private Handler handler;
 
   // World state broadcasts can happen at an independent rate.
@@ -50,10 +50,10 @@ public class ServerSimulation : BaseSimulation {
   private int missedInputs;
 
   public ServerSimulation(
-      float debugPhysicsErrorChance,
-      PlayerManager playerManager,
-      NetworkObjectManager networkObjectManager,
-      Handler handler) : base(playerManager, networkObjectManager) {
+    float debugPhysicsErrorChance,
+    PlayerManager playerManager,
+    NetworkObjectManager networkObjectManager,
+    Handler handler) : base(playerManager, networkObjectManager) {
     this.debugPhysicsErrorChance = debugPhysicsErrorChance;
     this.handler = handler;
     playerInputProcessor = new PlayerInputProcessor();
@@ -79,7 +79,7 @@ public class ServerSimulation : BaseSimulation {
 
     // Update connection info for the player.
     playerConnectionInfo[player.Id].latestInputTick =
-        playerInputProcessor.GetLatestPlayerInputTick(player.Id);
+      playerInputProcessor.GetLatestPlayerInputTick(player.Id);
   }
 
   public bool ProcessPlayerAttack(Player player, HitscanAttack attack) {
@@ -100,7 +100,7 @@ public class ServerSimulation : BaseSimulation {
       remoteViewTick--;
     }
 
-    int bufidx = remoteViewTick % 1024;
+    var bufidx = remoteViewTick % 1024;
     var head = new Dictionary<byte, PlayerState>();
     foreach (var entry in playerStateSnapshots) {
       var otherPlayer = playerManager.GetPlayer(entry.Key);
@@ -116,7 +116,8 @@ public class ServerSimulation : BaseSimulation {
     foreach (var entry in playerStateSnapshots) {
       var otherPlayer = playerManager.GetPlayer(entry.Key);
       if (otherPlayer.Id != player.Id) {
-        this.Log($"Other player at ${otherPlayer.GameObject.transform.position} for remote view tick ${remoteViewTick}");
+        this.Log(
+          $"Other player at ${otherPlayer.GameObject.transform.position} for remote view tick ${remoteViewTick}");
       }
     }
 
@@ -132,6 +133,7 @@ public class ServerSimulation : BaseSimulation {
       attack.AddForceToPlayer(playerObjectHit.GetComponent<CPMPlayerController>());
       return true;
     }
+
     return false;
   }
 
@@ -179,15 +181,14 @@ public class ServerSimulation : BaseSimulation {
     if (UnityEngine.Random.value < debugPhysicsErrorChance) {
       this.Log("Injecting random physics error.");
       playerManager.GetPlayers().ForEach(
-          p => p.GameObject.transform.Translate(new Vector3(1, 0, 0)));
+        p => p.GameObject.transform.Translate(new Vector3(1, 0, 0)));
     }
+
     ++WorldTick;
 
     // Snapshot everything.
     var bufidx = WorldTick % 1024;
-    playerManager.GetPlayers().ForEach(p => {
-      playerStateSnapshots[p.Id][bufidx] = p.Controller.ToNetworkState();
-    });
+    playerManager.GetPlayers().ForEach(p => { playerStateSnapshots[p.Id][bufidx] = p.Controller.ToNetworkState(); });
 
     // Update post-tick timers.
     worldStateBroadcastTimer.Update(dt);

@@ -9,13 +9,12 @@ public class NetworkObject : MonoBehaviour {
   private ushort _networkId;
 
   public ushort NetworkId {
-    get {
-      return _networkId;
-    }
+    get => _networkId;
     set {
       if (_networkId > 0) {
         throw new System.InvalidOperationException("Cannot set networkID more than once.");
       }
+
       _networkId = value;
     }
   }
@@ -30,8 +29,7 @@ public class NetworkObject : MonoBehaviour {
     };
   }
 
-  public void ApplyNetworkState(NetworkObjectState state) {
-  }
+  public void ApplyNetworkState(NetworkObjectState state) { }
 
   private void OnGUI() {
     if (GamePrefs.DebugMode) {

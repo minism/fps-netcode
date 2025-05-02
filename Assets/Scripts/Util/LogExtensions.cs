@@ -3,7 +3,6 @@ using UnityEngine;
 
 /// Better debug logger which prepends class name.
 public static class LogExtensions {
-
   public static void Log(this object obj, object message) {
     Debug.Log(FormatMessage(obj, message));
   }
