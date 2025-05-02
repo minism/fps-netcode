@@ -118,7 +118,7 @@ public static class NetExtensions {
     }
   }
 
-  public static T[] GetArray<T>(this NetDataReader reader) where T : INetSerializable, new() {
+  public static T[] GetArray<T>(this NetDataReader reader) where T : struct, INetSerializable {
     var len = reader.GetUShort();
     var array = new T[len];
     for (int i = 0; i < len; i++) {

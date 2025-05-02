@@ -39,7 +39,7 @@ public class NetChannel : INetEventListener, INetChannel {
   // Debugging stuff.
   private DebugNetworkSettings debugNetworkSettings;
   private float debugLargeStallsTimer;
-  private ulong lastBytesSent, lastBytesRecv;
+  private long lastBytesSent, lastBytesRecv;
   private Ice.TimedAverage sendAverage = new Ice.TimedAverage(1);
   private Ice.TimedAverage recvAverage = new Ice.TimedAverage(1);
 
@@ -159,12 +159,16 @@ public class NetChannel : INetEventListener, INetChannel {
 
   public void SendCommand<T>(NetPeer peer, T command) where T : class, new() {
     var deliveryMethod = NetCommand.Metadata.DeliveryType[typeof(T)];
-    netPacketProcessor.Send(peer, command, deliveryMethod);
+    netDataWriter.Reset();
+    netPacketProcessor.Write(netDataWriter, command);
+    peer.Send(netDataWriter, deliveryMethod);
   }
 
   public void SendNSCommand<T>(NetPeer peer, T command) where T : INetSerializable, new() {
     var deliveryMethod = NetCommand.Metadata.DeliveryType[typeof(T)];
-    netPacketProcessor.SendNetSerializable(peer, command, deliveryMethod);
+    netDataWriter.Reset();
+    netPacketProcessor.WriteNetSerializable(netDataWriter, ref command);
+    peer.Send(netDataWriter, deliveryMethod);
   }
 
   public void BroadcastCommand<T>(T command) where T : class, new() {
@@ -211,7 +215,8 @@ public class NetChannel : INetEventListener, INetChannel {
     request.AcceptIfKey(CONNECTION_KEY);
   }
 
-  public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, DeliveryMethod deliveryMethod) {
+  public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
+  {
     netPacketProcessor.ReadAllPackets(reader, peer);
   }
 

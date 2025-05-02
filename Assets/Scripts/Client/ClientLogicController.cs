@@ -160,7 +160,7 @@ public class ClientLogicController : BaseLogicController, ClientSimulation.Handl
   }
 
   protected override void OnPeerConnected(NetPeer peer) {
-    this.Log("Connected to host: " + peer.EndPoint);
+    this.Log("Connected to host: " + peer.Address);
     serverPeer = peer;
 
     // Send a join request.
