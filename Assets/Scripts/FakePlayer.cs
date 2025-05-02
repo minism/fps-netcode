@@ -23,6 +23,7 @@ public class FakePlayer : MonoBehaviour, IPlayerController {
     } else {
       velocity = Vector3.zero;
     }
+
     velocity = Vector3.ClampMagnitude(velocity, maxVelocity);
     transform.position += velocity * dt;
   }

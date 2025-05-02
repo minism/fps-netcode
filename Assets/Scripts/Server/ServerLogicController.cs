@@ -13,7 +13,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
   private ServerSimulation simulation;
 
   // Currently connected peers indexed by their peer ID.
-  private HashSet<NetPeer> connectedPeers = new HashSet<NetPeer>();
+  private HashSet<NetPeer> connectedPeers = new();
 
   // A handle to the game server registered with the hotel master server.
   private Hotel.RegisteredGameServer hotelGameServer;
@@ -44,6 +44,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     if (simulation != null) {
       simulation = null;
     }
+
     if (hotelGameServer != null) {
       hotelGameServer.Destroy();
       hotelGameServer = null;
@@ -60,7 +61,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     // It doesnt seem to cause an error when omitted, but the POST below never happens.
     await Hotel.HotelClient.Instance.WaitUntilInitialized();
     hotelGameServer = await Hotel.HotelClient.Instance.StartHostingServer(
-        host, port, 8, "Test");
+      host, port, 8, "Test");
     this.Log($"Registered game with master server.");
     if (loadScene) {
       LoadGameScene();
@@ -68,7 +69,7 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
 
     // Initialize simulation.
     simulation = new ServerSimulation(
-        debugPhysicsErrorChance, playerManager, networkObjectManager, this);
+      debugPhysicsErrorChance, playerManager, networkObjectManager, this);
   }
 
   /// Setup all server authoritative state for a new player.
@@ -116,7 +117,6 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
   }
 
   /** Network command handling */
-
   private void HandleJoinRequest(NetCommand.JoinRequest cmd, NetPeer peer) {
     // TODO: Validation should occur here, if any.
     var playerName = cmd.PlayerSetupData.Name;
@@ -147,11 +147,13 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
     if (cmd.Inputs == null) {
       this.LogError("Shouldnt be null here");
     }
+
     Player player;
     if (!playerManager.TryGetPlayerForPeer(peer, out player)) {
       // The player already disconnected, so just ignore this packet.
       return;
     }
+
     simulation.EnqueuePlayerInput(cmd, player);
   }
 
@@ -171,11 +173,11 @@ public class ServerLogicController : BaseLogicController, ServerSimulation.Handl
 
   /**
    * IPlayerActionHandler interface.
-   * 
+   *
    * TODO - Consider breaking this into a delegate.
    */
   public void HandlePlayerAttack(
-      Player player, NetworkObjectType type, Vector3 position, Quaternion orientation) {
+    Player player, NetworkObjectType type, Vector3 position, Quaternion orientation) {
     // Create the attack object and check for hits.
     var obj = networkObjectManager.SpawnPlayerObject(0, type, position, orientation);
     var wasHit = simulation.ProcessPlayerAttack(player, obj.GetComponent<HitscanAttack>());

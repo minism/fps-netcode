@@ -7,16 +7,16 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   public float friction = 6;
 
   /* Movement stuff */
-  public float moveSpeed = 7.0f;                // Ground move speed
-  public float runAcceleration = 14.0f;         // Ground accel
-  public float runDeacceleration = 10.0f;       // Deacceleration that occurs when running on the ground
-  public float airAcceleration = 2.0f;          // Air accel
-  public float airDecceleration = 2.0f;         // Deacceleration experienced when ooposite strafing
-  public float airControl = 0.3f;               // How precise air control is
-  public float sideStrafeAcceleration = 50.0f;  // How fast acceleration occurs to get up to sideStrafeSpeed when
-  public float sideStrafeSpeed = 1.0f;          // What the max speed to generate when side strafing
-  public float jumpSpeed = 8.0f;                // The speed at which the character's up axis gains when hitting jump
-  public bool holdJumpToBhop = false;           // When enabled allows player to just hold jump button to keep on bhopping
+  public float moveSpeed = 7.0f; // Ground move speed
+  public float runAcceleration = 14.0f; // Ground accel
+  public float runDeacceleration = 10.0f; // Deacceleration that occurs when running on the ground
+  public float airAcceleration = 2.0f; // Air accel
+  public float airDecceleration = 2.0f; // Deacceleration experienced when ooposite strafing
+  public float airControl = 0.3f; // How precise air control is
+  public float sideStrafeAcceleration = 50.0f; // How fast acceleration occurs to get up to sideStrafeSpeed when
+  public float sideStrafeSpeed = 1.0f; // What the max speed to generate when side strafing
+  public float jumpSpeed = 8.0f; // The speed at which the character's up axis gains when hitting jump
+  public bool holdJumpToBhop = false; // When enabled allows player to just hold jump button to keep on bhopping
 
   // Camera/attack stuff
   public float playerHeadHeight = 1.5f;
@@ -27,9 +27,11 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
       if (_controller == null) {
         _controller = GetComponent<CharacterController>();
       }
+
       return _controller;
     }
   }
+
   private CharacterController _controller;
 
   private NetworkObject networkObject {
@@ -37,9 +39,11 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
       if (_networkObject == null) {
         _networkObject = GetComponent<NetworkObject>();
       }
+
       return _networkObject;
     }
   }
+
   private NetworkObject _networkObject;
 
   // Last received input.
@@ -55,11 +59,7 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   private float attackCooldownTimer = 0f;
 
   // TODO: Needs more work
-  private Vector3 AttackPosition {
-    get {
-      return transform.position + Vector3.up * playerHeadHeight + transform.right * 0.2f;
-    }
-  }
+  private Vector3 AttackPosition => transform.position + Vector3.up * playerHeadHeight + transform.right * 0.2f;
 
   private PlayerAttackDelegate attackDelegate;
 
@@ -71,7 +71,6 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   /**
    * IPlayerController interface
    */
-
   public void SetPlayerAttackDelegate(PlayerAttackDelegate attackDelegate) {
     this.attackDelegate = attackDelegate;
   }
@@ -86,10 +85,11 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
 
     // Process movement.
     QueueJump();
-    if (controller.isGrounded)
+    if (controller.isGrounded) {
       GroundMove(dt);
-    else if (!controller.isGrounded)
+    } else if (!controller.isGrounded) {
       AirMove(dt);
+    }
 
     // Apply the final velocity to the character controller.
     controller.Move(playerVelocity * dt);
@@ -99,7 +99,7 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
     if (inputs.Fire && attackCooldownTimer <= 0) {
       attackCooldownTimer = 1f;
       attackDelegate(
-          NetworkObjectType.HITSCAN_ATTACK, AttackPosition, inputs.ViewDirection);
+        NetworkObjectType.HITSCAN_ATTACK, AttackPosition, inputs.ViewDirection);
     }
 
     // HACK: Reset to zero when falling off the edge for now.
@@ -155,10 +155,11 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
     Vector3 wishdir;
 
     // Do not apply friction if the player is queueing up the next jump
-    if (!wishJump)
+    if (!wishJump) {
       ApplyFriction(1.0f, dt);
-    else
+    } else {
       ApplyFriction(0, dt);
+    }
 
     wishdir = new Vector3(inputs.RightAxis, 0, inputs.ForwardAxis);
     wishdir = transform.TransformDirection(wishdir);
@@ -183,33 +184,38 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
   */
   private void AirMove(float dt) {
     Vector3 wishdir;
-    float wishvel = airAcceleration;
+    var wishvel = airAcceleration;
     float accel;
 
     wishdir = new Vector3(inputs.RightAxis, 0, inputs.ForwardAxis);
     wishdir = transform.TransformDirection(wishdir);
 
-    float wishspeed = wishdir.magnitude;
+    var wishspeed = wishdir.magnitude;
     wishspeed *= moveSpeed;
 
     wishdir.Normalize();
 
     // CPM: Aircontrol
-    float wishspeed2 = wishspeed;
-    if (Vector3.Dot(playerVelocity, wishdir) < 0)
+    var wishspeed2 = wishspeed;
+    if (Vector3.Dot(playerVelocity, wishdir) < 0) {
       accel = airDecceleration;
-    else
+    } else {
       accel = airAcceleration;
+    }
+
     // If the player is ONLY strafing left or right
     if (inputs.ForwardAxis == 0 && inputs.RightAxis != 0) {
-      if (wishspeed > sideStrafeSpeed)
+      if (wishspeed > sideStrafeSpeed) {
         wishspeed = sideStrafeSpeed;
+      }
+
       accel = sideStrafeAcceleration;
     }
 
     Accelerate(wishdir, wishspeed, accel, dt);
-    if (airControl > 0)
+    if (airControl > 0) {
       AirControl(wishdir, wishspeed2, dt);
+    }
     // !CPM: Aircontrol
 
     // Apply gravity
@@ -228,8 +234,10 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
     float k;
 
     // Can't control movement if not moving forward or backward
-    if (Mathf.Abs(inputs.ForwardAxis) < 0.001 || Mathf.Abs(wishspeed) < 0.001)
+    if (Mathf.Abs(inputs.ForwardAxis) < 0.001 || Mathf.Abs(wishspeed) < 0.001) {
       return;
+    }
+
     zspeed = playerVelocity.y;
     playerVelocity.y = 0;
     /* Next two lines are equivalent to idTech's VectorNormalize() */
@@ -261,11 +269,14 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
 
     currentspeed = Vector3.Dot(playerVelocity, wishdir);
     addspeed = wishspeed - currentspeed;
-    if (addspeed <= 0)
+    if (addspeed <= 0) {
       return;
+    }
+
     accelspeed = accel * dt * wishspeed;
-    if (accelspeed > addspeed)
+    if (accelspeed > addspeed) {
       accelspeed = addspeed;
+    }
 
     playerVelocity.x += accelspeed * wishdir.x;
     playerVelocity.z += accelspeed * wishdir.z;
@@ -275,7 +286,7 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
    * Applies friction to the player, called in both the air and on the ground
    */
   private void ApplyFriction(float t, float dt) {
-    Vector3 vec = playerVelocity; // Equivalent to: VectorCopy();
+    var vec = playerVelocity; // Equivalent to: VectorCopy();
     float speed;
     float newspeed;
     float control;
@@ -292,10 +303,13 @@ public class CPMPlayerController : MonoBehaviour, IPlayerController {
     }
 
     newspeed = speed - drop;
-    if (newspeed < 0)
+    if (newspeed < 0) {
       newspeed = 0;
-    if (speed > 0)
+    }
+
+    if (speed > 0) {
       newspeed /= speed;
+    }
 
     playerVelocity.x *= newspeed;
     playerVelocity.z *= newspeed;

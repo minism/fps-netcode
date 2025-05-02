@@ -18,20 +18,20 @@ public struct TickInput {
 // Processes input network commands from a set of players and presents them in
 // a way to the simulation which is easier to interact with.
 public class PlayerInputProcessor {
-  private SimplePriorityQueue<TickInput> queue = new SimplePriorityQueue<TickInput>();
-  private Dictionary<byte, TickInput> latestPlayerInput = new Dictionary<byte, TickInput>();
+  private SimplePriorityQueue<TickInput> queue = new();
+  private Dictionary<byte, TickInput> latestPlayerInput = new();
 
   // Monitoring.
-  private Ice.MovingAverage averageInputQueueSize = new Ice.MovingAverage(10);
+  private Ice.MovingAverage averageInputQueueSize = new(10);
 
   public void LogQueueStatsForPlayer(Player player, int worldTick) {
-    int count = 0;
-    foreach (var entry in queue) {
+    var count = 0;
+    foreach (var entry in queue)
       if (entry.Player.Id == player.Id && entry.WorldTick >= worldTick) {
         count++;
         worldTick++;
       }
-    }
+
     averageInputQueueSize.Push(count);
     this.LogValue("sv avg input queue", averageInputQueueSize.Average());
   }
@@ -41,6 +41,7 @@ public class PlayerInputProcessor {
     if (!TryGetLatestInput(playerId, out input)) {
       return 0;
     }
+
     return input.WorldTick;
   }
 
@@ -51,25 +52,24 @@ public class PlayerInputProcessor {
   public List<TickInput> DequeueInputsForTick(int worldTick) {
     var ret = new List<TickInput>();
     TickInput entry;
-    while (queue.TryDequeue(out entry)) {
-      if (entry.WorldTick < worldTick) {
-      } else if (entry.WorldTick == worldTick) {
+    while (queue.TryDequeue(out entry))
+      if (entry.WorldTick < worldTick) { } else if (entry.WorldTick == worldTick) {
         ret.Add(entry);
       } else {
         // We dequeued a future input, put it back in.
         queue.Enqueue(entry, entry.WorldTick);
         break;
       }
-    }
+
     return ret;
   }
 
   public void EnqueueInput(NetCommand.PlayerInputCommand command, Player player, int lastAckedInputTick) {
     // Calculate the last tick in the incoming command.
-    int maxTick = command.StartWorldTick + command.Inputs.Length - 1;
+    var maxTick = command.StartWorldTick + command.Inputs.Length - 1;
 
     // Queue any inputs we haven't yet acked.
-    int startIndex = lastAckedInputTick >= command.StartWorldTick
+    var startIndex = lastAckedInputTick >= command.StartWorldTick
       ? lastAckedInputTick - command.StartWorldTick + 1
       : 0;
 
@@ -77,7 +77,7 @@ public class PlayerInputProcessor {
     // inputs so we can use the "best" (most recent) input when filling gaps.
 
     // Scan for inputs which haven't been handled yet.
-    for (int i = startIndex; i < command.Inputs.Length; ++i) {
+    for (var i = startIndex; i < command.Inputs.Length; ++i) {
       // Apply inputs to the associated player controller and simulate the world.
       var worldTick = command.StartWorldTick + i;
       var tickInput = new TickInput {

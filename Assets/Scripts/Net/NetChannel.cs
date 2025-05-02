@@ -21,8 +21,7 @@ public class NetChannel : INetEventListener, INetChannel {
   public Action<NetPeer, DisconnectInfo> PeerDisconnectedHandler { get; set; }
 
   // Lookup for latency by peer.
-  public Dictionary<NetPeer, int> PeerLatency { get; private set; }
-      = new Dictionary<NetPeer, int>();
+  public Dictionary<NetPeer, int> PeerLatency { get; private set; } = new();
 
   private bool acceptConnections;
   private NetManager netManager;
@@ -30,18 +29,17 @@ public class NetChannel : INetEventListener, INetChannel {
   private NetDataWriter netDataWriter;
 
   // Separate net manager only used for ping/pong.
-  private PingHelper pingHelper = new PingHelper();
+  private PingHelper pingHelper = new();
 
   // Callbacks for connectionless pings.
-  private Dictionary<IPEndPoint, Action<int>> unconnectedPingCallbacks =
-      new Dictionary<IPEndPoint, Action<int>>();
+  private Dictionary<IPEndPoint, Action<int>> unconnectedPingCallbacks = new();
 
   // Debugging stuff.
   private DebugNetworkSettings debugNetworkSettings;
   private float debugLargeStallsTimer;
   private long lastBytesSent, lastBytesRecv;
-  private Ice.TimedAverage sendAverage = new Ice.TimedAverage(1);
-  private Ice.TimedAverage recvAverage = new Ice.TimedAverage(1);
+  private Ice.TimedAverage sendAverage = new(1);
+  private Ice.TimedAverage recvAverage = new(1);
 
   public NetChannel(DebugNetworkSettings debugNetworkSettings) {
     netManager = new NetManager(this) {
@@ -71,7 +69,7 @@ public class NetChannel : INetEventListener, INetChannel {
     debugLargeStallsTimer += Time.deltaTime;
     if (debugNetworkSettings.SimulateLargeStalls &&
         debugLargeStallsTimer > debugNetworkSettings.LargeStallsInterval +
-            debugNetworkSettings.LargeStallsDuration) {
+        debugNetworkSettings.LargeStallsDuration) {
       ApplyDebugNetworkSettings();
       debugLargeStallsTimer = 0;
     } else if (debugNetworkSettings.SimulateLargeStalls &&
@@ -125,7 +123,6 @@ public class NetChannel : INetEventListener, INetChannel {
   }
 
   /** INetChannel methods */
-
   public void Subscribe<T>(Action<T> onReceiveHandler) where T : class, new() {
     netPacketProcessor.SubscribeReusable(onReceiveHandler);
   }
@@ -145,16 +142,14 @@ public class NetChannel : INetEventListener, INetChannel {
 
   public void SubscribeQueue<T>(Queue<T> queue) where T : class, new() {
     // TODO: Optimize with a packet pool using queue max size.
-    netPacketProcessor.Subscribe((T data) => {
-      queue.Enqueue(data);
-    }, () => { return new T(); });
+    netPacketProcessor.Subscribe((T data) => { queue.Enqueue(data); }, () => { return new T(); });
   }
 
   public void SubscribeQueue<T>(Queue<WithPeer<T>> queue) where T : class, new() {
     // TODO: Optimize with a packet pool using queue max size.
-    netPacketProcessor.Subscribe((T data, NetPeer peer) => {
-      queue.Enqueue(new WithPeer<T> { Peer = peer, Value = data });
-    }, () => { return new T(); });
+    netPacketProcessor.Subscribe(
+      (T data, NetPeer peer) => { queue.Enqueue(new WithPeer<T> { Peer = peer, Value = data }); },
+      () => { return new T(); });
   }
 
   public void SendCommand<T>(NetPeer peer, T command) where T : class, new() {
@@ -196,10 +191,9 @@ public class NetChannel : INetEventListener, INetChannel {
 
   /**
    * Litenet Network events.
-   * 
+   *
    * These are lower level and handled directly by the channel, exposed as higher level APIs.
    */
-
   public void OnPeerConnected(NetPeer peer) {
     PeerConnectedHandler?.Invoke(peer);
   }
@@ -212,15 +206,17 @@ public class NetChannel : INetEventListener, INetChannel {
     if (!acceptConnections) {
       request.Reject();
     }
+
     request.AcceptIfKey(CONNECTION_KEY);
   }
 
-  public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
-  {
+  public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber,
+    DeliveryMethod deliveryMethod) {
     netPacketProcessor.ReadAllPackets(reader, peer);
   }
 
-  public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType) {
+  public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader,
+    UnconnectedMessageType messageType) {
     var header = reader.GetByte();
     if (header == PING_HEADER) {
       this.Log($"Received PING from {remoteEndPoint}");

@@ -7,14 +7,13 @@ using UnityEngine;
 /// Network top-level command data structures.
 namespace NetCommand {
   /** Client -> Server commands. */
-
   public class JoinRequest {
     public PlayerSetupData PlayerSetupData { get; set; }
   }
 
   /**
    * Custom serializable structure for reduntant player inputs.
-   * 
+   *
    * Uses two strategies for compression:
    *   - Player keys are compressed using a bitfield.
    *   - We only store ticks where keys actually changed.
@@ -35,7 +34,7 @@ namespace NetCommand {
     public void Serialize(NetDataWriter writer) {
       writer.Put(StartWorldTick);
       writer.Put(Inputs.Length);
-      for (int i = 0; i < Inputs.Length; i++) {
+      for (var i = 0; i < Inputs.Length; i++) {
         // Input.
         writer.Put(Inputs[i].GetKeyBitfield());
         writer.Put(Inputs[i].ViewDirection);
@@ -50,7 +49,7 @@ namespace NetCommand {
       var length = reader.GetInt();
       Inputs = new PlayerInputs[length];
       ClientWorldTickDeltas = new short[length];
-      for (int i = 0; i < length; i++) {
+      for (var i = 0; i < length; i++) {
         Inputs[i].ApplyKeyBitfield(reader.GetByte());
         Inputs[i].ViewDirection = reader.GetQuaternion();
         ClientWorldTickDeltas[i] = reader.GetShort();
@@ -59,7 +58,6 @@ namespace NetCommand {
   }
 
   /** Server -> Client commands. */
-
   public class JoinAccepted {
     public InitialPlayerState YourPlayerState { get; set; }
     public InitialPlayerState[] ExistingPlayerStates { get; set; }
@@ -122,9 +120,8 @@ namespace NetCommand {
 
   /// Metadata about each command.
   public static class Metadata {
-
     /// Mapping of the command type to its default delivery method, for convenience.
-    public static Dictionary<Type, DeliveryMethod> DeliveryType = new Dictionary<Type, DeliveryMethod>() {
+    public static Dictionary<Type, DeliveryMethod> DeliveryType = new() {
       // Major state changes must be reliable ordered.
       { typeof(JoinRequest), DeliveryMethod.ReliableOrdered },
       { typeof(JoinAccepted), DeliveryMethod.ReliableOrdered },

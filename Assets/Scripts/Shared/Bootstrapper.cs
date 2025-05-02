@@ -10,8 +10,8 @@ public class Bootstrapper : MonoBehaviour {
   public ClientLogicController clientLogicController;
   public ServerLogicController serverLogicController;
 
-  private static string DEFAULT_HOST = "localhost";
-  private static int DEFAULT_PORT = 10770;
+  private const string DefaultHost = "localhost";
+  private const int DefaultPort = 10770;
 
   private void Start() {
     // Parse command line arguments.
@@ -29,7 +29,7 @@ public class Bootstrapper : MonoBehaviour {
   }
 
   public void StartGameAsServer() {
-    StartGameAsServer(DEFAULT_HOST, DEFAULT_PORT);
+    StartGameAsServer(DefaultHost, DefaultPort);
   }
 
   public async void StartGameAsServer(string host, int port) {
@@ -40,12 +40,12 @@ public class Bootstrapper : MonoBehaviour {
 
   public async void StartGameAsListenServer() {
     this.Log("Starting game as a listen server.");
-    await serverLogicController.StartServer(DEFAULT_HOST, DEFAULT_PORT, false);
+    await serverLogicController.StartServer(DefaultHost, DefaultPort, false);
     // Fake player data for now.
     var playerSetupData = new PlayerSetupData {
       Name = "Player",
     };
-    clientLogicController.StartClient("localhost", DEFAULT_PORT, 0, playerSetupData);
+    clientLogicController.StartClient("localhost", DefaultPort, 0, playerSetupData);
   }
 
   public void StartGameAsClient(Hotel.GameServer serverToJoin, int initialLatency) {
@@ -57,6 +57,6 @@ public class Bootstrapper : MonoBehaviour {
       Name = "Player",
     };
     clientLogicController.StartClient(
-        serverToJoin.host, serverToJoin.port, initialLatency, playerSetupData);
+      serverToJoin.host, serverToJoin.port, initialLatency, playerSetupData);
   }
 }

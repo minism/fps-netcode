@@ -33,6 +33,7 @@ public class FixedTimer {
       if (!running) {
         return;
       }
+
       callback(fixedDelta);
       accumulator -= fixedDelta;
     }

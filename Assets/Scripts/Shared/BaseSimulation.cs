@@ -49,6 +49,7 @@ public abstract class BaseSimulation {
       // This has a time-warping effect.
       Tick(tickInterval);
     }
+
     interpController.ExplicitUpdate(dt);
     PostUpdate();
   }

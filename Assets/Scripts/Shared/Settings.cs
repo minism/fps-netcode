@@ -28,7 +28,9 @@ public static class Settings {
 
   // The maximum age of the last server state in milliseconds the client will continue simulating.
   public static float MaxStaleServerStateAgeMs = 500;
+
   public static int MaxStaleServerStateTicks = Mathf.CeilToInt(
-      MaxStaleServerStateAgeMs / SimulationTickRate);
+    MaxStaleServerStateAgeMs / SimulationTickRate);
+
   public static bool FreezeClientOnStaleServer = false;
 }

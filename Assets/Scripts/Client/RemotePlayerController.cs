@@ -10,7 +10,7 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
   private Quaternion targetRotation;
 
   // Interpolate between incoming server states.
-  private Queue<PlayerState> stateQueue = new Queue<PlayerState>();
+  private Queue<PlayerState> stateQueue = new();
   private PlayerState? lastState = null;
   private float stateTimer = 0;
 
@@ -37,9 +37,9 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
 
     this.LogValue("RemotePlayer q size", stateQueue.Count);
     var nextState = stateQueue.Peek();
-    float theta = stateTimer / Settings.ServerSendInterval;
+    var theta = stateTimer / Settings.ServerSendInterval;
     transform.position = Vector3.Lerp(
-        lastState.Value.Position, nextState.Position, theta);
+      lastState.Value.Position, nextState.Position, theta);
     //var a = Quaternion.Euler(0, lastState.Value.Rotation.y, 0);
     //var b = Quaternion.Euler(0, nextState.Rotation.y, 0);
     var a = lastState.Value.Rotation;
@@ -68,9 +68,7 @@ public class RemotePlayerController : MonoBehaviour, IPlayerController {
     if (Settings.UseClientInterp) {
       // TODO: This whole thing needs to be simplified a bit more, but at least make sure
       // we're not buffering more than we should be.
-      while (stateQueue.Count >= 2) {
-        stateQueue.Dequeue();
-      }
+      while (stateQueue.Count >= 2) stateQueue.Dequeue();
       stateQueue.Enqueue(state);
     } else {
       transform.position = state.Position;

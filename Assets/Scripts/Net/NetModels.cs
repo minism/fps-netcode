@@ -6,9 +6,9 @@ using UnityEngine;
 public static class NetModels {
   public static void RegisterAllNetworkNestedTypes(NetPacketProcessor processor) {
     processor.RegisterNestedType(
-        NetExtensions.SerializeVector3, NetExtensions.DeserializeVector3);
+      NetExtensions.SerializeVector3, NetExtensions.DeserializeVector3);
     processor.RegisterNestedType(
-        NetExtensions.SerializeQuaternion, NetExtensions.DeserializeQuaternion);
+      NetExtensions.SerializeQuaternion, NetExtensions.DeserializeQuaternion);
     processor.RegisterNestedType<PlayerSetupData>();
     processor.RegisterNestedType<PlayerMetadata>();
     processor.RegisterNestedType<InitialPlayerState>();
@@ -70,7 +70,9 @@ public struct InitialPlayerState : INetSerializable {
 /// once we have non-player networked objects.
 public struct PlayerState : INetSerializable {
   public ushort NetworkId;
+
   public Vector3 Position;
+
   // TODO: Compress via https://gafferongames.com/post/snapshot_compression/
   public Quaternion Rotation;
   public Vector3 Velocity;
